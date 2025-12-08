@@ -2,6 +2,9 @@ import sqlite3
 import json
 from datetime import datetime
 from typing import List, Dict, Any, Optional
+from pydantic import BaseModel
+
+# --- Database Init ---
 
 DB_NAME = "healthcare.db"
 
@@ -54,7 +57,7 @@ def create_batch(batch_id: str, count: int) -> str:
 def update_batch_analysis(batch_id: str, analysis: Dict[str, Any]):
     conn = get_connection()
     c = conn.cursor()
-    c.execute("UPDATE batches SET analysis_result = ? WHERE id = ?", (json.dumps(analysis), batch_id))
+    c.execute("UPDATE batches SET analysis_result = ? WHERE id = ?", (json.dumps(analysis, default=json_serial), batch_id))
     conn.commit()
     conn.close()
 
@@ -89,13 +92,21 @@ def get_batch(batch_id: str) -> Dict[str, Any]:
 
 # --- Jobs ---
 
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code"""
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    if isinstance(obj, BaseModel):
+        return obj.dict()
+    raise TypeError(f"Type {type(obj)} not serializable")
+
 def create_job(job_id: str, batch_id: str, provider_data: Dict[str, Any]):
     conn = get_connection()
     c = conn.cursor()
     c.execute('''
         INSERT INTO jobs (id, batch_id, status, provider_data) 
         VALUES (?, ?, ?, ?)
-    ''', (job_id, batch_id, "processing", json.dumps(provider_data)))
+    ''', (job_id, batch_id, "processing", json.dumps(provider_data, default=json_serial)))
     conn.commit()
     conn.close()
 
@@ -106,7 +117,7 @@ def update_job_result(job_id: str, result_state: Dict[str, Any]):
         UPDATE jobs 
         SET status = ?, result_state = ?
         WHERE id = ?
-    ''', ("completed", json.dumps(result_state), job_id))
+    ''', ("completed", json.dumps(result_state, default=json_serial), job_id))
     conn.commit()
     conn.close()
 

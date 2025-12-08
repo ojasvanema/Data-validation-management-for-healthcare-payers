@@ -22,17 +22,17 @@ async def graphical_agent_node(state: MainAgentState) -> MainAgentState:
     lat = lat_base + random.uniform(-0.5, 0.5)
     lon = lon_base + random.uniform(-0.5, 0.5)
     
-    state.graphical_data = GraphicalData(
-        geographic_distribution=[
-            {"lat": lat, "lon": lon, "weight": 1.0, "provider_id": state.provider_data.id}
-        ],
-        summary_stats={
-            "risk_level": state.fraud_analysis.risk_level if state.fraud_analysis else "UNKNOWN",
-            "validation_consistent": state.validation_result.is_consistent if state.validation_result else False
-        }
-    )
-
     if state.fraud_analysis and state.fraud_analysis.flagged_patterns:
         print(f"[{state.job_id}] [Graphical Agent] Generated fraud network & geographic map data.")
         
-    return state
+    return {
+        "graphical_data": GraphicalData(
+            geographic_distribution=[
+                {"lat": lat, "lon": lon, "weight": 1.0, "provider_id": state.provider_data.id}
+            ],
+            summary_stats={
+                "risk_level": state.fraud_analysis.risk_level if state.fraud_analysis else "UNKNOWN",
+                "validation_consistent": state.validation_result.is_consistent if state.validation_result else False
+            }
+        )
+    }

@@ -34,14 +34,9 @@ def create_main_graph():
     workflow.add_edge("parser_agent", "validation_agent")
     workflow.add_edge("validation_agent", "fraud_agent")
     
-    # Parallel execution simulation (LangGraph supports parallel branches)
-    # From Fraud, we go to both Predictive and Business
+    # Sequential execution to avoid race conditions on state updates
     workflow.add_edge("fraud_agent", "predictive_agent")
-    workflow.add_edge("fraud_agent", "business_agent")
-    
-    # Convergence: Both need to finished before we do final aggregations or comms
-    # We can chain them or use a join. For simplicity, let's chain them into Graphical
-    workflow.add_edge("predictive_agent", "graphical_agent")
+    workflow.add_edge("predictive_agent", "business_agent")
     workflow.add_edge("business_agent", "graphical_agent")
     
     workflow.add_edge("graphical_agent", "communicator_agent")

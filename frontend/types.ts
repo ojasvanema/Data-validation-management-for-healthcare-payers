@@ -51,6 +51,7 @@ export interface AnalysisResult {
   discrepanciesFound: number;
   timelineData: ChartDataPoint[];
   riskDistribution: ChartDataPoint[];
+  aggregateDecayCurve: ChartDataPoint[]; // New field for the graph
   summary: string;
   records?: ProviderRecord[];
 }

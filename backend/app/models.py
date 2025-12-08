@@ -28,6 +28,8 @@ class ProviderRecord(BaseModel):
     organization_name: Optional[str] = None
     license_number: Optional[str] = None
     license_state: Optional[str] = None
+    specialty: Optional[str] = "General Practice" # Default for demo
+    last_verified: Optional[datetime] = None # When was this data last confirmed real?
     # Raw data from documents can be dumped here
     raw_data: Dict[str, Any] = Field(default_factory=dict)
     file_path: Optional[str] = None # Path to the document file (PDF/Image)

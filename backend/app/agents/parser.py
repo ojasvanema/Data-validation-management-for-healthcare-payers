@@ -1,7 +1,7 @@
 from ..models import MainAgentState, ProviderRecord, ParsedData
 import asyncio
 import random
-from ..tools import DEFAULT_TOOLS
+from backend.app.tools import DEFAULT_TOOLS
 import re
 
 async def parser_agent_node(state: MainAgentState) -> MainAgentState:
@@ -54,13 +54,13 @@ async def parser_agent_node(state: MainAgentState) -> MainAgentState:
     if lines:
         extracted_name = lines[0] # Assume title/name is first
 
-    state.parsed_data = ParsedData(
-        extracted_npi=extracted_npi,
-        extracted_name=extracted_name,
-        extracted_address=None, # regex for address is complex
-        confidence_score=confidence
-    )
-    
     print(f"[{job_id}] [Document Parser] Result: NPI={extracted_npi}, Name={extracted_name}")
         
-    return state
+    return {
+        "parsed_data": ParsedData(
+            extracted_npi=extracted_npi,
+            extracted_name=extracted_name,
+            extracted_address=None,
+            confidence_score=confidence
+        )
+    }

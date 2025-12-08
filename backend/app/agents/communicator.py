@@ -11,4 +11,5 @@ async def communicator_agent_node(state: MainAgentState) -> MainAgentState:
         await asyncio.sleep(0.2)
         # Mock sending email/SMS
         print(f"[{state.job_id}] [Communicator Agent] Email sent to provider regarding discrepancies.")
-    return state
+        print(f"[{state.job_id}] [Communicator Agent] Email sent to provider regarding discrepancies.")
+    return {}

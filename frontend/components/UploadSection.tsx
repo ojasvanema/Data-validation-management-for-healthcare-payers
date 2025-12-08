@@ -135,24 +135,24 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFilesSelected, isProces
 
       <div className="mt-4 flex justify-center">
         <button
-          onClick={(e) => {
+          onClick={async (e) => {
             e.preventDefault();
-            const syntheticContent = `NPI,FirstName,LastName,Organization,Taxonomy,LicenseState,LicenseNumber,OIG_Exclusion
-1234567890,John,Doe,,Cardiology,NY,123456,False
-9876543210,Jane,Smith,,Dermatology,CA,654321,False
-1122334455,Robert,Malone,Malone Medical Group,General Practice,TX,998877,True
-5566778899,,,"Urgent Care Plus",Internal Medicine,FL,554433,False
-6677889900,Alice,Wonderland,,Psychiatry,WA,112233,False
-3344556677,Bad,Actor,Fraud Corp,Surgery,NV,000000,True`;
+            try {
+              const response = await fetch('/synthetic_providers.csv');
+              const syntheticContent = await response.text();
 
-            const newFile = {
-              name: "synthetic_providers.csv",
-              type: "text/csv",
-              size: syntheticContent.length,
-              content: syntheticContent
-            };
-            // @ts-ignore
-            setSelectedFiles(prev => [...prev, newFile]);
+              const newFile = {
+                name: "synthetic_providers.csv",
+                type: "text/csv",
+                size: syntheticContent.length,
+                content: syntheticContent
+              };
+              // @ts-ignore
+              setSelectedFiles(prev => [...prev, newFile]);
+            } catch (error) {
+              console.error("Failed to load synthetic data:", error);
+              alert("Failed to load synthetic data. Make sure synthetic_providers.csv is in the public directory.");
+            }
           }}
           className="text-emerald-400 text-sm hover:underline"
           disabled={isProcessing}

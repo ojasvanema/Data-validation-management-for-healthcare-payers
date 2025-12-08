@@ -38,16 +38,8 @@ except ImportError:
     HAS_WHISPER = False
 
 # Import Utils
-try:
-    from backend.app.utils import clean_text, detect_mime
-except ImportError:
-    try:
-        from app.utils import clean_text, detect_mime
-    except ImportError:
-         from utils import clean_text, detect_mime
-    except Exception:
-         def clean_text(t): return t.strip()
-         def detect_mime(f): return "application/octet-stream"
+from backend.app.utils import clean_text, detect_mime
+
 
 class BaseTool:
     name = "base"

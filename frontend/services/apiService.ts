@@ -59,15 +59,16 @@ const parseCSV = (content: string): any[] => {
         }
 
         // Map CSV fields to ProviderRecord format expected by backend
-        // CSV: NPI,FirstName,LastName,Organization,Taxonomy,LicenseState,LicenseNumber,OIG_Exclusion
-        // Backend: npi, first_name, last_name, organization_name, license_number, license_state
+        // CSV: id,npi,first_name,last_name,organization_name,license_number,license_state,specialty,last_verified
         records.push({
-            npi: obj['NPI'],
-            first_name: obj['FirstName'],
-            last_name: obj['LastName'],
-            organization_name: obj['Organization'],
-            license_state: obj['LicenseState'],
-            license_number: obj['LicenseNumber']
+            npi: obj['npi'],
+            first_name: obj['first_name'],
+            last_name: obj['last_name'],
+            organization_name: obj['organization_name'],
+            license_state: obj['license_state'],
+            license_number: obj['license_number'],
+            specialty: obj['specialty'] || 'General Practice',
+            last_verified: obj['last_verified'] || new Date().toISOString().split('T')[0]
         });
     }
     return records;
@@ -103,6 +104,12 @@ export const pollJobStatus = async (batchId: string): Promise<AnalysisResult | n
 
         if (!data.is_complete) return null; // Wait until WHOLE batch is done
 
+        console.log("DEBUG: Raw Backend Response:", JSON.stringify(data, null, 2));
+        if (data.records.length > 0) {
+            console.log("DEBUG: Sample Record:", JSON.stringify(data.records[0], null, 2));
+            console.log("DEBUG: Degradation Data:", data.records[0].degradation_prediction);
+        }
+
         // Transform Backend Batch Data to Frontend Type
         const transformedResult: AnalysisResult = {
             roi: data.roi,
@@ -123,7 +130,27 @@ export const pollJobStatus = async (batchId: string): Promise<AnalysisResult | n
                 { name: "High", value: data.records.filter(r => r.fraud_analysis?.risk_level === 'HIGH').length }
             ],
 
-            agentLogs: [],
+            // Calculate Aggregate Decay Curve (Average of all providers)
+            aggregateDecayCurve: (() => {
+                const curveMap: { [key: string]: number[] } = {};
+                data.records.forEach(r => {
+                    const curve = r.degradation_prediction?.decay_probability_curve || [];
+                    curve.forEach(point => {
+                        const [date, val] = Object.entries(point)[0];
+                        if (!curveMap[date]) curveMap[date] = [];
+                        curveMap[date].push(val);
+                    });
+                });
+                // Average it
+                return Object.entries(curveMap)
+                    .sort((a, b) => a[0].localeCompare(b[0]))
+                    .map(([date, vals]) => ({
+                        name: date,
+                        value: Number((vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(2))
+                    }));
+            })(),
+
+            agentLogs: [], // Logs are handled by socket/polling separately if needed, or static here
 
             // Map the full list of records
             records: data.records.map(r => ({
