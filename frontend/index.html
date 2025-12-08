@@ -1,142 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EY Techathon - Provider Intelligence</title>
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <!-- Ionicons -->
-    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="style.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HealthGuard AI Orchestrator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            colors: {
+              glass: {
+                100: 'rgba(255, 255, 255, 0.08)',
+                200: 'rgba(255, 255, 255, 0.15)',
+                300: 'rgba(255, 255, 255, 0.25)',
+                border: 'rgba(255, 255, 255, 0.15)',
+                highlight: 'rgba(16, 185, 129, 0.15)', // Emerald tint
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        margin: 0;
+        /* Deep Green / Forest Theme */
+        background: radial-gradient(circle at top center, #064e3b, #022c22, #000000);
+        background-attachment: fixed;
+        color: white;
+      }
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.2); 
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(16, 185, 129, 0.3); 
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(16, 185, 129, 0.5); 
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.556.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "recharts": "https://aistudiocdn.com/recharts@^3.5.1",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.31.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
 </head>
-<body>
-    <div class="app-container">
-        <!-- Sidebar -->
-        <aside class="sidebar glass">
-            <div class="logo">
-                <ion-icon name="pulse-outline"></ion-icon>
-                <span>MedGaurd AI</span>
-            </div>
-            <nav>
-                <a href="#" class="active"><ion-icon name="grid-outline"></ion-icon> Dashboard</a>
-                <a href="#"><ion-icon name="people-outline"></ion-icon> Providers</a>
-                <a href="#"><ion-icon name="shield-checkmark-outline"></ion-icon> Compliance</a>
-                <a href="#"><ion-icon name="trending-down-outline"></ion-icon> Degradation</a>
-            </nav>
-            <div class="user-profile">
-                <div class="avatar">AD</div>
-                <div class="info">
-                    <span class="name">Admin User</span>
-                    <span class="role">Compliance Officer</span>
-                </div>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="main-content">
-            <header>
-                <h1>Provider Validation Command Center</h1>
-                <div class="status-indicator">
-                    <span class="dot online"></span>
-                    System Operational
-                </div>
-            </header>
-
-            <div class="grid-layout">
-                <!-- Input Section -->
-                <section class="card glass input-section">
-                    <h2><ion-icon name="add-circle-outline"></ion-icon> New Provider Entry</h2>
-                    <form id="orchestratorForm">
-                        <div class="form-group">
-                            <label>NPI Number</label>
-                            <input type="text" name="npi" placeholder="1234567890" value="1234567890" required>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Provider Name</label>
-                                <input type="text" name="name" placeholder="Dr. Jane Doe" value="Dr. Jane Doe" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Specialty</label>
-                                <input type="text" name="specialty" placeholder="Cardiology" value="Cardiology" required>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>License Number</label>
-                                <input type="text" name="license_number" placeholder="LIC-2024-X" value="LIC-2024-X" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Last Updated</label>
-                                <input type="date" name="last_updated" value="2025-01-01">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Practice Address</label>
-                            <input type="text" name="address" placeholder="123 Medical Plaza, NY" value="123 Medical Plaza, NY" required>
-                        </div>
-                        <div class="form-group file-upload">
-                            <label for="file"><ion-icon name="document-attach-outline"></ion-icon> Attach Document (PDF/Image)</label>
-                            <input type="file" id="file" name="file">
-                        </div>
-                        
-                        <button type="submit" class="cta-btn" id="validateBtn">
-                            <ion-icon name="rocket-outline"></ion-icon> Run Orchestration
-                        </button>
-                    </form>
-                </section>
-
-                <!-- Live Monitor Section -->
-                <section class="card glass monitor-section">
-                    <h2><ion-icon name="terminal-outline"></ion-icon> Live Agent Activity</h2>
-                    <div class="log-window" id="logWindow">
-                        <div class="log-entry system">System initialized. Waiting for input...</div>
-                    </div>
-                </section>
-
-                <!-- Results Section -->
-                <section class="card glass results-section hidden" id="resultsSection">
-                    <div class="metrics-row">
-                        <div class="metric-card validation">
-                            <h3>Validation Score</h3>
-                            <div class="score-circle" id="validationScore">--%</div>
-                        </div>
-                        <div class="metric-card risk">
-                            <h3>Degradation Risk</h3>
-                            <div class="risk-meter">
-                                <span class="label" id="riskLabel">Low</span>
-                                <div class="bar-bg"><div class="bar-fill" id="riskBar"></div></div>
-                            </div>
-                            <p class="subtext" id="degradationDate">Est. Decay: --</p>
-                        </div>
-                    </div>
-                    
-                    <div class="details-tabs">
-                        <button class="tab-btn active" onclick="openTab('report')">Validation Report</button>
-                        <button class="tab-btn" onclick="openTab('doc')">Document Analysis</button>
-                    </div>
-                    
-                    <div id="report" class="tab-content active">
-                        <ul class="checklist" id="validationChecklist">
-                            <!-- Items populated by JS -->
-                        </ul>
-                    </div>
-                    <div id="doc" class="tab-content">
-                        <p id="docPreview" class="text-preview">No document analyzed.</p>
-                    </div>
-                    
-                    <div class="chart-container">
-                        <canvas id="riskChart"></canvas>
-                    </div>
-                </section>
-            </div>
-        </main>
-    </div>
-    <script src="app.js"></script>
-</body>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
 </html>

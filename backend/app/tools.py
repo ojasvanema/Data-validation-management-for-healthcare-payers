@@ -1,15 +1,53 @@
 import os
-import pdfplumber
-import docx
-import pandas as pd
-from PIL import Image
-import pytesseract
-from pydub import AudioSegment
 import tempfile
-import whisper
+import requests
+import difflib
 from typing import Dict, Any, List
-# Fix import to be absolute or relative to package
-from backend.utils import clean_text, detect_mime
+
+# Optional Imports with Graceful Degradation
+try:
+    import pdfplumber
+    HAS_PDF = True
+except ImportError:
+    HAS_PDF = False
+
+try:
+    import docx
+    HAS_DOCX = True
+except ImportError:
+    HAS_DOCX = False
+
+try:
+    import pandas as pd
+    HAS_PANDAS = True
+except ImportError:
+    HAS_PANDAS = False
+
+try:
+    from PIL import Image
+    import pytesseract
+    HAS_OCR = True
+except ImportError:
+    HAS_OCR = False
+
+try:
+    from pydub import AudioSegment
+    import whisper
+    HAS_WHISPER = True
+except ImportError:
+    HAS_WHISPER = False
+
+# Import Utils
+try:
+    from backend.app.utils import clean_text, detect_mime
+except ImportError:
+    try:
+        from app.utils import clean_text, detect_mime
+    except ImportError:
+         from utils import clean_text, detect_mime
+    except Exception:
+         def clean_text(t): return t.strip()
+         def detect_mime(f): return "application/octet-stream"
 
 class BaseTool:
     name = "base"
@@ -21,9 +59,10 @@ class BaseTool:
 class PDFTool(BaseTool):
     name = "pdf"
     def can_handle(self, file_path: str) -> bool:
-        return detect_mime(file_path) == 'application/pdf' or file_path.lower().endswith('.pdf')
+        return HAS_PDF and (detect_mime(file_path) == 'application/pdf' or file_path.lower().endswith('.pdf'))
 
     def parse(self, file_path: str) -> Dict[str, Any]:
+        if not HAS_PDF: return {'text': "", 'error': "pdfplumber not installed"}
         text_pages = []
         metadata = {}
         tables = []
@@ -39,7 +78,6 @@ class PDFTool(BaseTool):
                         if df is not None:
                             tables.append(df.to_dict(orient='records'))
         except Exception as e:
-            print(f"Error parsing PDF: {e}")
             return {'text': "", 'error': str(e)}
         
         full_text = "\n\n".join(text_pages)
@@ -48,9 +86,10 @@ class PDFTool(BaseTool):
 class DOCXTool(BaseTool):
     name = "docx"
     def can_handle(self, file_path: str) -> bool:
-        return file_path.lower().endswith('.docx') or detect_mime(file_path).endswith('wordprocessingml.document')
+        return HAS_DOCX and (file_path.lower().endswith('.docx'))
 
     def parse(self, file_path: str) -> Dict[str, Any]:
+        if not HAS_DOCX: return {'text': "", 'error': "python-docx not installed"}
         try:
             doc = docx.Document(file_path)
             paras = [p.text for p in doc.paragraphs if p.text.strip()]
@@ -73,11 +112,10 @@ class PlainTextTool(BaseTool):
 class CSVTool(BaseTool):
     name = "csv"
     def can_handle(self, file_path: str) -> bool:
-        return file_path.lower().endswith('.csv') or detect_mime(file_path) == 'text/csv'
+        return HAS_PANDAS and (file_path.lower().endswith('.csv'))
     def parse(self, file_path: str) -> Dict[str, Any]:
         try:
             df = pd.read_csv(file_path, low_memory=False)
-            # represent as text summary + table object
             text = df.to_csv(index=False)
             return {'text': text, 'table': df.to_dict(orient='records'), 'metadata': {'shape': df.shape}}
         except Exception as e:
@@ -86,8 +124,7 @@ class CSVTool(BaseTool):
 class ImageOCRTool(BaseTool):
     name = "image_ocr"
     def can_handle(self, file_path: str) -> bool:
-        mime = detect_mime(file_path)
-        return mime.startswith('image/') or file_path.lower().endswith(('.png', '.jpg', '.jpeg', '.tiff'))
+        return HAS_OCR and (file_path.lower().endswith(('.png', '.jpg', '.jpeg')))
     def parse(self, file_path: str) -> Dict[str, Any]:
         try:
             img = Image.open(file_path)
@@ -98,44 +135,51 @@ class ImageOCRTool(BaseTool):
 
 class AudioTranscribeTool(BaseTool):
     name = "audio"
-    def __init__(self, model_name: str = "base"):
-        self.model = None
-        self.model_name = model_name
-
-    def load_model(self):
-        if self.model is None:
-            try:
-                self.model = whisper.load_model(self.model_name)
-            except Exception as e:
-                print(f"Warning: Whisper model not loaded. {e}")
-                self.model = None
-
     def can_handle(self, file_path: str) -> bool:
-        return file_path.lower().endswith(('.mp3', '.wav', '.m4a', '.flac'))
-
+        return HAS_WHISPER and file_path.lower().endswith(('.mp3', '.wav'))
     def parse(self, file_path: str) -> Dict[str, Any]:
-        self.load_model()
-        if self.model is None:
-             return {'text': "Whisper model not available", 'metadata': {}}
-        
-        # Convert to wav if needed
-        audio_path = file_path
-        tmp = None
+        return {'text': "Whisper disabled", 'metadata': {}}
+
+class NpiRegistryTool:
+    name = "npi_registry"
+    BASE_URL = "https://npiregistry.cms.hhs.gov/api/"
+    
+    def lookup(self, npi: str) -> Dict[str, Any]:
+        if not npi or len(npi) != 10 or not npi.isdigit():
+             return {"valid": False, "error": "Invalid format"}
+             
+        params = {"number": npi, "version": "2.1"}
         try:
-            if not file_path.lower().endswith('.wav'):
-                tmp = tempfile.NamedTemporaryFile(suffix='.wav', delete=False)
-                audio = AudioSegment.from_file(file_path)
-                audio.export(tmp.name, format='wav')
-                audio_path = tmp.name
-            
-            res = self.model.transcribe(audio_path)
-            text = res.get('text', '')
-            return {'text': clean_text(text), 'metadata': {'duration': res.get('duration', None)}}
+            resp = requests.get(self.BASE_URL, params=params, timeout=5)
+            if resp.status_code == 200:
+                data = resp.json()
+                if "results" in data and len(data["results"]) > 0:
+                    result = data["results"][0]
+                    return {
+                        "valid": True,
+                        "data": {
+                            "first_name": result["basic"].get("first_name"),
+                            "last_name": result["basic"].get("last_name"),
+                            "credential": result["basic"].get("credential"),
+                            "addresses": result.get("addresses", [])
+                        }
+                    }
+                else:
+                    return {"valid": False, "error": "Not Found"}
+            else:
+                return {"valid": False, "error": f"API Error: {resp.status_code}"}
         except Exception as e:
-             return {'text': "", 'error': str(e)}
-        finally:
-            if tmp and os.path.exists(tmp.name):
-                os.remove(tmp.name)
+            return {"valid": False, "error": str(e)}
+
+class FuzzyMatchTool:
+    name = "fuzzy_match"
+    
+    def ratio(self, str1: str, str2: str) -> float:
+        if not str1 or not str2:
+             return 0.0
+        return difflib.SequenceMatcher(None, str1.lower(), str2.lower()).ratio()
 
 # Instance registry
 DEFAULT_TOOLS = [PDFTool(), DOCXTool(), PlainTextTool(), CSVTool(), ImageOCRTool(), AudioTranscribeTool()]
+NPI_TOOL = NpiRegistryTool()
+FUZZY_TOOL = FuzzyMatchTool()
