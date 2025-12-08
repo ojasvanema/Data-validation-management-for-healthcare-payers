@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+python-multipart
+pandas
+numpy
+scikit-learn
+sentence-transformers
+faiss-cpu
+filetype
+pdfplumber
+python-docx
+Pillow
+pytesseract
+pydub
+openai-whisper
