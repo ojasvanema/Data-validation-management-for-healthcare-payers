@@ -1,12 +1,11 @@
 import os
 import re
-import filetype
 from typing import List
 
 def detect_mime(file_path: str) -> str:
-    kind = filetype.guess(file_path)
-    if kind:
-        return kind.mime
+    # kind = filetype.guess(file_path)
+    # if kind:
+    #     return kind.mime
     # fallback by extension
     ext = os.path.splitext(file_path)[1].lower()
     map_ext = {
