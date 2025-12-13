@@ -51,8 +51,13 @@ export interface AnalysisResult {
   discrepanciesFound: number;
   timelineData: ChartDataPoint[];
   riskDistribution: ChartDataPoint[];
+  records: ProviderRecord[]; // Added detailed records
+  agentLogs: {
+    agent: AgentType;
+    log: string;
+    timestamp: string;
+  }[];
   summary: string;
-  records?: ProviderRecord[];
 }
 
 export interface HistoryItem {
@@ -66,5 +71,5 @@ export interface FileUpload {
   name: string;
   type: string;
   size: number;
-  content?: string;
+  content?: string; // Base64 for images/PDFs if needed in full implementation, usually processed differently
 }

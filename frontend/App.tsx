@@ -5,7 +5,7 @@ import UploadSection from './components/UploadSection';
 import AgentDashboard from './components/AgentDashboard';
 import MetricsDashboard from './components/MetricsDashboard';
 import RecordsExplorer from './components/RecordsExplorer';
-import { startIngestion, pollJobStatus } from './services/apiService';
+import { analyzeFilesWithAgents } from './services/apiService';
 import { Activity, LayoutDashboard, History, PlusCircle, ChevronRight, Leaf, Database } from 'lucide-react';
 import GlassCard from './components/GlassCard';
 
@@ -80,28 +80,12 @@ export default function App() {
         setAgents(INITIAL_AGENTS.map(a => ({ ...a, status: 'idle', message: 'Standing by' })));
 
         try {
-            // 1. Start Ingestion (Real Backend)
-            updateAgent(AgentType.ORCHESTRATOR, 'processing', 'Ingesting files to backend...');
-            const jobId = await startIngestion(files);
+            // Call Gemini Service
+            updateAgent(AgentType.ORCHESTRATOR, 'processing', 'Analyzing file structure...');
+            const result = await analyzeFilesWithAgents(files);
 
-            // 2. Poll for Status
-            updateAgent(AgentType.ORCHESTRATOR, 'processing', 'Orchestrating Agents (Async)...');
-
-            let attempts = 0;
-            let result: AnalysisResult | null = null;
-
-            while (attempts < 30 && !result) {
-                await delay(1000); // Poll every second
-                result = await pollJobStatus(jobId);
-                attempts++;
-            }
-
-            if (result) {
-                // Run the visual simulation using the REAL data
-                await simulateAgentActivity(result);
-            } else {
-                throw new Error("Timeout waiting for backend agents.");
-            }
+            // Run the visual simulation using the real data from Gemini
+            await simulateAgentActivity(result);
 
         } catch (error) {
             console.error(error);

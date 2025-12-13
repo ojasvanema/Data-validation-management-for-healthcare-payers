@@ -132,34 +132,6 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFilesSelected, isProces
       >
         {isProcessing ? 'Orchestrating Agents...' : 'Start Orchestration'}
       </button>
-
-      <div className="mt-4 flex justify-center">
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            const syntheticContent = `NPI,FirstName,LastName,Organization,Taxonomy,LicenseState,LicenseNumber,OIG_Exclusion
-1234567890,John,Doe,,Cardiology,NY,123456,False
-9876543210,Jane,Smith,,Dermatology,CA,654321,False
-1122334455,Robert,Malone,Malone Medical Group,General Practice,TX,998877,True
-5566778899,,,"Urgent Care Plus",Internal Medicine,FL,554433,False
-6677889900,Alice,Wonderland,,Psychiatry,WA,112233,False
-3344556677,Bad,Actor,Fraud Corp,Surgery,NV,000000,True`;
-
-            const newFile = {
-              name: "synthetic_providers.csv",
-              type: "text/csv",
-              size: syntheticContent.length,
-              content: syntheticContent
-            };
-            // @ts-ignore
-            setSelectedFiles(prev => [...prev, newFile]);
-          }}
-          className="text-emerald-400 text-sm hover:underline"
-          disabled={isProcessing}
-        >
-          Load Synthetic Data (Demo)
-        </button>
-      </div>
     </GlassCard>
   );
 };

@@ -1,153 +1,120 @@
+import { AnalysisResult, FileUpload, AgentType } from "../types";
 
-import axios from 'axios';
-import { AnalysisResult, AgentType, ProviderRecord, AgentThought } from '../types';
-
-const API_BASE_URL = 'http://localhost:8000';
-
-interface BatchStatusResponse {
-    batch_id: string;
-    is_complete: boolean;
-    progress: string;
-
-    // Aggregate data
-    roi: number;
-    fraud_risk_score: number;
-    risk_level: string;
-    discrepancies_found: number;
-
-    records: Array<{
-        job_id: string;
-        status: string;
-        provider_data?: any; // filled if complete
-        parsed_data?: any;
-        validation_result?: {
-            is_consistent: boolean;
-            conflicts: Array<{ field: string; description: string; entry_value: string; document_value: string }>;
-            npi_valid: boolean;
-            oig_excluded: boolean;
-        };
-        fraud_analysis?: {
-            risk_score: number;
-            risk_level: string;
-            flagged_patterns: string[];
-        };
-        degradation_prediction?: {
-            decay_probability_curve: Array<{ [key: string]: number }>;
-        };
-        business_impact?: {
-            estimated_savings: number;
-            roi_multiplier: number;
-        };
-    }>;
-}
-
-// Helper to parse CSV simply (in real app, use PapaParse)
-const parseCSV = (content: string): any[] => {
-    const lines = content.trim().split('\n');
-    const headers = lines[0].split(',').map(h => h.trim());
-
-    const records = [];
-
-    for (let i = 1; i < lines.length; i++) {
-        const currentLine = lines[i].split(',');
-        if (currentLine.length < headers.length) continue; // Skip empty lines
-
-        const obj: any = {};
-        for (let j = 0; j < headers.length; j++) {
-            const header = headers[j];
-            obj[header] = currentLine[j]?.trim();
-        }
-
-        // Map CSV fields to ProviderRecord format expected by backend
-        // CSV: NPI,FirstName,LastName,Organization,Taxonomy,LicenseState,LicenseNumber,OIG_Exclusion
-        // Backend: npi, first_name, last_name, organization_name, license_number, license_state
-        records.push({
-            npi: obj['NPI'],
-            first_name: obj['FirstName'],
-            last_name: obj['LastName'],
-            organization_name: obj['Organization'],
-            license_state: obj['LicenseState'],
-            license_number: obj['LicenseNumber']
-        });
-    }
-    return records;
-};
-
-export const startIngestion = async (files: any[]): Promise<string> => {
-    // 1. Check for CSV and parse it
-    const csvFile = files.find(f => f.name.endsWith('.csv'));
-
-    let payload = [];
-
-    if (csvFile && csvFile.content) {
-        payload = parseCSV(csvFile.content);
-    } else {
-        // Fallback for demo if no CSV content, or just single file
-        payload = [{
-            npi: "1234567890",
-            first_name: "John",
-            last_name: "Doe (Fallback)",
-            organization_name: "Demo Org"
-        }];
-    }
-
-    // 2. Send Batch
-    const response = await axios.post(`${API_BASE_URL}/ingest`, payload);
-    return response.data.batch_id;
-};
-
-export const pollJobStatus = async (batchId: string): Promise<AnalysisResult | null> => {
-    try {
-        const response = await axios.get<BatchStatusResponse>(`${API_BASE_URL}/status/${batchId}`);
-        const data = response.data;
-
-        if (!data.is_complete) return null; // Wait until WHOLE batch is done
-
-        // Transform Backend Batch Data to Frontend Type
-        const transformedResult: AnalysisResult = {
-            roi: data.roi,
-            fraudRiskScore: data.fraud_risk_score,
-            providersProcessed: data.records.length,
-            discrepanciesFound: data.discrepancies_found,
-            summary: `Batch Analysis Complete. Risk Level: ${data.risk_level}. Processed ${data.records.length} records.`,
-
-            // Generate aggregate timeline/risk data from individual records
-            timelineData: [
-                { name: "Valid", value: data.records.filter(r => r.fraud_analysis?.risk_level === 'LOW').length },
-                { name: "Flagged", value: data.records.filter(r => r.fraud_analysis?.risk_level !== 'LOW').length }
-            ],
-
-            riskDistribution: [
-                { name: "Low", value: data.records.filter(r => r.fraud_analysis?.risk_level === 'LOW').length },
-                { name: "Medium", value: data.records.filter(r => r.fraud_analysis?.risk_level === 'MEDIUM').length },
-                { name: "High", value: data.records.filter(r => r.fraud_analysis?.risk_level === 'HIGH').length }
-            ],
-
-            agentLogs: [],
-
-            // Map the full list of records
-            records: data.records.map(r => ({
-                id: r.job_id,
-                name: `${r.provider_data?.first_name || 'Unknown'} ${r.provider_data?.last_name || ''}`,
-                npi: r.provider_data?.npi || 'N/A',
-                specialty: "General Practice",
-                status: r.validation_result?.oig_excluded ? 'Flagged' : (r.fraud_analysis?.risk_level === 'HIGH' ? 'Review' : 'Verified'),
-                riskScore: r.fraud_analysis?.risk_score || 0,
-                decayProb: r.degradation_prediction?.decay_probability_curve ? (1 - Object.values(r.degradation_prediction.decay_probability_curve[0])[0]) : 0,
-                conflicts: r.validation_result?.conflicts?.map(c => `${c.description} (${c.field}: ${c.entry_value} vs ${c.document_value})`) || [],
+// Mock Data Generation
+const generateMockResult = (): AnalysisResult => {
+    return {
+        roi: 1250000,
+        fraudRiskScore: 42,
+        providersProcessed: 1542,
+        discrepanciesFound: 128,
+        summary: "Analysis Complete: High ROI potential detected. 128 discrepancies found in 1,542 inspected provider records. Critical fraud flags in 'New York' region requiring immediate review.",
+        timelineData: [
+            { name: '00:00', value: 45, secondaryValue: 2 },
+            { name: '04:00', value: 120, secondaryValue: 5 },
+            { name: '08:00', value: 890, secondaryValue: 45 },
+            { name: '12:00', value: 1200, secondaryValue: 88 },
+            { name: '16:00', value: 1542, secondaryValue: 128 },
+        ],
+        riskDistribution: [
+            { name: 'Low Risk', value: 1200 },
+            { name: 'Medium Risk', value: 300 },
+            { name: 'High Risk', value: 42 }
+        ],
+        agentLogs: [
+            { agent: AgentType.ORCHESTRATOR, log: "Batch ingestion started: 1,542 records.", timestamp: new Date().toISOString() },
+            { agent: AgentType.DOCUMENT, log: "OCR processing complete. 98.5% confidence.", timestamp: new Date().toISOString() },
+            { agent: AgentType.VALIDATION, log: "NPI Registry cross-reference started.", timestamp: new Date().toISOString() },
+            { agent: AgentType.VALIDATION, log: "15 license mismatches detected.", timestamp: new Date().toISOString() },
+            { agent: AgentType.FRAUD, log: "Anomaly detected in billing cycle ID #9928.", timestamp: new Date().toISOString() },
+            { agent: AgentType.BUSINESS, log: "ROI calculation updated based on fraud prevention.", timestamp: new Date().toISOString() },
+            { agent: AgentType.ORCHESTRATOR, log: "Processing complete.", timestamp: new Date().toISOString() }
+        ],
+        records: [
+            {
+                id: "1",
+                name: "Dr. Sarah Chen",
+                npi: "1928374650",
+                specialty: "Cardiology",
+                riskScore: 12,
+                decayProb: 0.05,
+                status: "Verified",
+                conflicts: [],
                 lastUpdated: new Date().toISOString(),
                 agentThoughts: [
-                    { agentName: 'Validation Agent', thought: `Registry Check: ${r.validation_result?.npi_valid ? 'Valid' : 'Invalid'}. OIG Check: ${r.validation_result?.oig_excluded ? 'HIT' : 'Clean'}.`, verdict: r.validation_result?.npi_valid ? 'pass' : 'fail', timestamp: new Date().toISOString() },
-                    { agentName: 'Fraud Detector', thought: `Risk Score: ${r.fraud_analysis?.risk_score}. Patterns: ${r.fraud_analysis?.flagged_patterns?.join(', ') || 'None'}.`, verdict: r.fraud_analysis?.risk_level === 'HIGH' ? 'fail' : 'pass', timestamp: new Date().toISOString() },
-                    { agentName: 'Business Impact', thought: `Savings: $${r.business_impact?.estimated_savings}. ROI: ${r.business_impact?.roi_multiplier}x.`, verdict: 'pass', timestamp: new Date().toISOString() }
+                    { agentName: "Validation Agent", thought: "NPI confirmed in CMS Registry. Active status.", verdict: "pass", timestamp: new Date().toISOString() },
+                    { agentName: "Fraud Detection", thought: "No abnormal billing patterns found in last 12 months.", verdict: "pass", timestamp: new Date().toISOString() }
                 ]
-            }))
-        };
+            },
+            {
+                id: "2",
+                name: "Dr. James Wilson",
+                npi: "9988776655",
+                specialty: "Dermatology",
+                riskScore: 85,
+                decayProb: 0.8,
+                status: "Flagged",
+                conflicts: ["License Expired", "Address Mismatch"],
+                lastUpdated: new Date().toISOString(),
+                agentThoughts: [
+                    { agentName: "Validation Agent", thought: "CRITICAL: State License expired 45 days ago.", verdict: "fail", timestamp: new Date().toISOString() },
+                    { agentName: "Document Parser", thought: "OCR mismatch: Uploaded PDF shows different practice address than registry.", verdict: "warn", timestamp: new Date().toISOString() },
+                    { agentName: "Predictive Degradation", thought: "High probability of credential lapse spreading to other network participations.", verdict: "fail", timestamp: new Date().toISOString() }
+                ]
+            },
+            {
+                id: "3",
+                name: "Dr. Emily Davis",
+                npi: "1122334455",
+                specialty: "Pediatrics",
+                riskScore: 45,
+                decayProb: 0.3,
+                status: "Review",
+                conflicts: ["DEA Number Verification Pending"],
+                lastUpdated: new Date().toISOString(),
+                agentThoughts: [
+                    { agentName: "Validation Agent", thought: "Primary license valid. DEA registration query timed out.", verdict: "warn", timestamp: new Date().toISOString() },
+                    { agentName: "Business Impact", thought: "Potential delayed reimbursement revenue if DEA not verified.", verdict: "neutral", timestamp: new Date().toISOString() }
+                ]
+            },
+            {
+                id: "4",
+                name: "Dr. Michael Change",
+                npi: "5566778899",
+                specialty: "Surgery",
+                riskScore: 92,
+                decayProb: 0.95,
+                status: "Flagged",
+                conflicts: ["OIG Exclusion Match", "High Billing Anomaly"],
+                lastUpdated: new Date().toISOString(),
+                agentThoughts: [
+                    { agentName: "Fraud Detection", thought: "ALERT: Name matches OIG exclusion list entry.", verdict: "fail", timestamp: new Date().toISOString() },
+                    { agentName: "Fraud Detection", thought: "Billing frequency 400% above regional average.", verdict: "fail", timestamp: new Date().toISOString() },
+                    { agentName: "Communicator", thought: "Drafted immediate suspension notice.", verdict: "neutral", timestamp: new Date().toISOString() }
+                ]
+            },
+            {
+                id: "5",
+                name: "Dr. Linda Martinez",
+                npi: "6677889900",
+                specialty: "General Practice",
+                riskScore: 5,
+                decayProb: 0.01,
+                status: "Verified",
+                conflicts: [],
+                lastUpdated: new Date().toISOString(),
+                agentThoughts: [
+                    { agentName: "Validation Agent", thought: "All credentials verified across 15 sources.", verdict: "pass", timestamp: new Date().toISOString() }
+                ]
+            }
+        ]
+    };
+};
 
-        return transformedResult;
+export const analyzeFilesWithAgents = async (files: FileUpload[]): Promise<AnalysisResult> => {
+    console.log("Analyzing files (DEMO MODE):", files);
 
-    } catch (e) {
-        console.error("Polling error", e);
-        return null; // Keep polling if error (or handle properly)
-    }
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500)); // Fast response for demo
+
+    return generateMockResult();
 };
