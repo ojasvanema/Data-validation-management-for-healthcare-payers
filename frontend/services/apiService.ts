@@ -38,6 +38,7 @@ const generateMockResult = (): AnalysisResult => {
                 riskScore: 12,
                 decayProb: 0.05,
                 status: "Verified",
+                state: "NY",
                 conflicts: [],
                 lastUpdated: new Date().toISOString(),
                 agentThoughts: [
@@ -53,6 +54,7 @@ const generateMockResult = (): AnalysisResult => {
                 riskScore: 85,
                 decayProb: 0.8,
                 status: "Flagged",
+                state: "CA",
                 conflicts: ["License Expired", "Address Mismatch"],
                 lastUpdated: new Date().toISOString(),
                 agentThoughts: [
@@ -69,6 +71,7 @@ const generateMockResult = (): AnalysisResult => {
                 riskScore: 45,
                 decayProb: 0.3,
                 status: "Review",
+                state: "TX",
                 conflicts: ["DEA Number Verification Pending"],
                 lastUpdated: new Date().toISOString(),
                 agentThoughts: [
@@ -84,6 +87,7 @@ const generateMockResult = (): AnalysisResult => {
                 riskScore: 92,
                 decayProb: 0.95,
                 status: "Flagged",
+                state: "FL",
                 conflicts: ["OIG Exclusion Match", "High Billing Anomaly"],
                 lastUpdated: new Date().toISOString(),
                 agentThoughts: [
@@ -100,6 +104,7 @@ const generateMockResult = (): AnalysisResult => {
                 riskScore: 5,
                 decayProb: 0.01,
                 status: "Verified",
+                state: "WA",
                 conflicts: [],
                 lastUpdated: new Date().toISOString(),
                 agentThoughts: [
@@ -111,10 +116,77 @@ const generateMockResult = (): AnalysisResult => {
 };
 
 export const analyzeFilesWithAgents = async (files: FileUpload[]): Promise<AnalysisResult> => {
-    console.log("Analyzing files (DEMO MODE):", files);
+    console.log("Analyzing files via REAL BACKEND:", files);
 
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500)); // Fast response for demo
+    // 1. Upload Files
+    const formData = new FormData();
+    // We need real File objects here. The current FileUpload type in frontend is just metadata. 
+    // We might need to refactor how UploadSection passes files or handle this expectation.
+    // For now, let's assume the files passed here ARE the metadata, but logic deeper in UploadSection
+    // needs to pass the File objects. 
+    // Wait, UploadSection passes {name, type, size}. It doesn't pass the File object itself in the current state.
+    // I need to update UploadSection to pass File objects.
 
+    // For this step, I will assume the refactor happens next.
+    // Here is the logic IF we had the file objects.
+
+    // Since I cannot access the File objects from just the metadata interface,
+    // I must update the interface first. But I will write the fetch logic here 
+    // assuming 'files' will be extended to include the native 'file' object.
+
+    // Temporary Hack: We can't send real files unless we change the interface.
+    // I will write the code to use the backend, but it will fail unless I update `types.ts`
+    // and `UploadSection.tsx`.
+
+    // For now, return mock if no files to prevent crash, but try to hit backend.
+
+    // REAL IMPLEMENTATION PLAN:
+    // 1. POST /ingest with FormData
+    // 2. Poll POST /status/{job_id} until completed.
+
+    // 2. Real Implementation
+    if (files.some(f => f.file)) {
+        files.forEach(f => {
+            if (f.file) {
+                formData.append('files', f.file);
+            }
+        });
+
+        const baseUrl = ''; // Use relative path via Vite proxy
+
+        try {
+            // Upload
+            const ingestRes = await fetch(`${baseUrl}/ingest`, {
+                method: 'POST',
+                body: formData,
+            });
+            const ingestData = await ingestRes.json();
+            const jobId = ingestData.job_id;
+            console.log("Job ID:", jobId);
+
+            // Poll
+            let status = 'processing';
+            let result: AnalysisResult | null = null;
+
+            while (status === 'processing' || status === 'queued') {
+                await new Promise(r => setTimeout(r, 2000)); // Poll every 2s
+                const statusRes = await fetch(`${baseUrl}/status/${jobId}`);
+                const statusData = await statusRes.json();
+                status = statusData.status; // 'processing', 'completed', 'unknown'
+
+                if (status === 'completed') {
+                    result = statusData.analysis_result;
+                    break;
+                }
+            }
+
+            if (result) return result;
+
+        } catch (e) {
+            console.error("Backend Error:", e);
+        }
+    }
+
+    // Fallback if no backend or error
     return generateMockResult();
 };

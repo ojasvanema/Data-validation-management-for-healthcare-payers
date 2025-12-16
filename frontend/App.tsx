@@ -6,14 +6,17 @@ import AgentDashboard from './components/AgentDashboard';
 import MetricsDashboard from './components/MetricsDashboard';
 import RecordsExplorer from './components/RecordsExplorer';
 import { analyzeFilesWithAgents } from './services/apiService';
-import { Activity, LayoutDashboard, History, PlusCircle, ChevronRight, Leaf, Database } from 'lucide-react';
+import { Activity, LayoutDashboard, History, PlusCircle, ChevronRight, Leaf, Database, LogOut, ShieldCheck, PlayCircle } from 'lucide-react';
 import GlassCard from './components/GlassCard';
+
+import LandingPage from './components/LandingPage';
+import LoginTransition from './components/LoginTransition';
 
 export default function App() {
     const [agents, setAgents] = useState<AgentStatus[]>(INITIAL_AGENTS);
     const [isProcessing, setIsProcessing] = useState(false);
     const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
-    const [view, setView] = useState<'home' | 'dashboard' | 'explorer'>('home');
+    const [view, setView] = useState<'landing' | 'login' | 'home' | 'dashboard' | 'explorer'>('landing');
     const [history, setHistory] = useState<HistoryItem[]>([]);
 
     // Function to simulate agent activity step-by-step
@@ -107,17 +110,47 @@ export default function App() {
         setAgents(INITIAL_AGENTS.map(a => ({ ...a, status: 'idle', message: 'Standing by' })));
     };
 
+    const loadDemoData = async () => {
+        setIsProcessing(true);
+        setView('dashboard');
+        setAgents(INITIAL_AGENTS.map(a => ({ ...a, status: 'idle', message: 'Standing by' })));
+
+        // Simulate processing for visual effect
+        updateAgent(AgentType.ORCHESTRATOR, 'processing', 'Initiating demo sequence...');
+
+        try {
+            const response = await fetch('/demo-data', {
+                method: 'POST'
+            });
+            const dummyResult = await response.json();
+            await simulateAgentActivity(dummyResult);
+        } catch (error) {
+            console.error("Failed to load demo data:", error);
+            updateAgent(AgentType.ORCHESTRATOR, 'error', 'Failed to load demo data.');
+            setIsProcessing(false);
+        }
+    };
+
+    if (view === 'landing') {
+        return <LandingPage onLogin={() => setView('login')} />;
+    }
+
+    if (view === 'login') {
+        return <LoginTransition onComplete={() => setView('dashboard')} />;
+    }
+
+    // Main Dashboard View
     return (
-        <div className="flex h-screen overflow-hidden text-white font-sans bg-black/40 backdrop-blur-sm">
+        <div className="flex h-screen overflow-hidden text-white font-sans bg-[#050505]">
 
             {/* Sidebar */}
-            <aside className="w-64 bg-black/40 border-r border-white/5 flex flex-col flex-shrink-0 z-10 backdrop-blur-xl">
+            <aside className="w-64 bg-[#0a0a0a]/60 border-r border-white/5 flex flex-col flex-shrink-0 z-20 backdrop-blur-xl">
                 <div className="p-6 border-b border-white/5">
                     <div className="flex items-center gap-2 mb-1">
-                        <div className="bg-emerald-500 p-1.5 rounded-lg shadow-lg shadow-emerald-500/20">
-                            <Leaf size={20} className="text-black fill-current" />
+                        <div className="bg-emerald-500/10 p-1.5 rounded-lg border border-emerald-500/20">
+                            <ShieldCheck size={20} className="text-emerald-400" />
                         </div>
-                        <h1 className="font-bold text-lg tracking-tight text-emerald-50">HealthGuard</h1>
+                        <h1 className="font-bold text-lg tracking-tight text-white">Health<span className="text-emerald-400">Guard</span></h1>
                     </div>
                     <p className="text-xs text-emerald-400/60 pl-9">AI Orchestrator</p>
                 </div>
@@ -184,7 +217,15 @@ export default function App() {
                     </div>
                 </nav>
 
-                <div className="p-4 border-t border-white/5">
+                <div className="p-4 border-t border-white/5 space-y-2">
+                    <button
+                        onClick={() => setView('landing')}
+                        className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-xs text-gray-500 hover:text-white hover:bg-white/5 transition-colors"
+                    >
+                        <LogOut size={14} />
+                        Logout
+                    </button>
+
                     <GlassCard className="p-3 bg-gradient-to-br from-emerald-900/50 to-black border-emerald-500/20">
                         <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-black font-bold text-xs">
@@ -200,7 +241,7 @@ export default function App() {
             </aside>
 
             {/* Main Content Area */}
-            <main className="flex-1 flex flex-col h-full overflow-hidden bg-gradient-to-br from-emerald-900/10 via-black to-black relative">
+            <main className="flex-1 flex flex-col h-full overflow-hidden bg-gradient-to-br from-[#022c22] via-[#050505] to-[#000000] relative">
                 {/* Background Decoration */}
                 <div className="absolute top-0 left-0 w-full h-96 bg-emerald-500/5 blur-[120px] pointer-events-none rounded-full transform -translate-y-1/2"></div>
 
@@ -236,7 +277,7 @@ export default function App() {
                                             Upload provider data to initiate the multi-agent orchestration for fraud detection and ROI analysis.
                                         </p>
                                     </div>
-                                    <UploadSection onFilesSelected={handleFilesSelected} isProcessing={isProcessing} />
+                                    <UploadSection onFilesSelected={handleFilesSelected} isProcessing={isProcessing} onLoadDemoData={loadDemoData} />
                                 </div>
                             </div>
                         )}
@@ -245,7 +286,7 @@ export default function App() {
                             <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 h-full animate-in slide-in-from-bottom-8 duration-500">
                                 {/* Left Column: Upload (Compact) & Orchestration */}
                                 <div className="xl:col-span-4 flex flex-col gap-6">
-                                    <UploadSection onFilesSelected={handleFilesSelected} isProcessing={isProcessing} compact />
+                                    <UploadSection onFilesSelected={handleFilesSelected} isProcessing={isProcessing} compact onLoadDemoData={loadDemoData} />
                                     <div className="flex-grow min-h-[400px]">
                                         <AgentDashboard agents={agents} />
                                     </div>

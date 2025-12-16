@@ -1,18 +1,89 @@
 import React from 'react';
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar, Cell } from 'recharts';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar, Cell, Treemap } from 'recharts';
 import GlassCard from './GlassCard';
 import { AnalysisResult } from '../types';
-import { DollarSign, ShieldAlert, Users, AlertOctagon, TrendingUp } from 'lucide-react';
+import { DollarSign, ShieldAlert, Users, AlertOctagon, TrendingUp, Map } from 'lucide-react';
 
 interface MetricsDashboardProps {
   data: AnalysisResult | null;
 }
 
+
+const processStateData = (records: any[]) => {
+  if (!records || records.length === 0) return [];
+
+  const stateMap = new Map();
+  records.forEach(r => {
+    const state = r.state || 'Unknown';
+    if (!stateMap.has(state)) {
+      stateMap.set(state, { count: 0, totalRisk: 0 });
+    }
+    const curr = stateMap.get(state);
+    curr.count++;
+    curr.totalRisk += r.riskScore;
+  });
+
+  return Array.from(stateMap.entries()).map(([name, val]) => {
+    // Color interpolation: Green (low risk) -> Red (high risk)
+    // Simple distinct colors for demo: 
+    // < 30: Emerald (#10b981)
+    // 30-70: Amber (#f59e0b)
+    // > 70: Rose (#f43f5e)
+    // Using hex for Recharts
+    const avgRisk = Math.round(val.totalRisk / val.count);
+    let fill = '#10b981';
+    if (avgRisk > 70) fill = '#f43f5e';
+    else if (avgRisk > 30) fill = '#f59e0b';
+
+    return {
+      name,
+      size: val.count,
+      riskScore: avgRisk,
+      fill
+    };
+  }).sort((a, b) => b.size - a.size);
+};
+
+const CustomTreemapContent = (props: any) => {
+  const { root, depth, x, y, width, height, index, payload, colors, rank, name, fill } = props;
+
+  return (
+    <g>
+      <rect
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        style={{
+          fill: fill, // Use the pre-calculated fill
+          stroke: '#050505',
+          strokeWidth: 2,
+          strokeOpacity: 1,
+        }}
+      />
+      {
+        width > 30 && height > 30 ? (
+          <text
+            x={x + width / 2}
+            y={y + height / 2 + 7}
+            textAnchor="middle"
+            fill="#fff"
+            fontSize={14}
+            fontWeight="bold"
+          >
+            {name}
+          </text>
+        ) : null
+      }
+    </g>
+  );
+};
+
 const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ data }) => {
   if (!data) return (
     <div className="h-full flex flex-col items-center justify-center text-gray-500 space-y-4">
       <div className="p-4 bg-white/5 rounded-full">
-         <TrendingUp size={48} className="text-emerald-900" />
+        <TrendingUp size={48} className="text-emerald-900" />
       </div>
       <p className="text-lg">Run an orchestration to see live metrics</p>
     </div>
@@ -20,28 +91,28 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ data }) => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      
+
       {/* KPIs */}
       <div className="lg:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-4">
         <GlassCard className="p-4 flex flex-col items-center justify-center text-center border-emerald-500/20 bg-emerald-900/10">
-            <DollarSign className="text-emerald-400 mb-2" size={24} />
-            <span className="text-emerald-200/60 text-xs uppercase tracking-wider">Potential ROI</span>
-            <span className="text-2xl font-bold text-white">${data.roi.toLocaleString()}</span>
+          <DollarSign className="text-emerald-400 mb-2" size={24} />
+          <span className="text-emerald-200/60 text-xs uppercase tracking-wider">Potential ROI</span>
+          <span className="text-2xl font-bold text-white">${data.roi.toLocaleString()}</span>
         </GlassCard>
         <GlassCard className="p-4 flex flex-col items-center justify-center text-center border-red-500/20 bg-red-900/10">
-            <ShieldAlert className="text-red-400 mb-2" size={24} />
-            <span className="text-red-200/60 text-xs uppercase tracking-wider">Fraud Risk</span>
-            <span className="text-2xl font-bold text-white">{data.fraudRiskScore}/100</span>
+          <ShieldAlert className="text-red-400 mb-2" size={24} />
+          <span className="text-red-200/60 text-xs uppercase tracking-wider">Fraud Risk</span>
+          <span className="text-2xl font-bold text-white">{data.fraudRiskScore}/100</span>
         </GlassCard>
         <GlassCard className="p-4 flex flex-col items-center justify-center text-center border-blue-500/20 bg-blue-900/10">
-            <Users className="text-blue-400 mb-2" size={24} />
-            <span className="text-blue-200/60 text-xs uppercase tracking-wider">Providers</span>
-            <span className="text-2xl font-bold text-white">{data.providersProcessed}</span>
+          <Users className="text-blue-400 mb-2" size={24} />
+          <span className="text-blue-200/60 text-xs uppercase tracking-wider">Providers</span>
+          <span className="text-2xl font-bold text-white">{data.providersProcessed}</span>
         </GlassCard>
         <GlassCard className="p-4 flex flex-col items-center justify-center text-center border-orange-500/20 bg-orange-900/10">
-            <AlertOctagon className="text-orange-400 mb-2" size={24} />
-            <span className="text-orange-200/60 text-xs uppercase tracking-wider">Discrepancies</span>
-            <span className="text-2xl font-bold text-white">{data.discrepanciesFound}</span>
+          <AlertOctagon className="text-orange-400 mb-2" size={24} />
+          <span className="text-orange-200/60 text-xs uppercase tracking-wider">Discrepancies</span>
+          <span className="text-2xl font-bold text-white">{data.discrepanciesFound}</span>
         </GlassCard>
       </div>
 
@@ -55,18 +126,18 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ data }) => {
           <AreaChart data={data.timelineData}>
             <defs>
               <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
               </linearGradient>
               <linearGradient id="colorIss" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
+                <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#f43f5e" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
             <XAxis dataKey="name" stroke="rgba(255,255,255,0.3)" fontSize={12} tickLine={false} axisLine={false} />
             <YAxis stroke="rgba(255,255,255,0.3)" fontSize={12} tickLine={false} axisLine={false} />
-            <Tooltip 
+            <Tooltip
               contentStyle={{ backgroundColor: '#022c22', borderColor: '#064e3b', color: '#fff', borderRadius: '8px' }}
               itemStyle={{ color: '#fff' }}
             />
@@ -87,8 +158,8 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ data }) => {
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
             <XAxis dataKey="name" stroke="rgba(255,255,255,0.3)" fontSize={12} tickLine={false} axisLine={false} />
             <Tooltip
-                cursor={{fill: 'rgba(255,255,255,0.05)'}}
-                contentStyle={{ backgroundColor: '#022c22', borderColor: '#064e3b', color: '#fff', borderRadius: '8px' }}
+              cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+              contentStyle={{ backgroundColor: '#022c22', borderColor: '#064e3b', color: '#fff', borderRadius: '8px' }}
             />
             <Bar dataKey="value" radius={[4, 4, 0, 0]}>
               {data.riskDistribution.map((entry, index) => (
@@ -99,20 +170,55 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ data }) => {
         </ResponsiveContainer>
       </GlassCard>
 
+      {/* Geographic Risk Heatmap - DISABLED DEBUGGING */}
+      {/* 
+      <GlassCard className="lg:col-span-3 p-6 min-h-[350px]">
+        <h3 className="text-lg font-semibold mb-6 text-white flex items-center gap-2">
+          <span className="w-2 h-6 bg-purple-500 rounded-sm"></span>
+          Geographic Risk Heatmap
+        </h3>
+        <ResponsiveContainer width="100%" height={300}>
+          <Treemap
+            data={processStateData(data.records || [])}
+            dataKey="size"
+            aspectRatio={4 / 3}
+            stroke="#050505"
+            content={<CustomTreemapContent />}
+          >
+            <Tooltip
+              content={({ active, payload }) => {
+                if (active && payload && payload.length) {
+                  const d = payload[0].payload;
+                  return (
+                    <div className="bg-[#022c22] border border-[#064e3b] text-white p-3 rounded-lg shadow-xl">
+                      <p className="font-bold mb-1">{d.name}</p>
+                      <p className="text-xs text-gray-300">Providers: <span className="text-white font-mono">{d.size}</span></p>
+                      <p className="text-xs text-gray-300">Avg Risk: <span className="text-white font-mono">{d.riskScore}</span></p>
+                    </div>
+                  );
+                }
+                return null;
+              }}
+            />
+          </Treemap>
+        </ResponsiveContainer>
+      </GlassCard> 
+      */}
+
       {/* Agent Logs (Scrollable) */}
       <GlassCard className="lg:col-span-3 p-6 max-h-[300px] overflow-hidden flex flex-col">
         <h3 className="text-lg font-semibold mb-4 text-white sticky top-0 flex items-center gap-2">
-            <span className="w-2 h-6 bg-blue-500 rounded-sm"></span>
-            System Logs
+          <span className="w-2 h-6 bg-blue-500 rounded-sm"></span>
+          System Logs
         </h3>
         <div className="overflow-y-auto pr-2 space-y-2 custom-scrollbar">
-            {data.agentLogs.map((log, idx) => (
-                <div key={idx} className="flex gap-4 text-sm border-b border-white/5 pb-3 last:border-0 hover:bg-white/5 p-2 rounded transition-colors">
-                    <span className="text-gray-500 font-mono text-xs w-24 shrink-0 pt-1">{new Date(log.timestamp).toLocaleTimeString()}</span>
-                    <span className="text-emerald-400 font-bold w-32 shrink-0 pt-1">{log.agent}</span>
-                    <span className="text-gray-300 leading-relaxed">{log.log}</span>
-                </div>
-            ))}
+          {data.agentLogs.map((log, idx) => (
+            <div key={idx} className="flex gap-4 text-sm border-b border-white/5 pb-3 last:border-0 hover:bg-white/5 p-2 rounded transition-colors">
+              <span className="text-gray-500 font-mono text-xs w-24 shrink-0 pt-1">{new Date(log.timestamp).toLocaleTimeString()}</span>
+              <span className="text-emerald-400 font-bold w-32 shrink-0 pt-1">{log.agent}</span>
+              <span className="text-gray-300 leading-relaxed">{log.log}</span>
+            </div>
+          ))}
         </div>
       </GlassCard>
     </div>

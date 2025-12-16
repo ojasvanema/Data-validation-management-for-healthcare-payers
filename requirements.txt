@@ -1,16 +1,19 @@
 fastapi
 uvicorn
 python-multipart
-pandas
+pydantic
 numpy
-scikit-learn
-sentence-transformers
-faiss-cpu
+pandas
 filetype
 pdfplumber
 python-docx
 Pillow
 pytesseract
 pydub
+<<<<<<< HEAD
 openai-whisper
 langgraph
+=======
+langgraph
+requests
+>>>>>>> 27f39b92aed15fa0b218cb1062b9c2ddffc12767
