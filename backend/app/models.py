@@ -89,7 +89,9 @@ class FrontendProviderRecord(BaseModel):
     status: str # Verified, Flagged, Review
     conflicts: List[str]
     agentThoughts: List[AgentThought]
+    agentThoughts: List[AgentThought]
     lastUpdated: str
+    state: str # US State Code
 
 class AnalysisResult(BaseModel):
     """Matches the frontend expected format."""

@@ -1,59 +1,123 @@
 # HealthGuard AI Orchestrator
 
-A multi-agent system for validating healthcare provider data, designed to automate compliance checks, detect fraud, and analyze business impact using AI agents.
+**Data Validation & Management System for Healthcare Payers**
 
-## 🚀 Quick Start (Demo Mode)
-
-The system is currently configured in **Demo Mode**, allowing you to explore the full dashboard capabilities with simulated data without needing external API keys.
-
-### 1. Backend Setup
-The backend handles orchestration and agent logic (FastAPI + LangGraph).
-
-```bash
-# Navigate to the project root
-cd /path/to/project
-
-# Install Python dependencies
-pip install -r requirements.txt
-
-# Start the Backend Server
-python -m uvicorn backend.app.main:app --reload --port 8000
-```
-*The backend will be available at `http://localhost:8000`.*
-
-### 2. Frontend Setup
-The frontend provides the interactive dashboard (React + Vite).
-
-```bash
-# Navigate to the frontend directory
-cd frontend
-
-# Install Node dependencies
-npm install
-
-# Start the Frontend Server
-npm run dev
-```
-*The frontend will be available at `http://localhost:3000`.*
+HealthGuard is a cutting-edge multi-agent system designed to automate the validation of healthcare provider data. It leverages AI agents to perform complex checks, detect fraud patterns, and analyze business impact, ensuring data integrity and operational efficiency for healthcare payers.
 
 ---
 
-## 🖥️ Using the Application
+## 🌟 Highlights
 
-1.  Open your browser to `http://localhost:3000`.
-2.  **Start Analysis**: Click the **"New Analysis"** button or upload any dummy file (e.g., a text file or PDF).
-3.  **View Results**: The system will simulate a comprehensive analysis of 1,500+ provider records.
-    *   **Dashboard**: View high-level ROI, Fraud Risk, and Compliance metrics.
-    *   **Records Explorer**: Drill down into specific physician profiles to see "Agent Thoughts" and validation details.
-    *   **Live Logs**: Watch the AI agents (Validation, Fraud, Business) communicate in real-time.
+*   **Multi-Agent Orchestration**: Powered by LangGraph, coordinating specialized agents (Validation, Fraud, Business, Graphical).
+*   **Real-Time Dashboard**: Interactive React-based UI for live monitoring of validation workflows.
+*   **Geographic Risk Heatmap**: Visualizes provider risk distribution across states using interactive Treemaps.
+*   **Fraud Detection**: automated analysis of provider records for suspicious patterns and billing anomalies.
+*   **ROI Analysis**: Instant calculation of potential savings and business impact.
+*   **Modular Architecture**: Clean separation of concerns with a robust FastAPI backend and modern React frontend.
 
-## 🏗️ Project Architecture
+---
 
-*   **Frontend**: React, TypeScript, Tailwind CSS, Vite.
-*   **Backend**: FastAPI, Python 3.10+.
-*   **AI Orchestration**: LangGraph (managing multi-agent workflows).
-*   **Database/State**: In-memory state management (SQLite ready).
+## 🛠️ Technology Stack
+
+### Frontend
+*   **Framework**: React (Vite)
+*   **Language**: TypeScript
+*   **Styling**: Tailwind CSS, Lucide Icons
+*   **Visualization**: Recharts (Charts, Treemaps)
+
+### Backend
+*   **API Framework**: FastAPI
+*   **Language**: Python 3.10+
+*   **Orchestration**: LangGraph, LangChain
+*   **Data Processing**: Pandas, Scikit-learn
+*   **Server**: Uvicorn
+
+---
+
+## 🚀 Getting Started
+
+Follow these steps to set up the project locally.
+
+### Prerequisites
+*   Node.js (v18+)
+*   Python (v3.10+)
+
+### 1. Clone the Repository
+```bash
+git clone <repository-url>
+cd Data-validation-management-for-healthcare-payers
+```
+
+### 2. Backend Setup
+Set up the Python environment and start the API server.
+
+```bash
+# Navigate to project root
+cd .
+
+# Create and activate virtual environment (optional but recommended)
+python3 -m venv .venv
+source .venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Start the Backend Server (runs on http://127.0.0.1:8000)
+python3 -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload
+```
+
+### 3. Frontend Setup
+Set up the React application.
+
+```bash
+# Open a new terminal and navigate to frontend directory
+cd frontend
+
+# Install dependencies
+npm install
+
+# Start the Development Server (runs on http://localhost:5173)
+npm run dev
+```
+
+---
+
+## 🎮 Usage Guide
+
+1.  **Launch**: Ensure both Backend and Frontend servers are running.
+2.  **Access**: Open your browser and go to the frontend URL (usually `http://localhost:5173`).
+3.  **Demo Mode**:
+    *   Click the **"Load Demo Data"** button in the sidebar.
+    *   Watch the AI Orchestrator simulate the validation of 100 provider records.
+    *   Explore the **Dashboard**, **Risk Heatmap**, and **Drill-down Data**.
+4.  **Real Ingestion (Experimental)**:
+    *   Click "Start Orchestration" and upload a file (PDF/CSV).
+    *   The system will attempt to parse and validate the file using the connected agents.
+
+---
+
+## 📂 Project Structure
+
+```
+├── backend/
+│   ├── app/
+│   │   ├── agents/         # Modular AI Agents (Validation, Fraud, etc.)
+│   │   ├── main.py         # FastAPI Entry Point
+│   │   ├── models.py       # Pydantic Data Models
+│   │   └── graph.py        # LangGraph Workflow Definition
+│   └── requirements.txt    # Python Dependencies
+├── frontend/
+│   ├── src/
+│   │   ├── components/     # React UI Components
+│   │   ├── services/       # API Integration
+│   │   └── types.ts        # TypeScript Interfaces
+│   ├── App.tsx             # Main App Component
+│   └── index.html          # Entry Point
+└── README.md               # Project Documentation
+```
+
+---
 
 ## ⚠️ Notes
-
-*   **Demo Mode**: Currently, `frontend/services/apiService.ts` is configured to return mock data for demonstration purposes. To connect to the real live agents, you will need to revert the mock data changes in that file and ensure your backend agents have valid API keys (e.g., for NPI Registry or LLM providers).
+*   **Demo Mode Endpoint**: The `/demo-data` endpoint creates synthetic data for demonstration, ensuring the UI can be fully tested without sensitive real-world data.
+*   **Agent Logic**: The current iteration focuses on the orchestration flow and UI integration. Some downstream agents use logic stubs for stable demonstration performance.
