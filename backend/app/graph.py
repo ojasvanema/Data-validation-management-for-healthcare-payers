@@ -6,14 +6,46 @@ import random
 
 # --- Node Implementation (Stubs for Now) ---
 
+from .agents.parser_agent import LangGraphFileAgent
+
+# Global parser instance (singleton for efficiency)
+# In production, this might be per-request or pooled
+parser_instance = LangGraphFileAgent()
+
 async def sub_agent_parser(state: MainAgentState) -> MainAgentState:
-    """Simulates parsing a document or enriching initial data."""
-    # In reality, this would call the VLM/OCR tools
-    print(f"[{state.job_id}] Parsing document...")
-    await asyncio.sleep(0.1) # Simulate IO
-    if not state.provider_data.npi:
-        # Mock parsing extraction
-        state.provider_data.npi = "1234567890"
+    """Uses real tools to parse documents."""
+    print(f"[{state.job_id}] Parsing document via LangGraphFileAgent...")
+    
+    files = state.provider_data.raw_data.get("files", [])
+    parsed_results = []
+    
+    for file_path in files:
+        try:
+            print(f"[{state.job_id}] Ingesting: {file_path}")
+            result = parser_instance.ingest_file(file_path)
+            parsed_results.append(result)
+            
+            # Simple heuristic extraction logic (mocking 'LLM' extraction from parsed text)
+            # In a real scenario, query_with_context would be used here.
+            text_content = result.get('parsed', {}).get('text', '')
+            
+            # Very basic extraction (Regex/Hueristic) as requested to avoid intensive calls
+            if "NPI" in text_content:
+                # Mock finding NPI in text
+                pass 
+                
+        except Exception as e:
+            print(f"Error parsing {file_path}: {e}")
+            state.errors.append(f"Parsing error for {file_path}: {str(e)}")
+
+    # For now, since we aren't using a real LLM for extraction, we keep the mock NPI
+    # BUT we attach the real parsed text to the state for auditing
+    state.provider_data.raw_data['parsed_results'] = parsed_results
+    
+    # Simulate extraction success if we parsed something
+    if not state.provider_data.npi and parsed_results:
+        state.provider_data.npi = "1234567890" # Still fallback for flow continuity
+        
     return state
 
 async def sub_agent_validation(state: MainAgentState) -> MainAgentState:

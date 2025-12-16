@@ -42,6 +42,7 @@ export interface ProviderRecord {
   conflicts: string[];
   agentThoughts: AgentThought[];
   lastUpdated: string;
+  state: string; // US State Code (e.g., 'NY', 'CA')
 }
 
 export interface AnalysisResult {
@@ -72,4 +73,5 @@ export interface FileUpload {
   type: string;
   size: number;
   content?: string; // Base64 for images/PDFs if needed in full implementation, usually processed differently
+  file?: File; // Actual file object for upload
 }

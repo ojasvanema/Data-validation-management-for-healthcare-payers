@@ -5,11 +5,12 @@ import { FileUpload } from '../types';
 
 interface UploadSectionProps {
   onFilesSelected: (files: FileUpload[]) => void;
+  onLoadDemoData?: () => void;
   isProcessing: boolean;
   compact?: boolean;
 }
 
-const UploadSection: React.FC<UploadSectionProps> = ({ onFilesSelected, isProcessing, compact = false }) => {
+const UploadSection: React.FC<UploadSectionProps> = ({ onFilesSelected, onLoadDemoData, isProcessing, compact = false }) => {
   const [dragActive, setDragActive] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<FileUpload[]>([]);
 
@@ -31,7 +32,8 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFilesSelected, isProces
       const newFiles = Array.from(e.dataTransfer.files).map((f: File) => ({
         name: f.name,
         type: f.type,
-        size: f.size
+        size: f.size,
+        file: f
       }));
       setSelectedFiles(prev => [...prev, ...newFiles]);
     }
@@ -43,7 +45,8 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFilesSelected, isProces
       const newFiles = Array.from(e.target.files).map((f: File) => ({
         name: f.name,
         type: f.type,
-        size: f.size
+        size: f.size,
+        file: f
       }));
       setSelectedFiles(prev => [...prev, ...newFiles]);
     }
@@ -73,16 +76,20 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFilesSelected, isProces
       </div>
 
       <div
-        className={`
-          flex-grow border-2 border-dashed rounded-xl flex flex-col items-center justify-center transition-all duration-300
-          ${dragActive ? 'border-emerald-400 bg-emerald-900/20' : 'border-white/10 hover:border-white/20 hover:bg-white/5'}
-          ${isProcessing ? 'opacity-50 pointer-events-none' : ''}
-          ${compact ? 'p-4 min-h-[120px]' : 'p-12 min-h-[250px]'}
-        `}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
         onDrop={handleDrop}
+        className={`
+          border-2 border-dashed rounded-xl p-8 transition-all duration-300 flex flex-col items-center justify-center cursor-pointer group
+          ${dragActive
+            ? 'border-emerald-500 bg-emerald-500/10 scale-[1.02]'
+            : compact
+              ? 'border-white/10 bg-white/[0.02] hover:bg-white/[0.04] hover:border-emerald-500/30'
+              : 'border-white/10 bg-white/[0.02] hover:bg-white/[0.04] hover:border-emerald-500/30 h-64'
+          }
+          ${isProcessing ? 'opacity-50 pointer-events-none' : ''}
+        `}
       >
         <UploadCloud size={compact ? 32 : 56} className="text-emerald-400 mb-4" />
         <p className={`${compact ? 'text-sm' : 'text-xl'} font-medium text-center text-gray-200`}>
@@ -99,6 +106,25 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFilesSelected, isProces
             accept=".csv,.pdf,.jpg,.png,.xlsx"
           />
         </label>
+
+        {onLoadDemoData && (
+          <div className="mt-4 flex flex-col items-center w-full">
+            <div className="flex items-center gap-2 w-full mb-2">
+              <div className="h-px bg-white/10 flex-1"></div>
+              <span className="text-xs text-gray-500 uppercase">Demo</span>
+              <div className="h-px bg-white/10 flex-1"></div>
+            </div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onLoadDemoData();
+              }}
+              className="text-sm text-purple-400 hover:text-purple-300 hover:underline transition-colors"
+            >
+              Load 100 Dummy Records
+            </button>
+          </div>
+        )}
       </div>
 
       {selectedFiles.length > 0 && (

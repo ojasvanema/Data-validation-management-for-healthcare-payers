@@ -15,14 +15,14 @@ const AgentDashboard: React.FC<AgentDashboardProps> = ({ agents }) => {
   return (
     <div className="flex flex-col gap-6 h-full">
       {/* Main Orchestrator Section */}
-      <GlassCard className="p-6 border-emerald-500/30 bg-emerald-900/20 shadow-emerald-900/20">
+      <GlassCard className="p-6 border-emerald-500/20 bg-emerald-950/20 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-4">
             <div className={`p-3 rounded-full transition-colors duration-500 ${orchestrator?.status === 'processing' ? 'bg-emerald-500/20' : 'bg-white/5'}`}>
-               {orchestrator && React.createElement(AGENT_ICONS[orchestrator.icon], { 
-                 size: 32, 
-                 className: orchestrator.status === 'processing' ? "text-emerald-300 animate-pulse" : "text-gray-400" 
-               })}
+              {orchestrator && React.createElement(AGENT_ICONS[orchestrator.icon], {
+                size: 32,
+                className: orchestrator.status === 'processing' ? "text-emerald-300 animate-pulse" : "text-gray-400"
+              })}
             </div>
             <div>
               <h3 className="text-xl font-bold text-white">{orchestrator?.name}</h3>
@@ -30,10 +30,10 @@ const AgentDashboard: React.FC<AgentDashboardProps> = ({ agents }) => {
             </div>
           </div>
           <div className={`px-4 py-1 rounded-full text-sm font-mono border transition-all duration-300
-            ${orchestrator?.status === 'processing' 
-              ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-300 animate-pulse' 
+            ${orchestrator?.status === 'processing'
+              ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-300 animate-pulse'
               : 'bg-black/20 border-white/5 text-gray-500'}`
-            }>
+          }>
             {orchestrator?.message}
           </div>
         </div>
@@ -47,13 +47,13 @@ const AgentDashboard: React.FC<AgentDashboardProps> = ({ agents }) => {
         {workerAgents.map((agent) => {
           const Icon = AGENT_ICONS[agent.icon];
           const isActive = agent.status !== 'idle';
-          
+
           return (
-            <GlassCard 
-              key={agent.id} 
+            <GlassCard
+              key={agent.id}
               className={`p-4 flex flex-col justify-between transition-all duration-500
-                ${isActive ? 'opacity-100 bg-glass-200' : 'opacity-40 grayscale hover:opacity-60'}
-              `} 
+                ${isActive ? 'opacity-100' : 'opacity-40 grayscale hover:opacity-60'}
+              `}
               hoverEffect={isActive}
             >
               <div className="flex justify-between items-start mb-2">
@@ -65,7 +65,7 @@ const AgentDashboard: React.FC<AgentDashboardProps> = ({ agents }) => {
                 {agent.status === 'error' && <AlertTriangle size={16} className="text-red-400" />}
                 {agent.status === 'idle' && <PlayCircle size={16} className="text-gray-600" />}
               </div>
-              
+
               <div>
                 <h4 className={`font-semibold mb-1 ${isActive ? 'text-white' : 'text-gray-400'}`}>{agent.name}</h4>
                 <p className="text-xs text-gray-400 mb-3 line-clamp-2">{agent.description}</p>
