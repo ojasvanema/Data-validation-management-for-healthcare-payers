@@ -69,6 +69,7 @@ const mapBackendResponse = (data: any): AnalysisResult => {
         specialty: "General Practice",
         riskScore: f.risk_score || 0,
         decayProb: 0.1,
+        state: "NY",
         status: (v.npi_valid ? "Verified" : "Flagged") as "Verified" | "Flagged",
         conflicts: v.is_consistent ? [] : ["Data Mismatch"],
         lastUpdated: new Date().toISOString(),

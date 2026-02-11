@@ -12,3 +12,4 @@ pytesseract
 pydub
 langgraph
 requests
+huggingface_hub

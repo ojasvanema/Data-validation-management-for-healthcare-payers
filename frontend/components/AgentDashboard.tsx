@@ -1,82 +1,148 @@
-import React from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import GlassCard from './GlassCard';
 import { AgentStatus, AgentType } from '../types';
 import { AGENT_ICONS } from '../constants';
-import { Loader2, CheckCircle2, AlertTriangle, PlayCircle } from 'lucide-react';
+import { Loader2, Terminal, MessageSquare, Bot } from 'lucide-react';
 
 interface AgentDashboardProps {
   agents: AgentStatus[];
 }
 
+interface ChatMessage {
+  id: string;
+  agentId: AgentType;
+  message: string;
+  timestamp: number;
+}
+
 const AgentDashboard: React.FC<AgentDashboardProps> = ({ agents }) => {
-  const orchestrator = agents.find(a => a.id === AgentType.ORCHESTRATOR);
-  const workerAgents = agents.filter(a => a.id !== AgentType.ORCHESTRATOR);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Monitor agent status changes to trigger messages
+  useEffect(() => {
+    agents.forEach(agent => {
+      if (agent.status === 'processing' || agent.status === 'completed') {
+        const lastMsg = messages[messages.length - 1];
+        // simple de-dupe to avoid spamming the same message
+        if (!lastMsg || lastMsg.message !== agent.message) {
+
+          // Don't show "Standing by" or "Cycle finished" as chat
+          if (agent.message !== 'Standing by' && agent.message !== 'Cycle finished.') {
+            setMessages(prev => [...prev, {
+              id: Date.now().toString() + Math.random(),
+              agentId: agent.id,
+              message: agent.message,
+              timestamp: Date.now()
+            }]);
+          }
+        }
+      }
+    });
+  }, [agents]);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  const activeAgents = agents.filter(a => a.status === 'processing');
 
   return (
-    <div className="flex flex-col gap-6 h-full">
-      {/* Main Orchestrator Section */}
-      <GlassCard className="p-6 border-emerald-500/20 bg-emerald-950/20 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-4">
-            <div className={`p-3 rounded-full transition-colors duration-500 ${orchestrator?.status === 'processing' ? 'bg-emerald-500/20' : 'bg-white/5'}`}>
-              {orchestrator && React.createElement(AGENT_ICONS[orchestrator.icon], {
-                size: 32,
-                className: orchestrator.status === 'processing' ? "text-emerald-300 animate-pulse" : "text-gray-400"
-              })}
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-white">{orchestrator?.name}</h3>
-              <p className="text-emerald-200/70 text-sm">{orchestrator?.description}</p>
-            </div>
+    <div className="flex flex-col gap-4 h-full">
+      {/* Live Agent Conversation Log */}
+      <GlassCard className="flex-1 border-slate-200 dark:border-emerald-500/20 bg-white/80 dark:bg-[#050505]/80 flex flex-col p-0 overflow-hidden shadow-sm dark:shadow-none">
+        <div className="p-4 border-b border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Terminal size={16} className="text-emerald-600 dark:text-emerald-400" />
+            <h3 className="font-bold text-sm text-slate-900 dark:text-white">Agent Communication Channel</h3>
           </div>
-          <div className={`px-4 py-1 rounded-full text-sm font-mono border transition-all duration-300
-            ${orchestrator?.status === 'processing'
-              ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-300 animate-pulse'
-              : 'bg-black/20 border-white/5 text-gray-500'}`
-          }>
-            {orchestrator?.message}
+          <div className="flex items-center gap-2">
+            {activeAgents.length > 0 && (
+              <span className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 animate-pulse">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                Live
+              </span>
+            )}
           </div>
         </div>
-        <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-          <div className={`h-full bg-emerald-400 transition-all duration-1000 ease-out ${orchestrator?.status === 'processing' ? 'w-full animate-progress' : 'w-0'}`} />
+
+        <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+          {messages.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center text-slate-400 dark:text-gray-600 opacity-50">
+              <Bot size={48} className="mb-2" />
+              <p className="text-sm">Waiting for agent activity...</p>
+            </div>
+          ) : (
+            messages.map((msg) => {
+              const agent = agents.find(a => a.id === msg.agentId);
+              const Icon = agent ? AGENT_ICONS[agent.icon] : MessageSquare;
+
+              return (
+                <div key={msg.id} className="flex gap-3 animate-in fade-in slide-in-from-left-2 duration-300">
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border
+                                ${agent?.id === AgentType.ORCHESTRATOR
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/20 dark:border-emerald-500/30 dark:text-emerald-300'
+                      : 'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-500/20 dark:border-blue-500/30 dark:text-blue-300'}
+                            `}>
+                    <Icon size={16} />
+                  </div>
+                  <div className="flex flex-col max-w-[85%]">
+                    <div className="flex items-baseline gap-2 mb-0.5">
+                      <span className={`text-xs font-bold ${agent?.id === AgentType.ORCHESTRATOR ? 'text-emerald-700 dark:text-emerald-400' : 'text-blue-700 dark:text-blue-400'}`}>
+                        {agent?.name}
+                      </span>
+                      <span className="text-[10px] text-slate-400 dark:text-gray-600 font-mono">
+                        {new Date(msg.timestamp).toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                      </span>
+                    </div>
+                    <div className="text-sm text-slate-700 dark:text-gray-300 bg-slate-50 dark:bg-white/5 px-3 py-2 rounded-r-lg rounded-bl-lg border border-slate-200 dark:border-white/5 shadow-sm dark:shadow-none">
+                      {msg.message}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+
+          {activeAgents.length > 0 && (
+            <div className="flex gap-3 opacity-50">
+              <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-gray-800 flex items-center justify-center shrink-0">
+                <Loader2 size={16} className="animate-spin text-slate-400 dark:text-gray-400" />
+              </div>
+              <div className="flex items-center gap-1 h-8">
+                <span className="w-1.5 h-1.5 bg-slate-400 dark:bg-gray-600 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                <span className="w-1.5 h-1.5 bg-slate-400 dark:bg-gray-600 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                <span className="w-1.5 h-1.5 bg-slate-400 dark:bg-gray-600 rounded-full animate-bounce"></span>
+              </div>
+            </div>
+          )}
         </div>
       </GlassCard>
 
-      {/* Worker Agents Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 flex-grow overflow-y-auto pr-1">
-        {workerAgents.map((agent) => {
+      {/* Mini Status Grid */}
+      <div className="grid grid-cols-5 gap-2 h-20">
+        {agents.map((agent) => {
           const Icon = AGENT_ICONS[agent.icon];
-          const isActive = agent.status !== 'idle';
+          const isActive = agent.status === 'processing';
+          const isCompleted = agent.status === 'completed';
 
           return (
             <GlassCard
               key={agent.id}
-              className={`p-4 flex flex-col justify-between transition-all duration-500
-                ${isActive ? 'opacity-100' : 'opacity-40 grayscale hover:opacity-60'}
-              `}
-              hoverEffect={isActive}
+              className={`p-0 flex flex-col items-center justify-center gap-1 transition-all duration-300 shadow-sm dark:shadow-none
+                        ${isActive
+                  ? 'bg-emerald-50 border-emerald-200 dark:bg-emerald-500/10 dark:border-emerald-500/30'
+                  : isCompleted
+                    ? 'bg-white border-slate-200 dark:bg-white/5 dark:border-white/10'
+                    : 'opacity-50 grayscale bg-slate-100 dark:bg-transparent'}
+                    `}
             >
-              <div className="flex justify-between items-start mb-2">
-                <div className={`p-2 rounded-lg transition-colors duration-300 ${agent.status === 'processing' ? 'bg-emerald-500/20' : 'bg-white/5'}`}>
-                  <Icon size={20} className={agent.status === 'processing' ? 'text-emerald-300 animate-pulse' : agent.status === 'completed' ? 'text-emerald-400' : 'text-gray-400'} />
-                </div>
-                {agent.status === 'processing' && <Loader2 size={16} className="animate-spin text-emerald-400" />}
-                {agent.status === 'completed' && <CheckCircle2 size={16} className="text-emerald-400" />}
-                {agent.status === 'error' && <AlertTriangle size={16} className="text-red-400" />}
-                {agent.status === 'idle' && <PlayCircle size={16} className="text-gray-600" />}
-              </div>
-
-              <div>
-                <h4 className={`font-semibold mb-1 ${isActive ? 'text-white' : 'text-gray-400'}`}>{agent.name}</h4>
-                <p className="text-xs text-gray-400 mb-3 line-clamp-2">{agent.description}</p>
-                <div className={`text-xs font-mono p-2 rounded border transition-all duration-300 truncate
-                   ${isActive ? 'bg-black/20 border-white/10 text-gray-300' : 'bg-transparent border-transparent text-gray-600'}
-                `}>
-                  {agent.message}
-                </div>
-              </div>
+              <Icon size={16} className={isActive ? 'text-emerald-600 dark:text-emerald-400 animate-pulse' : isCompleted ? 'text-emerald-600 dark:text-emerald-500' : 'text-slate-400 dark:text-gray-500'} />
+              <span className="text-[9px] font-medium text-slate-500 dark:text-gray-400 truncate w-full text-center px-1">{agent.name.split(' ')[0]}</span>
             </GlassCard>
-          );
+          )
         })}
       </div>
     </div>

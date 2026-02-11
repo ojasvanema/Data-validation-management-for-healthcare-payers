@@ -1,6 +1,6 @@
 import React from 'react';
 import { FileText, ShieldCheck, Siren, TrendingUp, DollarSign, Mail, PieChart, Activity } from 'lucide-react';
-import { Agent } from '../types';
+import { Agent } from '../../types';
 
 const agents: Agent[] = [
     {
@@ -65,35 +65,35 @@ const AgentCard: React.FC<{ agent: Agent, index: number }> = ({ agent, index }) 
             <div className="text-xs uppercase tracking-wider text-emerald-400 mb-3">{agent.role}</div>
             <p className="text-gray-400 text-sm leading-relaxed">{agent.description}</p>
         </div>
-        
+
         {/* Decorative corner */}
         <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-emerald-500/5 to-transparent -mr-8 -mt-8 rounded-full blur-xl group-hover:bg-emerald-500/20 transition-all duration-500"></div>
     </div>
 );
 
 const AgentSystem: React.FC = () => {
-  return (
-    <section id="agents" className="py-24 relative">
-        <div className="max-w-7xl mx-auto px-6">
-            <div className="mb-16 text-center">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono mb-6">
-                    <Activity className="w-3 h-3" />
-                    <span>LANGGRAPH ORCHESTRATION</span>
+    return (
+        <section id="agents" className="py-24 relative">
+            <div className="max-w-7xl mx-auto px-6">
+                <div className="mb-16 text-center">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono mb-6">
+                        <Activity className="w-3 h-3" />
+                        <span>LANGGRAPH ORCHESTRATION</span>
+                    </div>
+                    <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">The 7-Agent Architecture</h2>
+                    <p className="text-gray-400 max-w-2xl mx-auto text-lg">
+                        A collective of specialized autonomous agents working in concert to ensure absolute data integrity.
+                    </p>
                 </div>
-                <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">The 7-Agent Architecture</h2>
-                <p className="text-gray-400 max-w-2xl mx-auto text-lg">
-                    A collective of specialized autonomous agents working in concert to ensure absolute data integrity.
-                </p>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                {agents.map((agent, i) => (
-                    <AgentCard key={agent.id} agent={agent} index={i} />
-                ))}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    {agents.map((agent, i) => (
+                        <AgentCard key={agent.id} agent={agent} index={i} />
+                    ))}
+                </div>
             </div>
-        </div>
-    </section>
-  );
+        </section>
+    );
 };
 
 export default AgentSystem;
