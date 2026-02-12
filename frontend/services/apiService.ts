@@ -1,4 +1,5 @@
-import { AnalysisResult, FileUpload, AgentType } from "../types";
+import { AnalysisResult, FileUpload, AgentType, ProviderRecord } from "../types";
+import api from "./api";
 
 // Mock Data Generation
 const generateMockResult = (): AnalysisResult => {
@@ -113,6 +114,24 @@ const generateMockResult = (): AnalysisResult => {
             }
         ]
     };
+};
+
+// For now, we'll keep using the API directly as the source of truth
+// The backend now persists data in SQLite
+
+// --- MOCK DATA FOR DEMO ---
+// NOTE: We are transitioning to backend-generated data. 
+// These local mocks are kept for fallback but need updates to match new types if used.
+// For now, we will rely on the backend.
+
+export const fetchDemoData = async (): Promise<AnalysisResult> => {
+    const response = await api.post<AnalysisResult>('/demo-data', {});
+    return response.data;
+};
+
+export const updateProviderStatus = async (id: string, status: string): Promise<ProviderRecord> => {
+    const response = await api.put<ProviderRecord>(`/providers/${id}/status`, { status });
+    return response.data;
 };
 
 export const analyzeFilesWithAgents = async (files: FileUpload[]): Promise<AnalysisResult> => {

@@ -43,6 +43,19 @@ export interface ProviderRecord {
   agentThoughts: AgentThought[];
   lastUpdated: string;
   state: string; // US State Code (e.g., 'NY', 'CA')
+  feedback?: {
+    score: number;
+    trend: number[];
+    recent_reviews: string[];
+  };
+  locations: {
+    address: string;
+    updated: string;
+  }[];
+  contact_numbers: {
+    number: string;
+    type: string;
+  }[];
 }
 
 export interface AnalysisResult {

@@ -13,7 +13,8 @@ export default defineConfig(({ mode }) => {
         '/ingest': 'http://127.0.0.1:8000',
         '/status': 'http://127.0.0.1:8000',
         '/docs': 'http://127.0.0.1:8000',
-        '/openapi.json': 'http://127.0.0.1:8000'
+        '/openapi.json': 'http://127.0.0.1:8000',
+        '/providers': 'http://127.0.0.1:8000'
       }
     },
     plugins: [react()],

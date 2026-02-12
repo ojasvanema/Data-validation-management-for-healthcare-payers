@@ -130,24 +130,26 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFilesSelected, onLoadDe
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
+      <div className="flex flex-col gap-4 flex-1">
         {/* Manual Entry Card */}
-        <div className="group relative bg-slate-50 border border-slate-200 dark:bg-[#0a0a0a]/40 dark:border-white/10 hover:border-emerald-500/30 rounded-2xl p-6 transition-all duration-300 hover:bg-white dark:hover:bg-[#0a0a0a]/60 cursor-pointer flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-md dark:shadow-none">
+        <div className="group relative bg-slate-50 border border-slate-200 dark:bg-[#0a0a0a]/40 dark:border-white/10 hover:border-emerald-500/30 rounded-2xl p-5 transition-all duration-300 hover:bg-white dark:hover:bg-[#0a0a0a]/60 cursor-pointer flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-md dark:shadow-none min-h-[160px]">
           <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
             <FileText size={80} className="text-slate-900 dark:text-white" />
           </div>
 
-          <div>
-            <div className="w-12 h-12 rounded-full bg-blue-50 border border-blue-100 dark:bg-blue-500/10 dark:border-blue-500/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-              <Plus className="text-blue-500 dark:text-blue-400" size={24} />
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-full bg-blue-50 border border-blue-100 dark:bg-blue-500/10 dark:border-blue-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
+              <Plus className="text-blue-500 dark:text-blue-400" size={20} />
             </div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">Manual Entry</h3>
-            <p className="text-sm text-slate-500 dark:text-gray-500 leading-relaxed">
-              Input individual provider details directly for ad-hoc validation. Useful for quick checks on specific NPIs.
-            </p>
+            <div>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">Manual Entry</h3>
+              <p className="text-xs text-slate-500 dark:text-gray-500 leading-relaxed max-w-[90%]">
+                Input individual provider details directly for ad-hoc validation.
+              </p>
+            </div>
           </div>
 
-          <button className="mt-6 w-full py-2.5 rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-white/5 text-slate-600 dark:text-gray-300 font-medium hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 dark:hover:bg-blue-500/20 dark:hover:text-blue-300 dark:hover:border-blue-500/30 transition-all text-sm flex items-center justify-center gap-2">
+          <button className="mt-4 w-full py-2 rounded-lg border border-slate-200 bg-white dark:border-white/10 dark:bg-white/5 text-slate-600 dark:text-gray-300 font-medium hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 dark:hover:bg-blue-500/20 dark:hover:text-blue-300 dark:hover:border-blue-500/30 transition-all text-xs flex items-center justify-center gap-2">
             Open Form <span className="opacity-0 group-hover:opacity-100 transition-opacity">→</span>
           </button>
         </div>
@@ -155,23 +157,25 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFilesSelected, onLoadDe
         {/* Fetch Data Card */}
         <div
           onClick={handleFetchClick}
-          className="group relative bg-slate-50 border border-emerald-200 dark:bg-[#0a0a0a]/40 dark:border-emerald-500/20 hover:border-emerald-500/50 rounded-2xl p-6 transition-all duration-300 hover:bg-white dark:hover:bg-[#0a0a0a]/60 cursor-pointer flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-md dark:shadow-none"
+          className="group relative bg-slate-50 border border-emerald-200 dark:bg-[#0a0a0a]/40 dark:border-emerald-500/20 hover:border-emerald-500/50 rounded-2xl p-5 transition-all duration-300 hover:bg-white dark:hover:bg-[#0a0a0a]/60 cursor-pointer flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-md dark:shadow-none min-h-[160px]"
         >
           <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
             <Database size={80} className="text-emerald-500" />
           </div>
 
-          <div>
-            <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-100 dark:bg-emerald-500/10 dark:border-emerald-500/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-              <PlayCircle className="text-emerald-500 dark:text-emerald-400" size={24} />
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-full bg-emerald-50 border border-emerald-100 dark:bg-emerald-500/10 dark:border-emerald-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
+              <PlayCircle className="text-emerald-500 dark:text-emerald-400" size={20} />
             </div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-colors">Fetch Connection</h3>
-            <p className="text-sm text-slate-500 dark:text-gray-500 leading-relaxed">
-              Connect to the Claims DB to retrieve the latest batch of provider data based on specific criteria.
-            </p>
+            <div>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-colors">Fetch Connection</h3>
+              <p className="text-xs text-slate-500 dark:text-gray-500 leading-relaxed max-w-[90%]">
+                Connect to the Claims DB to retrieve the latest batch.
+              </p>
+            </div>
           </div>
 
-          <button className="mt-6 w-full py-2.5 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 group-hover:bg-emerald-100 group-hover:border-emerald-200 dark:group-hover:bg-emerald-500/20 dark:group-hover:border-emerald-500/40 transition-all text-sm flex items-center justify-center gap-2">
+          <button className="mt-4 w-full py-2 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 group-hover:bg-emerald-100 group-hover:border-emerald-200 dark:group-hover:bg-emerald-500/20 dark:group-hover:border-emerald-500/40 transition-all text-xs flex items-center justify-center gap-2">
             Configure Fetch <span className="opacity-0 group-hover:opacity-100 transition-opacity">→</span>
           </button>
         </div>

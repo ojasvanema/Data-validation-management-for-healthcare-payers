@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ShieldCheck, Menu, X } from 'lucide-react';
 import Button from './ui/Button';
-import ThemeToggle from '../ThemeToggle';
 
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -46,7 +45,6 @@ const Navbar: React.FC = () => {
               {link.name}
             </a>
           ))}
-          <ThemeToggle />
           <Button variant="secondary" size="sm" className="ml-4">
             Request Access
           </Button>
@@ -54,7 +52,6 @@ const Navbar: React.FC = () => {
 
         {/* Mobile Menu Button */}
         <div className="md:hidden flex items-center gap-4">
-          <ThemeToggle />
           <button
             className="text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}

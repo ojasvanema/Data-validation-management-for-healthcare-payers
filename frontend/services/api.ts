@@ -1,6 +1,34 @@
 import { AnalysisResult, FileUpload } from "../types";
 
-const API_BASE_URL = "http://localhost:8000";
+const API_BASE_URL = "";
+
+const api = {
+    get: async <T>(url: string) => {
+        const response = await fetch(`${API_BASE_URL}${url}`);
+        if (!response.ok) throw new Error(response.statusText);
+        return { data: await response.json() as T };
+    },
+    post: async <T>(url: string, body: any) => {
+        const response = await fetch(`${API_BASE_URL}${url}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        if (!response.ok) throw new Error(response.statusText);
+        return { data: await response.json() as T };
+    },
+    put: async <T>(url: string, body: any) => {
+        const response = await fetch(`${API_BASE_URL}${url}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        if (!response.ok) throw new Error(response.statusText);
+        return { data: await response.json() as T };
+    }
+};
+
+export default api;
 
 export const analyzeFilesWithAgents = async (files: FileUpload[]): Promise<AnalysisResult> => {
     if (files.length === 0) {

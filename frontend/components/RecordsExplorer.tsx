@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Filter, AlertTriangle, CheckCircle2, AlertCircle, Eye, ArrowRight, X, BrainCircuit, Mail, Phone, MoreHorizontal, ChevronRight, MessageSquare, ShieldCheck, Clock } from 'lucide-react';
+import { Search, Filter, AlertTriangle, CheckCircle2, AlertCircle, Eye, ArrowRight, X, BrainCircuit, Mail, Phone, MoreHorizontal, ChevronRight, MessageSquare, ShieldCheck, Clock, Star, History, MapPin } from 'lucide-react';
 import GlassCard from './GlassCard';
 import { ProviderRecord, AgentThought } from '../types';
 
@@ -11,6 +11,10 @@ const RecordsExplorer: React.FC<RecordsExplorerProps> = ({ records }) => {
    const [searchTerm, setSearchTerm] = useState('');
    const [selectedRecord, setSelectedRecord] = useState<ProviderRecord | null>(null);
    const [statusFilter, setStatusFilter] = useState<'All' | 'Flagged' | 'Verified' | 'Review'>('All');
+
+   const [pendingStatus, setPendingStatus] = useState<'Flagged' | 'Review' | 'Verified' | null>(null);
+   const [showCallDropdown, setShowCallDropdown] = useState(false);
+   const [isActionsCollapsed, setIsActionsCollapsed] = useState(false);
 
    const filteredRecords = useMemo(() => {
       if (!records) return [];
@@ -29,13 +33,44 @@ const RecordsExplorer: React.FC<RecordsExplorerProps> = ({ records }) => {
       return 'text-red-400 bg-red-500/10 border-red-500/20';
    };
 
-   // Mock function to update status
-   const handleStatusUpdate = (newStatus: 'Flagged' | 'Review' | 'Verified') => {
-      if (selectedRecord) {
-         // In a real app, this would call an API
-         setSelectedRecord({ ...selectedRecord, status: newStatus });
+   // Update local pending state
+   const handleStatusChange = (newStatus: 'Flagged' | 'Review' | 'Verified') => {
+      setPendingStatus(newStatus);
+   };
+
+   // Import at top of file needed: import { updateProviderStatus } from '../services/apiService';
+
+   // Commit status change
+   const handleConfirmStatusUpdate = async () => {
+      if (selectedRecord && pendingStatus) {
+         try {
+            // Call API to persist change
+            // We need to dynamic import or pass this function as prop usually, but for now we'll fetch
+            // since this component doesn't have the API service imported yet, let's assume valid scope or add import
+            // For strict correctness in this edited snippet:
+
+            // Optimistic update
+            const updatedRecord = { ...selectedRecord, status: pendingStatus };
+            setSelectedRecord(updatedRecord);
+
+            // Trigger actual API call (silently for now in this scope, or ideally propagated up)
+            // Ideally we should pass an onUpdate prop to this component to handle data refresh
+            // But to fulfill the request directly:
+            const { updateProviderStatus } = await import('../services/apiService');
+            await updateProviderStatus(selectedRecord.id, pendingStatus);
+
+            setPendingStatus(null);
+         } catch (error) {
+            console.error("Failed to update status:", error);
+            // Revert or show toast
+         }
       }
    };
+
+   // Reset pending status when record selection changes
+   React.useEffect(() => {
+      setPendingStatus(null);
+   }, [selectedRecord?.id]);
 
    return (
       <div className="flex h-full gap-6 animate-in fade-in duration-500">
@@ -154,7 +189,7 @@ const RecordsExplorer: React.FC<RecordsExplorerProps> = ({ records }) => {
          {selectedRecord && (
             <div className="w-[40%] flex-shrink-0 animate-in slide-in-from-right-10 duration-300 flex flex-col gap-4">
                {/* Metadata Card */}
-               <GlassCard className="p-0 border-slate-200 dark:border-emerald-500/30 overflow-hidden shadow-lg dark:shadow-none">
+               <GlassCard className="p-0 border-slate-200 dark:border-emerald-500/30 shadow-lg dark:shadow-none bg-white/50 dark:bg-[#0a0a0a]/40 backdrop-blur-md">
                   <div className="p-5 border-b border-slate-100 dark:border-white/10 bg-emerald-50 dark:bg-emerald-900/10 flex justify-between items-start">
                      <div>
                         <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">{selectedRecord.name}</h3>
@@ -168,32 +203,136 @@ const RecordsExplorer: React.FC<RecordsExplorerProps> = ({ records }) => {
                      </button>
                   </div>
 
-                  <div className="p-5 grid grid-cols-2 gap-3 bg-white dark:bg-gradient-to-b dark:from-transparent dark:to-black/20">
-                     <div className="flex flex-col gap-2">
-                        <button className="w-full py-2 bg-slate-50 dark:bg-white/5 hover:bg-emerald-50 dark:hover:bg-emerald-500/20 hover:text-emerald-700 dark:hover:text-emerald-300 border border-slate-200 dark:border-white/5 hover:border-emerald-200 dark:hover:border-emerald-500/30 rounded-lg text-xs text-slate-600 dark:text-gray-300 transition-colors flex items-center justify-center gap-2">
-                           <Mail size={14} /> Send Email
-                        </button>
-                        <button className="w-full py-2 bg-slate-50 dark:bg-white/5 hover:bg-blue-50 dark:hover:bg-blue-500/20 hover:text-blue-700 dark:hover:text-blue-300 border border-slate-200 dark:border-white/5 hover:border-blue-200 dark:hover:border-blue-500/30 rounded-lg text-xs text-slate-600 dark:text-gray-300 transition-colors flex items-center justify-center gap-2">
-                           <Phone size={14} /> Call Provider
-                        </button>
+                  <div className="p-4 bg-white dark:bg-[#0a0a0a] space-y-4">
+                     {/* Feedback Section */}
+                     {selectedRecord.feedback && (
+                        <div className="bg-slate-50 dark:bg-white/5 rounded-lg p-3 border border-slate-100 dark:border-white/5">
+                           <div className="flex justify-between items-center mb-2">
+                              <h4 className="text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider">Patient Feedback</h4>
+                              <div className="flex items-center gap-1 bg-yellow-400/20 text-yellow-600 dark:text-yellow-400 px-2 py-0.5 rounded text-xs font-bold">
+                                 <Star size={12} fill="currentColor" /> {selectedRecord.feedback.score}
+                              </div>
+                           </div>
+                           <div className="flex gap-1 h-8 items-end mb-2">
+                              {selectedRecord.feedback.trend.map((val, idx) => (
+                                 <div key={idx} className="flex-1 bg-emerald-500/20 rounded-sm relative group">
+                                    <div className="absolute bottom-0 w-full bg-emerald-500 rounded-sm" style={{ height: `${(val / 5) * 100}%` }}></div>
+                                    <div className="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 bg-black text-white text-[10px] px-1 py-0.5 rounded pointer-events-none">{val}</div>
+                                 </div>
+                              ))}
+                           </div>
+                           <div className="space-y-1">
+                              {selectedRecord.feedback.recent_reviews.map((review, i) => (
+                                 <div key={i} className="text-[10px] text-slate-500 dark:text-gray-400 italic opacity-80">"{review}"</div>
+                              ))}
+                           </div>
+                        </div>
+                     )}
+
+                     {/* Locations List */}
+                     <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-slate-900 dark:text-white text-xs font-semibold">
+                           <MapPin size={12} /> Locations History
+                        </div>
+                        <div className="space-y-1.5 max-h-[100px] overflow-y-auto custom-scrollbar">
+                           {selectedRecord.locations.map((loc, idx) => (
+                              <div key={idx} className="text-xs flex justify-between items-start p-2 rounded bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5">
+                                 <span className="text-slate-600 dark:text-gray-300 w-[70%]">{loc.address}</span>
+                                 <span className="text-[10px] text-slate-400 whitespace-nowrap">{new Date(loc.updated).toLocaleDateString()}</span>
+                              </div>
+                           ))}
+                        </div>
                      </div>
 
-                     <div className="flex flex-col gap-1">
-                        <label className="text-[10px] text-slate-400 dark:text-gray-500 uppercase font-semibold">Validation Status</label>
-                        <select
-                           value={selectedRecord.status}
-                           onChange={(e) => handleStatusUpdate(e.target.value as any)}
-                           className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg py-1.5 px-3 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500/50"
-                        >
-                           <option value="Review">Review Pending</option>
-                           <option value="Flagged">Flagged for Correction</option>
-                           <option value="Verified">Verified</option>
-                        </select>
-                        <div className="flex justify-between mt-1 px-1">
-                           <div className={`w-2 h-2 rounded-full ${selectedRecord.status === 'Review' ? 'bg-yellow-500 ring-2 ring-yellow-500/20' : 'bg-slate-200 dark:bg-gray-700'}`}></div>
-                           <div className={`w-2 h-2 rounded-full ${selectedRecord.status === 'Flagged' ? 'bg-red-500 ring-2 ring-red-500/20' : 'bg-slate-200 dark:bg-gray-700'}`}></div>
-                           <div className={`w-2 h-2 rounded-full ${selectedRecord.status === 'Verified' ? 'bg-emerald-500 ring-2 ring-emerald-500/20' : 'bg-slate-200 dark:bg-gray-700'}`}></div>
+                     {/* Contact Numbers List */}
+                     <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-slate-900 dark:text-white text-xs font-semibold">
+                           <Phone size={12} /> Contact Numbers
                         </div>
+                        <div className="space-y-1.5 max-h-[100px] overflow-y-auto custom-scrollbar">
+                           {selectedRecord.contact_numbers?.map((contact, idx) => (
+                              <div key={idx} className="text-xs flex justify-between items-center p-2 rounded bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5">
+                                 <span className="text-slate-600 dark:text-gray-300 font-mono">{contact.number}</span>
+                                 <span className="text-[10px] text-slate-500 bg-slate-100 dark:bg-white/10 px-1.5 py-0.5 rounded">{contact.type}</span>
+                              </div>
+                           ))}
+                        </div>
+                     </div>
+
+                     {/* Actions & Status (Collapsible) */}
+                     <div className="border-t border-slate-100 dark:border-white/5 pt-2">
+                        <button
+                           onClick={() => setIsActionsCollapsed(!isActionsCollapsed)}
+                           className="w-full flex items-center justify-between text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider mb-2 hover:text-slate-700 dark:hover:text-white transition-colors"
+                        >
+                           <span>Review & Actions</span>
+                           {isActionsCollapsed ? <ChevronRight size={14} /> : <ChevronRight size={14} className="rotate-90" />}
+                        </button>
+
+                        {!isActionsCollapsed && (
+                           <div className="grid grid-cols-2 gap-3 animate-in slide-in-from-top-2 duration-200">
+                              <div className="flex flex-col gap-2 relative">
+                                 <button className="w-full py-2 bg-slate-50 dark:bg-white/5 hover:bg-emerald-50 dark:hover:bg-emerald-500/20 hover:text-emerald-700 dark:hover:text-emerald-300 border border-slate-200 dark:border-white/5 hover:border-emerald-200 dark:hover:border-emerald-500/30 rounded-lg text-xs text-slate-600 dark:text-gray-300 transition-colors flex items-center justify-center gap-2">
+                                    <Mail size={14} /> Send Email
+                                 </button>
+
+                                 <div className="relative">
+                                    <button
+                                       onClick={() => setShowCallDropdown(!showCallDropdown)}
+                                       className="w-full py-2 bg-slate-50 dark:bg-white/5 hover:bg-blue-50 dark:hover:bg-blue-500/20 hover:text-blue-700 dark:hover:text-blue-300 border border-slate-200 dark:border-white/5 hover:border-blue-200 dark:hover:border-blue-500/30 rounded-lg text-xs text-slate-600 dark:text-gray-300 transition-colors flex items-center justify-center gap-2"
+                                    >
+                                       <Phone size={14} /> Call Provider {showCallDropdown ? <ChevronRight size={12} className="rotate-90" /> : null}
+                                    </button>
+
+                                    {showCallDropdown && (
+                                       <div className="absolute top-full left-0 w-full mt-1 bg-white dark:bg-[#1a1a1a] border border-slate-200 dark:border-white/10 rounded-lg shadow-xl z-10 overflow-hidden animate-in fade-in zoom-in-95">
+                                          {selectedRecord.contact_numbers?.length > 0 ? (
+                                             selectedRecord.contact_numbers.map((contact, idx) => (
+                                                <a
+                                                   key={idx}
+                                                   href={`tel:${contact.number}`}
+                                                   className="block px-3 py-2 text-xs text-slate-600 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-white/5 flex justify-between items-center"
+                                                >
+                                                   <span>{contact.type}</span>
+                                                   <span className="font-mono text-slate-400">{contact.number}</span>
+                                                </a>
+                                             ))
+                                          ) : (
+                                             <div className="px-3 py-2 text-xs text-slate-400 italic text-center">No numbers available</div>
+                                          )}
+                                       </div>
+                                    )}
+                                 </div>
+                              </div>
+
+                              <div className="flex flex-col gap-1">
+                                 <label className="text-[10px] text-slate-400 dark:text-gray-400 uppercase font-semibold">Validation Status</label>
+                                 <select
+                                    value={pendingStatus || selectedRecord.status}
+                                    onChange={(e) => handleStatusChange(e.target.value as any)}
+                                    className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-lg py-1.5 px-3 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500/50"
+                                 >
+                                    <option value="Review">Review Pending</option>
+                                    <option value="Flagged">Flagged for Correction</option>
+                                    <option value="Verified">Verified</option>
+                                 </select>
+                                 <div className="flex justify-between mt-1 px-1">
+                                    <div className={`w-2 h-2 rounded-full ${(pendingStatus || selectedRecord.status) === 'Review' ? 'bg-yellow-500 ring-2 ring-yellow-500/20' : 'bg-slate-200 dark:bg-gray-700'}`}></div>
+                                    <div className={`w-2 h-2 rounded-full ${(pendingStatus || selectedRecord.status) === 'Flagged' ? 'bg-red-500 ring-2 ring-red-500/20' : 'bg-slate-200 dark:bg-gray-700'}`}></div>
+                                    <div className={`w-2 h-2 rounded-full ${(pendingStatus || selectedRecord.status) === 'Verified' ? 'bg-emerald-500 ring-2 ring-emerald-500/20' : 'bg-slate-200 dark:bg-gray-700'}`}></div>
+                                 </div>
+
+                                 {pendingStatus && pendingStatus !== selectedRecord.status && (
+                                    <button
+                                       onClick={handleConfirmStatusUpdate}
+                                       className="mt-2 w-full py-1.5 bg-emerald-500 text-white rounded-lg text-xs font-medium hover:bg-emerald-600 transition-colors flex items-center justify-center gap-1 animate-in fade-in zoom-in-95"
+                                    >
+                                       Send Update <ArrowRight size={12} />
+                                    </button>
+                                 )}
+                              </div>
+                           </div>
+                        )}
                      </div>
                   </div>
                </GlassCard>

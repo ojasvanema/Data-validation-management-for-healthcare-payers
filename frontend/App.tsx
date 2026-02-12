@@ -6,10 +6,9 @@ import AgentDashboard from './components/AgentDashboard';
 import MetricsDashboard from './components/MetricsDashboard';
 import RecordsExplorer from './components/RecordsExplorer';
 import { analyzeFilesWithAgents } from './services/apiService';
-import { Activity, LayoutDashboard, History, PlusCircle, ChevronRight, Leaf, Database, LogOut, ShieldCheck, PlayCircle } from 'lucide-react';
+import { Activity, LayoutDashboard, History, PlusCircle, ChevronRight, ChevronLeft, Leaf, Database, LogOut, ShieldCheck, PlayCircle } from 'lucide-react';
 import GlassCard from './components/GlassCard';
 import { ThemeProvider } from './components/ThemeContext';
-import ThemeToggle from './components/ThemeToggle';
 
 import LandingPage from './components/LandingPage';
 import LoginTransition from './components/LoginTransition';
@@ -17,6 +16,7 @@ import LoginTransition from './components/LoginTransition';
 function AppContent() {
     const [agents, setAgents] = useState<AgentStatus[]>(INITIAL_AGENTS);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
     const [view, setView] = useState<'landing' | 'login' | 'home' | 'dashboard' | 'explorer'>('landing');
     const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -146,56 +146,73 @@ function AppContent() {
         <div className="flex h-screen overflow-hidden font-sans transition-colors duration-300 bg-slate-50 dark:bg-[#050505] text-slate-900 dark:text-white">
 
             {/* Sidebar */}
-            <aside className="w-64 flex flex-col flex-shrink-0 z-20 backdrop-blur-xl border-r transition-all duration-300
+            <aside className={`${isSidebarCollapsed ? 'w-20' : 'w-64'} flex flex-col flex-shrink-0 z-20 backdrop-blur-xl border-r transition-all duration-300
                 bg-white/80 border-slate-200
                 dark:bg-[#0a0a0a]/60 dark:border-white/5
-            ">
-                <div className="p-6 border-b border-inherit">
+            `}>
+                <div className={`p-6 border-b border-inherit flex items-center ${isSidebarCollapsed ? 'justify-center' : 'justify-between'}`}>
                     <div className="flex items-center gap-2 mb-1">
                         <div className="p-1.5 rounded-lg border bg-emerald-50 border-emerald-200 dark:bg-emerald-500/10 dark:border-emerald-500/20">
                             <ShieldCheck size={20} className="text-emerald-600 dark:text-emerald-400" />
                         </div>
-                        <h1 className="font-bold text-lg tracking-tight">Health<span className="text-emerald-600 dark:text-emerald-400">Guard</span></h1>
+                        {!isSidebarCollapsed && <h1 className="font-bold text-lg tracking-tight animate-in fade-in duration-300">Health<span className="text-emerald-600 dark:text-emerald-400">Guard</span></h1>}
                     </div>
-                    <p className="text-xs text-slate-500 dark:text-emerald-400/60 pl-9">AI Orchestrator</p>
+                    {!isSidebarCollapsed && <button onClick={() => setIsSidebarCollapsed(true)} className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 text-slate-400 hover:text-emerald-500 transition-colors">
+                        <ChevronLeft size={16} />
+                    </button>}
                 </div>
+                {isSidebarCollapsed && (
+                    <div className="flex justify-center py-2 border-b border-inherit">
+                        <button onClick={() => setIsSidebarCollapsed(false)} className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 text-slate-400 hover:text-emerald-500 transition-colors" title="Expand Sidebar">
+                            <ChevronRight size={16} />
+                        </button>
+                    </div>
+                )}
+                {!isSidebarCollapsed && (
+                    <div className="px-6 pb-2 pt-1">
+                        <p className="text-xs text-slate-500 dark:text-emerald-400/60 pl-9 animate-in fade-in duration-300">AI Orchestrator</p>
+                    </div>
+                )}
 
                 <nav className="flex-1 overflow-y-auto p-4 space-y-2">
                     <button
                         onClick={resetToHome}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-sm font-medium
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-sm font-medium group relative
                     ${view === 'home'
                                 ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30 border'
                                 : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white'}`}
+                        title={isSidebarCollapsed ? "New Analysis" : ""}
                     >
-                        <PlusCircle size={18} />
-                        New Analysis
+                        <PlusCircle size={18} className="shrink-0" />
+                        {!isSidebarCollapsed && <span className="animate-in fade-in duration-300">New Analysis</span>}
                     </button>
                     <button
                         onClick={() => view !== 'home' && setView('dashboard')}
                         disabled={!analysisResult}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-sm font-medium
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-sm font-medium group relative
                     ${view === 'dashboard'
                                 ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30 border'
                                 : !analysisResult ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white'}`}
+                        title={isSidebarCollapsed ? "Live Dashboard" : ""}
                     >
-                        <LayoutDashboard size={18} />
-                        Live Dashboard
+                        <LayoutDashboard size={18} className="shrink-0" />
+                        {!isSidebarCollapsed && <span className="animate-in fade-in duration-300">Live Dashboard</span>}
                     </button>
                     <button
                         onClick={() => view !== 'home' && setView('explorer')}
                         disabled={!analysisResult}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-sm font-medium
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-sm font-medium group relative
                     ${view === 'explorer'
                                 ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30 border'
                                 : !analysisResult ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white'}`}
+                        title={isSidebarCollapsed ? "Data Explorer" : ""}
                     >
-                        <Database size={18} />
-                        Data Explorer
+                        <Database size={18} className="shrink-0" />
+                        {!isSidebarCollapsed && <span className="animate-in fade-in duration-300">Data Explorer</span>}
                     </button>
 
-                    <div className="pt-6 pb-2">
-                        <h3 className="text-xs font-semibold uppercase tracking-wider px-2 mb-2 flex items-center gap-2 text-slate-400 dark:text-gray-500">
+                    <div className={`pt-6 pb-2 ${isSidebarCollapsed ? 'hidden' : 'block'}`}>
+                        <h3 className="text-xs font-semibold uppercase tracking-wider px-2 mb-2 flex items-center gap-2 text-slate-400 dark:text-gray-500 animate-in fade-in duration-300">
                             <History size={12} />
                             Recent Runs
                         </h3>
@@ -225,21 +242,24 @@ function AppContent() {
                 <div className="p-4 border-t border-inherit space-y-2">
                     <button
                         onClick={() => setView('landing')}
-                        className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-xs transition-colors text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:text-gray-500 dark:hover:text-white dark:hover:bg-white/5"
+                        className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg text-xs transition-colors text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:text-gray-500 dark:hover:text-white dark:hover:bg-white/5 ${isSidebarCollapsed ? 'justify-center' : ''}`}
+                        title={isSidebarCollapsed ? "Logout" : ""}
                     >
-                        <LogOut size={14} />
-                        Logout
+                        <LogOut size={14} className="shrink-0" />
+                        {!isSidebarCollapsed && <span className="animate-in fade-in duration-300">Logout</span>}
                     </button>
 
                     <GlassCard className="p-3 bg-gradient-to-br from-white to-slate-100 border-slate-200 dark:from-emerald-900/50 dark:to-black dark:border-emerald-500/20">
-                        <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white dark:text-black font-bold text-xs shadow-sm">
+                        <div className={`flex items-center gap-3 ${isSidebarCollapsed ? 'justify-center' : ''}`}>
+                            <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white dark:text-black font-bold text-xs shadow-sm shrink-0">
                                 EY
                             </div>
-                            <div>
-                                <p className="text-xs font-medium text-slate-900 dark:text-white">Enterprise User</p>
-                                <p className="text-[10px] text-emerald-600 dark:text-emerald-400">Connected</p>
-                            </div>
+                            {!isSidebarCollapsed && (
+                                <div className="animate-in fade-in duration-300">
+                                    <p className="text-xs font-medium text-slate-900 dark:text-white">Enterprise User</p>
+                                    <p className="text-[10px] text-emerald-600 dark:text-emerald-400">Connected</p>
+                                </div>
+                            )}
                         </div>
                     </GlassCard>
                 </div>
@@ -276,8 +296,6 @@ function AppContent() {
                             <Activity size={12} />
                             <span>System Operational</span>
                         </div>
-                        <div className="w-px h-6 bg-slate-200 dark:bg-white/10 mx-1"></div>
-                        <ThemeToggle />
                     </div>
                 </header>
 

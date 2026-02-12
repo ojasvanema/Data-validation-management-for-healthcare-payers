@@ -51,6 +51,19 @@ class BusinessImpact(BaseModel):
     roi_multiplier: float = 0.0
     notes: str = ""
 
+class Location(BaseModel):
+    address: str
+    updated: str
+
+class ContactNumber(BaseModel):
+    number: str
+    type: str # Mobile, Office, Fax
+
+class Feedback(BaseModel):
+    score: float # 0.0 to 5.0
+    trend: List[float] = Field(default_factory=list) # Last 6 months
+    recent_reviews: List[str] = Field(default_factory=list)
+
 # --- Agent State (LangGraph) ---
 
 class MainAgentState(BaseModel):
@@ -92,6 +105,9 @@ class FrontendProviderRecord(BaseModel):
     agentThoughts: List[AgentThought]
     lastUpdated: str
     state: str # US State Code
+    feedback: Optional[Dict[str, Any]] = None # Score, trend, reviews
+    locations: List[Dict[str, str]] = Field(default_factory=list)
+    contact_numbers: List[Dict[str, str]] = Field(default_factory=list)
 
 class AnalysisResult(BaseModel):
     """Matches the frontend expected format."""
