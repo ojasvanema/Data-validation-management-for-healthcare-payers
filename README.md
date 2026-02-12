@@ -1,8 +1,8 @@
-# HealthGuard AI Orchestrator
+# VERA — Validation & Enrichment for Reliable Access
 
 **Data Validation & Management System for Healthcare Payers**
 
-HealthGuard is a cutting-edge multi-agent system designed to automate the validation of healthcare provider data. It leverages AI agents to perform complex checks, detect fraud patterns, and analyze business impact, ensuring data integrity and operational efficiency for healthcare payers.
+VERA is a cutting-edge multi-agent system designed to automate the validation of healthcare provider data. It leverages AI agents to perform complex checks, detect fraud patterns, and analyze business impact, ensuring data integrity and operational efficiency for healthcare payers.
 
 ---
 

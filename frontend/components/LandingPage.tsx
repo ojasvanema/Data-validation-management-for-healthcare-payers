@@ -28,7 +28,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
                     <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
                         <h2 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6">Ready to secure your network?</h2>
                         <p className="text-xl text-slate-600 dark:text-gray-400 mb-10">
-                            Join top healthcare payers using HealthGuard to reduce risk and optimize operational efficiency.
+                            Join top healthcare payers using VERA to reduce risk and optimize operational efficiency.
                         </p>
                         <button className="bg-emerald-600 text-white dark:bg-white dark:text-black px-8 py-4 rounded-lg font-bold text-lg hover:bg-emerald-700 dark:hover:bg-gray-100 transition-colors shadow-lg shadow-emerald-500/20 dark:shadow-[0_0_40px_rgba(255,255,255,0.3)]" onClick={onLogin}>
                             Schedule a Demo
