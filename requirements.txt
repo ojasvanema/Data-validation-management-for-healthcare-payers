@@ -10,6 +10,8 @@ python-docx
 Pillow
 pytesseract
 pydub
+openai-whisper
 langgraph
 requests
 huggingface_hub
+
