@@ -1,83 +1,94 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HealthGuard AI Orchestrator</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-              mono: ['JetBrains Mono', 'monospace'],
+<html lang="en" class="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HealthGuard AI Orchestrator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            emerald: {
+              400: '#34d399',
+              450: '#10b981', // Custom tweak - keeping for compatibility but preferring standard palette
+              500: '#10b981',
+              600: '#059669',
+              950: '#022c22',
             },
-            colors: {
-              emerald: {
-                450: '#10b981', // Custom tweak
-                950: '#022c22',
-              },
-              glass: {
-                100: 'rgba(255, 255, 255, 0.08)',
-                200: 'rgba(255, 255, 255, 0.15)',
-                300: 'rgba(255, 255, 255, 0.25)',
-                border: 'rgba(255, 255, 255, 0.15)',
-                highlight: 'rgba(16, 185, 129, 0.15)', // Emerald tint
-              }
+            slate: {
+              850: '#1e293b', // Custom dark slate
+              900: '#0f172a',
+              950: '#020617', // Darker background
             },
-            animation: {
-              'blob': 'blob 7s infinite',
-              'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
-              'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-              'float-slow': 'float 6s ease-in-out infinite',
-              'float-medium': 'float 5s ease-in-out infinite',
-              'float-fast': 'float 4s ease-in-out infinite',
+            glass: {
+              100: 'rgba(255, 255, 255, 0.05)',
+              200: 'rgba(255, 255, 255, 0.1)',
+              300: 'rgba(255, 255, 255, 0.2)',
+              border: 'rgba(255, 255, 255, 0.1)',
+              highlight: 'rgba(16, 185, 129, 0.1)', // Emerald tint
+            }
+          },
+          animation: {
+            'blob': 'blob 7s infinite',
+            'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'float-slow': 'float 6s ease-in-out infinite',
+            'float-medium': 'float 5s ease-in-out infinite',
+            'float-fast': 'float 4s ease-in-out infinite',
+          },
+          keyframes: {
+            blob: {
+              '0%': { transform: 'translate(0px, 0px) scale(1)' },
+              '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+              '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+              '100%': { transform: 'translate(0px, 0px) scale(1)' },
             },
-            keyframes: {
-              blob: {
-                '0%': { transform: 'translate(0px, 0px) scale(1)' },
-                '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
-                '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
-                '100%': { transform: 'translate(0px, 0px) scale(1)' },
-              },
-              fadeInUp: {
-                '0%': { opacity: '0', transform: 'translateY(20px)' },
-                '100%': { opacity: '1', transform: 'translateY(0)' },
-              },
-              float: {
-                '0%, 100%': { transform: 'translateY(0)' },
-                '50%': { transform: 'translateY(-20px)' },
-              }
+            fadeInUp: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-20px)' },
             }
           }
         }
       }
-    </script>
-    <style>
-      body {
-        margin: 0;
-        /* Deep Green / Forest Theme */
-        background: radial-gradient(circle at top center, #064e3b, #022c22, #000000);
-        background-attachment: fixed;
-        color: white;
-      }
-      /* Custom Scrollbar */
-      ::-webkit-scrollbar {
-        width: 6px;
-      }
-      ::-webkit-scrollbar-track {
-        background: rgba(0, 0, 0, 0.2); 
-      }
-      ::-webkit-scrollbar-thumb {
-        background: rgba(16, 185, 129, 0.3); 
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: rgba(16, 185, 129, 0.5); 
-      }
-    </style>
+    }
+  </script>
+  <style>
+    body {
+      margin: 0;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(16, 185, 129, 0.3);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(16, 185, 129, 0.5);
+    }
+  </style>
   <script type="importmap">
 {
   "imports": {
@@ -90,10 +101,12 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
+  <link rel="stylesheet" href="/index.css">
 </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
-  </body>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+
 </html>

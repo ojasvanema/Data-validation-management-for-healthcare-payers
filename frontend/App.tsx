@@ -6,15 +6,17 @@ import AgentDashboard from './components/AgentDashboard';
 import MetricsDashboard from './components/MetricsDashboard';
 import RecordsExplorer from './components/RecordsExplorer';
 import { analyzeFilesWithAgents } from './services/apiService';
-import { Activity, LayoutDashboard, History, PlusCircle, ChevronRight, Leaf, Database, LogOut, ShieldCheck, PlayCircle } from 'lucide-react';
+import { Activity, LayoutDashboard, History, PlusCircle, ChevronRight, ChevronLeft, Leaf, Database, LogOut, ShieldCheck, PlayCircle } from 'lucide-react';
 import GlassCard from './components/GlassCard';
+import { ThemeProvider } from './components/ThemeContext';
 
 import LandingPage from './components/LandingPage';
 import LoginTransition from './components/LoginTransition';
 
-export default function App() {
+function AppContent() {
     const [agents, setAgents] = useState<AgentStatus[]>(INITIAL_AGENTS);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
     const [view, setView] = useState<'landing' | 'login' | 'home' | 'dashboard' | 'explorer'>('landing');
     const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -141,73 +143,93 @@ export default function App() {
 
     // Main Dashboard View
     return (
-        <div className="flex h-screen overflow-hidden text-white font-sans bg-[#050505]">
+        <div className="flex h-screen overflow-hidden font-sans transition-colors duration-300 bg-slate-50 dark:bg-[#050505] text-slate-900 dark:text-white">
 
             {/* Sidebar */}
-            <aside className="w-64 bg-[#0a0a0a]/60 border-r border-white/5 flex flex-col flex-shrink-0 z-20 backdrop-blur-xl">
-                <div className="p-6 border-b border-white/5">
+            <aside className={`${isSidebarCollapsed ? 'w-20' : 'w-64'} flex flex-col flex-shrink-0 z-20 backdrop-blur-xl border-r transition-all duration-300
+                bg-white/80 border-slate-200
+                dark:bg-[#0a0a0a]/60 dark:border-white/5
+            `}>
+                <div className={`p-6 border-b border-inherit flex items-center ${isSidebarCollapsed ? 'justify-center' : 'justify-between'}`}>
                     <div className="flex items-center gap-2 mb-1">
-                        <div className="bg-emerald-500/10 p-1.5 rounded-lg border border-emerald-500/20">
-                            <ShieldCheck size={20} className="text-emerald-400" />
+                        <div className="p-1.5 rounded-lg border bg-emerald-50 border-emerald-200 dark:bg-emerald-500/10 dark:border-emerald-500/20">
+                            <ShieldCheck size={20} className="text-emerald-600 dark:text-emerald-400" />
                         </div>
-                        <h1 className="font-bold text-lg tracking-tight text-white">Health<span className="text-emerald-400">Guard</span></h1>
+                        {!isSidebarCollapsed && <h1 className="font-bold text-lg tracking-tight animate-in fade-in duration-300">Health<span className="text-emerald-600 dark:text-emerald-400">Guard</span></h1>}
                     </div>
-                    <p className="text-xs text-emerald-400/60 pl-9">AI Orchestrator</p>
+                    {!isSidebarCollapsed && <button onClick={() => setIsSidebarCollapsed(true)} className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 text-slate-400 hover:text-emerald-500 transition-colors">
+                        <ChevronLeft size={16} />
+                    </button>}
                 </div>
+                {isSidebarCollapsed && (
+                    <div className="flex justify-center py-2 border-b border-inherit">
+                        <button onClick={() => setIsSidebarCollapsed(false)} className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 text-slate-400 hover:text-emerald-500 transition-colors" title="Expand Sidebar">
+                            <ChevronRight size={16} />
+                        </button>
+                    </div>
+                )}
+                {!isSidebarCollapsed && (
+                    <div className="px-6 pb-2 pt-1">
+                        <p className="text-xs text-slate-500 dark:text-emerald-400/60 pl-9 animate-in fade-in duration-300">AI Orchestrator</p>
+                    </div>
+                )}
 
                 <nav className="flex-1 overflow-y-auto p-4 space-y-2">
                     <button
                         onClick={resetToHome}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-sm font-medium
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-sm font-medium group relative
                     ${view === 'home'
-                                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                                : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30 border'
+                                : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white'}`}
+                        title={isSidebarCollapsed ? "New Analysis" : ""}
                     >
-                        <PlusCircle size={18} />
-                        New Analysis
+                        <PlusCircle size={18} className="shrink-0" />
+                        {!isSidebarCollapsed && <span className="animate-in fade-in duration-300">New Analysis</span>}
                     </button>
                     <button
                         onClick={() => view !== 'home' && setView('dashboard')}
                         disabled={!analysisResult}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-sm font-medium
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-sm font-medium group relative
                     ${view === 'dashboard'
-                                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                                : !analysisResult ? 'text-gray-600 cursor-not-allowed' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30 border'
+                                : !analysisResult ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white'}`}
+                        title={isSidebarCollapsed ? "Live Dashboard" : ""}
                     >
-                        <LayoutDashboard size={18} />
-                        Live Dashboard
+                        <LayoutDashboard size={18} className="shrink-0" />
+                        {!isSidebarCollapsed && <span className="animate-in fade-in duration-300">Live Dashboard</span>}
                     </button>
                     <button
                         onClick={() => view !== 'home' && setView('explorer')}
                         disabled={!analysisResult}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-sm font-medium
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-sm font-medium group relative
                     ${view === 'explorer'
-                                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                                : !analysisResult ? 'text-gray-600 cursor-not-allowed' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30 border'
+                                : !analysisResult ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white'}`}
+                        title={isSidebarCollapsed ? "Data Explorer" : ""}
                     >
-                        <Database size={18} />
-                        Data Explorer
+                        <Database size={18} className="shrink-0" />
+                        {!isSidebarCollapsed && <span className="animate-in fade-in duration-300">Data Explorer</span>}
                     </button>
 
-                    <div className="pt-6 pb-2">
-                        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-2 mb-2 flex items-center gap-2">
+                    <div className={`pt-6 pb-2 ${isSidebarCollapsed ? 'hidden' : 'block'}`}>
+                        <h3 className="text-xs font-semibold uppercase tracking-wider px-2 mb-2 flex items-center gap-2 text-slate-400 dark:text-gray-500 animate-in fade-in duration-300">
                             <History size={12} />
                             Recent Runs
                         </h3>
                         <div className="space-y-1">
                             {history.length === 0 ? (
-                                <div className="px-4 py-3 text-xs text-gray-600 italic">No history yet</div>
+                                <div className="px-4 py-3 text-xs text-slate-400 dark:text-gray-600 italic">No history yet</div>
                             ) : (
                                 history.map(item => (
                                     <button
                                         key={item.id}
                                         onClick={() => loadHistoryItem(item)}
-                                        className="w-full text-left px-3 py-2 rounded-lg hover:bg-white/5 transition-colors group"
+                                        className="w-full text-left px-3 py-2 rounded-lg transition-colors group hover:bg-slate-100 dark:hover:bg-white/5"
                                     >
-                                        <div className="text-sm text-gray-300 group-hover:text-emerald-300 truncate font-medium">
+                                        <div className="text-sm font-medium truncate text-slate-700 dark:text-gray-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-300">
                                             {item.timestamp.toLocaleDateString()}
                                         </div>
-                                        <div className="text-xs text-gray-500 truncate mt-0.5">
+                                        <div className="text-xs truncate mt-0.5 text-slate-500 dark:text-gray-500">
                                             {item.summary}
                                         </div>
                                     </button>
@@ -217,46 +239,60 @@ export default function App() {
                     </div>
                 </nav>
 
-                <div className="p-4 border-t border-white/5 space-y-2">
+                <div className="p-4 border-t border-inherit space-y-2">
                     <button
                         onClick={() => setView('landing')}
-                        className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-xs text-gray-500 hover:text-white hover:bg-white/5 transition-colors"
+                        className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg text-xs transition-colors text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:text-gray-500 dark:hover:text-white dark:hover:bg-white/5 ${isSidebarCollapsed ? 'justify-center' : ''}`}
+                        title={isSidebarCollapsed ? "Logout" : ""}
                     >
-                        <LogOut size={14} />
-                        Logout
+                        <LogOut size={14} className="shrink-0" />
+                        {!isSidebarCollapsed && <span className="animate-in fade-in duration-300">Logout</span>}
                     </button>
 
-                    <GlassCard className="p-3 bg-gradient-to-br from-emerald-900/50 to-black border-emerald-500/20">
-                        <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-black font-bold text-xs">
+                    <GlassCard className="p-3 bg-gradient-to-br from-white to-slate-100 border-slate-200 dark:from-emerald-900/50 dark:to-black dark:border-emerald-500/20">
+                        <div className={`flex items-center gap-3 ${isSidebarCollapsed ? 'justify-center' : ''}`}>
+                            <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white dark:text-black font-bold text-xs shadow-sm shrink-0">
                                 EY
                             </div>
-                            <div>
-                                <p className="text-xs text-white font-medium">Enterprise User</p>
-                                <p className="text-[10px] text-emerald-400">Connected</p>
-                            </div>
+                            {!isSidebarCollapsed && (
+                                <div className="animate-in fade-in duration-300">
+                                    <p className="text-xs font-medium text-slate-900 dark:text-white">Enterprise User</p>
+                                    <p className="text-[10px] text-emerald-600 dark:text-emerald-400">Connected</p>
+                                </div>
+                            )}
                         </div>
                     </GlassCard>
                 </div>
             </aside>
 
             {/* Main Content Area */}
-            <main className="flex-1 flex flex-col h-full overflow-hidden bg-gradient-to-br from-[#022c22] via-[#050505] to-[#000000] relative">
-                {/* Background Decoration */}
-                <div className="absolute top-0 left-0 w-full h-96 bg-emerald-500/5 blur-[120px] pointer-events-none rounded-full transform -translate-y-1/2"></div>
+            <main className="flex-1 flex flex-col h-full overflow-hidden relative transition-colors duration-500
+                 bg-slate-50 dark:from-[#022c22] dark:via-[#050505] dark:to-[#000000] dark:bg-gradient-to-br
+            ">
+                {/* Background Decoration - Dark Mode Only */}
+                <div className="hidden dark:block absolute top-0 left-0 w-full h-96 bg-emerald-500/5 blur-[120px] pointer-events-none rounded-full transform -translate-y-1/2"></div>
 
-                <header className="h-16 border-b border-white/5 flex items-center justify-between px-8 flex-shrink-0 z-10 backdrop-blur-sm">
-                    <div className="flex items-center text-sm breadcrumbs text-gray-400">
-                        <span className="hover:text-white cursor-pointer" onClick={resetToHome}>Home</span>
+                {/* Background Decoration - Light Mode */}
+                <div className="dark:hidden absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-500/5 blur-[80px] pointer-events-none rounded-full transform -translate-y-1/2 translate-x-1/2"></div>
+
+                <header className="h-16 border-b flex items-center justify-between px-8 flex-shrink-0 z-10 backdrop-blur-sm transition-colors duration-300
+                    border-slate-200 bg-white/50
+                    dark:border-white/5 dark:bg-transparent
+                ">
+                    <div className="flex items-center text-sm breadcrumbs text-slate-400 dark:text-gray-400">
+                        <span className="hover:text-slate-900 dark:hover:text-white cursor-pointer transition-colors" onClick={resetToHome}>Home</span>
                         <ChevronRight size={14} className="mx-2" />
-                        <span className={view !== 'home' ? 'text-white' : ''}>Analysis</span>
+                        <span className={view !== 'home' ? 'text-slate-900 dark:text-white' : ''}>Analysis</span>
                         {view !== 'home' && <ChevronRight size={14} className="mx-2" />}
-                        <span className="text-emerald-400 font-medium">
+                        <span className="text-emerald-600 dark:text-emerald-400 font-medium">
                             {view === 'dashboard' ? 'Live Dashboard' : view === 'explorer' ? 'Data Explorer' : ''}
                         </span>
                     </div>
                     <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-400 font-mono">
+                        <div className="flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono
+                            bg-emerald-50 text-emerald-600 border border-emerald-200
+                            dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20
+                         ">
                             <Activity size={12} />
                             <span>System Operational</span>
                         </div>
@@ -270,10 +306,10 @@ export default function App() {
                             <div className="flex-1 flex flex-col items-center justify-center min-h-[500px] animate-in zoom-in-95 duration-500">
                                 <div className="w-full max-w-2xl">
                                     <div className="text-center mb-10">
-                                        <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-emerald-200 via-teal-200 to-emerald-400">
+                                        <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-600 dark:from-emerald-200 dark:via-teal-200 dark:to-emerald-400">
                                             Provider Validation AI
                                         </h1>
-                                        <p className="text-lg text-gray-400 max-w-lg mx-auto">
+                                        <p className="text-lg text-slate-500 dark:text-gray-400 max-w-lg mx-auto">
                                             Upload provider data to initiate the multi-agent orchestration for fraud detection and ROI analysis.
                                         </p>
                                     </div>
@@ -294,7 +330,7 @@ export default function App() {
 
                                 {/* Right Column: Analytics Dashboard */}
                                 <div className="xl:col-span-8 flex flex-col h-full">
-                                    <MetricsDashboard data={analysisResult} />
+                                    <MetricsDashboard data={analysisResult} onViewDetails={() => setView('explorer')} />
                                 </div>
                             </div>
                         )}
@@ -309,5 +345,13 @@ export default function App() {
                 </div>
             </main>
         </div>
+    );
+}
+
+export default function App() {
+    return (
+        <ThemeProvider>
+            <AppContent />
+        </ThemeProvider>
     );
 }

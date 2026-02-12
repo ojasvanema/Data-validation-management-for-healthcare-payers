@@ -1,0 +1,35 @@
+import React, { createContext, useContext, useEffect, useState } from 'react';
+
+type Theme = 'dark';
+
+interface ThemeContextType {
+    theme: Theme;
+}
+
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    // Always default to 'dark' for this app
+    const [theme] = useState<Theme>('dark');
+
+    useEffect(() => {
+        const root = window.document.documentElement;
+        root.classList.remove('light');
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+    }, []);
+
+    return (
+        <ThemeContext.Provider value={{ theme }}>
+            {children}
+        </ThemeContext.Provider>
+    );
+};
+
+export const useTheme = () => {
+    const context = useContext(ThemeContext);
+    if (context === undefined) {
+        throw new Error('useTheme must be used within a ThemeProvider');
+    }
+    return context;
+};

@@ -17,134 +17,236 @@ app = FastAPI(title="Healthcare Data Validation System", version="1.0.0")
 STATES = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']
 SPECIALTIES = ['Cardiology', 'Dermatology', 'Neurology', 'Orthopedics', 'Pediatrics', 'Radiology', 'Surgery', 'Urology']
 
+from .database import init_db, save_provider, get_all_providers, update_provider_status
+from pydantic import BaseModel
+
+# Initialize DB on startup
+@app.on_event("startup")
+def on_startup():
+    init_db()
+
+class StatusUpdate(BaseModel):
+    status: str
+
+@app.put("/providers/{provider_id}/status", response_model=FrontendProviderRecord)
+async def update_status(provider_id: str, update: StatusUpdate):
+    updated_record = update_provider_status(provider_id, update.status)
+    if not updated_record:
+        raise HTTPException(status_code=404, detail="Provider not found")
+    return updated_record
+
 @app.post("/demo-data", response_model=AnalysisResult)
 async def generate_demo_data():
+    # Check if data exists
+    existing_records = get_all_providers()
     records = []
-    for i in range(100):
-        risk_score = random.randint(0, 100)
-        status = "Verified"
-        if risk_score > 80:
-            status = "Flagged"
-        elif risk_score > 50:
-            status = "Review"
+
+    if existing_records and len(existing_records) > 0:
+        records = existing_records
+    else:
+        # Generate new data if empty
+        for i in range(100):
+            risk_score = random.randint(0, 100)
+            status = "Verified"
+            if risk_score > 80:
+                status = "Flagged"
+            elif risk_score > 50:
+                status = "Review"
+                
+            conflicts = []
+            if risk_score > 70:
+                conflicts = ['NPI Mismatch', 'License Expired']
+
+            # --- Enhanced Data Generation ---
+            # Feedback
+            feedback_score = round(random.uniform(1.0, 5.0), 1)
+            feedback_trend = [round(random.uniform(2.0, 5.0), 1) for _ in range(6)]
             
-        conflicts = []
-        if risk_score > 70:
-            conflicts = ['NPI Mismatch', 'License Expired']
+            recent_reviews = []
+            if feedback_score < 3.0:
+                 recent_reviews = [
+                     "Doctor is always late.", 
+                     "Front desk is rude.", 
+                     "Hard to get an appointment."
+                 ]
+            elif feedback_score > 4.5:
+                 recent_reviews = [
+                     "Excellent care!", 
+                     "Very professional staff.", 
+                     "Best specialist in town."
+                 ]
+            else:
+                 recent_reviews = ["Average experience.", "Good doctor, bad wait times."]
+                 
+            feedback_data = {
+                "score": feedback_score,
+                "trend": feedback_trend,
+                "recent_reviews": recent_reviews
+            }
 
-        rec = FrontendProviderRecord(
-            id=f"DUMMY-{i + 1}",
-            name=f"Dr. Generated {i + 1}",
-            npi=f"999{random.randint(1000000, 9999999)}",
-            specialty=random.choice(SPECIALTIES),
-            riskScore=float(risk_score),
-            decayProb=random.random(),
-            status=status,
-            conflicts=conflicts,
-            agentThoughts=[],
-            lastUpdated=datetime.datetime.now().isoformat(),
-            state=random.choice(STATES)
-        )
+            # Locations (List)
+            locations = [{"address": f"{random.randint(100, 999)} Main St, {random.choice(STATES)}", "updated": "2024-01-15"}]
+            if random.random() > 0.7: # 30% chance of multiple locations (mover)
+                 locations.append({"address": f"{random.randint(1, 99)} Old Rd, {random.choice(STATES)}", "updated": "2023-05-10"})
+            if random.random() > 0.9: # 10% chance of 3 locations
+                 locations.append({"address": f"{random.randint(500, 600)} Clinic Ave, {random.choice(STATES)}", "updated": "2022-11-20"})
+                 
+            # Contact Numbers (List)
+            contact_numbers = []
+            if random.random() > 0.1: # 90% chance of at least one number
+                 contact_numbers.append({"number": f"({random.randint(200, 999)}) {random.randint(200, 999)}-{random.randint(1000, 9999)}", "type": "Office"})
+            
+            if random.random() > 0.4: # 60% chance of a second number
+                 contact_numbers.append({"number": f"({random.randint(200, 999)}) {random.randint(200, 999)}-{random.randint(1000, 9999)}", "type": "Mobile"})
 
-        # Detailed Agent Thoughts Generation
-        thoughts = []
-        now_str = datetime.datetime.now().isoformat()
+            if random.random() > 0.8: # 20% chance of a third number
+                 contact_numbers.append({"number": f"({random.randint(200, 999)}) {random.randint(200, 999)}-{random.randint(1000, 9999)}", "type": "Fax"})
 
-        # 1. Validation Agent
-        if status == "Verified":
-            thoughts.append(AgentThought(
-                agentName="Validation Agent",
-                thought="Confirmed NPI exists in NPPES registry. License active and in good standing.",
-                verdict="pass",
-                timestamp=now_str
-            ))
-        elif status == "Review":
-            thoughts.append(AgentThought(
-                agentName="Validation Agent",
-                thought="NPI valid, but primary license expires in < 30 days. Requires manual check.",
-                verdict="warn",
-                timestamp=now_str
-            ))
-        else: # Flagged
-            thoughts.append(AgentThought(
-                agentName="Validation Agent",
-                thought=f"CRITICAL: NPI/License mismatch detected. {'License Expired' if 'License Expired' in conflicts else 'NPI not found in registry'}.",
-                verdict="fail",
-                timestamp=now_str
-            ))
+            rec = FrontendProviderRecord(
+                id=f"DUMMY-{i + 1}",
+                name=f"Dr. Generated {i + 1}",
+                npi=f"999{random.randint(1000000, 9999999)}",
+                specialty=random.choice(SPECIALTIES),
+                riskScore=float(risk_score),
+                decayProb=random.random(),
+                status=status,
+                conflicts=conflicts,
+                agentThoughts=[],
+                lastUpdated=datetime.datetime.now().isoformat(),
+                state=random.choice(STATES),
+                feedback=feedback_data,
+                locations=locations,
+                contact_numbers=contact_numbers
+            )
 
-        # 2. Fraud Detection Agent
-        if risk_score > 80:
-            thoughts.append(AgentThought(
-                agentName="Fraud Detection",
-                thought="Detected billing frequency 300% above regional average for this specialty.",
-                verdict="fail",
-                timestamp=now_str
-            ))
-            if "OIG Exclusion Match" in conflicts:
+            # Detailed Agent Thoughts Generation
+            thoughts = []
+            now_str = datetime.datetime.now().isoformat()
+
+            # 1. Validation Agent
+            if len(locations) > 2:
+                 thoughts.append(AgentThought(
+                    agentName="Validation Agent",
+                    thought=f"Frequent address changes detected ({len(locations)} locations). Flagging for stability check.",
+                    verdict="warn",
+                    timestamp=now_str
+                ))
+            
+            if status == "Verified":
                 thoughts.append(AgentThought(
-                    agentName="Fraud Detection",
-                    thought="Provider name fuzzy-matches entry in OIG Exclusion List.",
+                    agentName="Validation Agent",
+                    thought="Confirmed NPI exists in NPPES registry. License active and in good standing.",
+                    verdict="pass",
+                    timestamp=now_str
+                ))
+            elif status == "Review":
+                thoughts.append(AgentThought(
+                    agentName="Validation Agent",
+                    thought="NPI valid, but primary license expires in < 30 days. Requires manual check.",
+                    verdict="warn",
+                    timestamp=now_str
+                ))
+            else: # Flagged
+                thoughts.append(AgentThought(
+                    agentName="Validation Agent",
+                    thought=f"CRITICAL: NPI/License mismatch detected. {'License Expired' if 'License Expired' in conflicts else 'NPI not found in registry'}.",
                     verdict="fail",
                     timestamp=now_str
                 ))
-        elif risk_score > 50:
-             thoughts.append(AgentThought(
-                agentName="Fraud Detection",
-                thought="Minor anomalies in claim submission timestamps. Monitoring recommended.",
-                verdict="warn",
-                timestamp=now_str
-            ))
-        else:
-            thoughts.append(AgentThought(
-                agentName="Fraud Detection",
-                thought="No abnormal billing or claim patterns detected in historical data.",
-                verdict="pass",
-                timestamp=now_str
-            ))
 
-        # 3. Predictive Degradation Agent
-        decay_val = rec.decayProb
-        if decay_val > 0.7:
-             thoughts.append(AgentThought(
-                agentName="Predictive Degradation",
-                thought=f"High decay probability ({decay_val:.2f}). Contact information likely to become obsolete within 60 days based on peer turnover models.",
-                verdict="fail",
-                timestamp=now_str
-            ))
-        elif decay_val > 0.3:
-             thoughts.append(AgentThought(
-                agentName="Predictive Degradation",
-                thought=f"Moderate decay risk ({decay_val:.2f}). Regular quarterly validation recommended.",
-                verdict="neutral",
-                timestamp=now_str
-            ))
-        else:
-             thoughts.append(AgentThought(
-                agentName="Predictive Degradation",
-                thought="Data freshness verified. Low risk of immediate obsolescence.",
-                verdict="pass",
-                timestamp=now_str
-            ))
+            # 2. Fraud Detection Agent
+            # Check for review bombing
+            avg_last_3 = sum(feedback_trend[-3:]) / 3
+            if avg_last_3 < 2.0 and feedback_score > 4.0:
+                 thoughts.append(AgentThought(
+                    agentName="Fraud Detection",
+                    thought="Suspicious drop in recent feedback trend despite high overall score. Potential review bombing or service degradation.",
+                    verdict="warn",
+                    timestamp=now_str
+                ))
 
-        # 4. Communicator Agent
-        if status == "Flagged":
-             thoughts.append(AgentThought(
-                agentName="Communicator",
-                thought="Drafted 'Urgent Credential Update Request' email to provider office.",
-                verdict="neutral",
-                timestamp=now_str
-            ))
-        elif status == "Review":
-             thoughts.append(AgentThought(
-                agentName="Communicator",
-                thought="Scheduled automated follow-up call for license renewal reminder.",
-                verdict="neutral",
-                timestamp=now_str
-            ))
+            if risk_score > 80:
+                thoughts.append(AgentThought(
+                    agentName="Fraud Detection",
+                    thought="Detected billing frequency 300% above regional average for this specialty.",
+                    verdict="fail",
+                    timestamp=now_str
+                ))
+                if "OIG Exclusion Match" in conflicts:
+                    thoughts.append(AgentThought(
+                        agentName="Fraud Detection",
+                        thought="Provider name fuzzy-matches entry in OIG Exclusion List.",
+                        verdict="fail",
+                        timestamp=now_str
+                    ))
+            elif risk_score > 50:
+                 thoughts.append(AgentThought(
+                    agentName="Fraud Detection",
+                    thought="Minor anomalies in claim submission timestamps. Monitoring recommended.",
+                    verdict="warn",
+                    timestamp=now_str
+                ))
+            else:
+                thoughts.append(AgentThought(
+                    agentName="Fraud Detection",
+                    thought="No abnormal billing or claim patterns detected in historical data.",
+                    verdict="pass",
+                    timestamp=now_str
+                ))
 
-        rec.agentThoughts = thoughts
-        records.append(rec)
+            # 3. Predictive Degradation Agent
+            decay_val = rec.decayProb
+            # Correlate feedback with decay
+            if feedback_score < 2.5:
+                 decay_val += 0.2 # Low feedback increases decay risk
+                 thoughts.append(AgentThought(
+                    agentName="Predictive Degradation",
+                    thought=f"Low feedback score ({feedback_score}) highly correlated with future data obsolescence. Adjusted decay probability.",
+                    verdict="warn",
+                    timestamp=now_str
+                ))
+
+            if decay_val > 0.7:
+                 thoughts.append(AgentThought(
+                    agentName="Predictive Degradation",
+                    thought=f"High decay probability ({decay_val:.2f}). Contact information likely to become obsolete within 60 days based on peer turnover models.",
+                    verdict="fail",
+                    timestamp=now_str
+                ))
+            elif decay_val > 0.3:
+                 thoughts.append(AgentThought(
+                    agentName="Predictive Degradation",
+                    thought=f"Moderate decay risk ({decay_val:.2f}). Regular quarterly validation recommended.",
+                    verdict="neutral",
+                    timestamp=now_str
+                ))
+            else:
+                 thoughts.append(AgentThought(
+                    agentName="Predictive Degradation",
+                    thought="Data freshness verified. Low risk of immediate obsolescence.",
+                    verdict="pass",
+                    timestamp=now_str
+                ))
+
+            # 4. Communicator Agent
+            if status == "Flagged":
+                 thoughts.append(AgentThought(
+                    agentName="Communicator",
+                    thought="Drafted 'Urgent Credential Update Request' email to provider office.",
+                    verdict="neutral",
+                    timestamp=now_str
+                ))
+            elif status == "Review":
+                 thoughts.append(AgentThought(
+                    agentName="Communicator",
+                    thought="Scheduled automated follow-up call for license renewal reminder.",
+                    verdict="neutral",
+                    timestamp=now_str
+                ))
+
+            rec.agentThoughts = thoughts
+            records.append(rec)
+            save_provider(rec)
 
     # Calculate Aggregates
     total_risk = sum(r.riskScore for r in records)
@@ -176,17 +278,17 @@ async def generate_demo_data():
     return AnalysisResult(
         roi=roi,
         fraudRiskScore=avg_risk,
-        providersProcessed=100,
+        providersProcessed=len(records),
         discrepanciesFound=discrepancies,
         timelineData=timeline_data,
         riskDistribution=risk_distribution,
         records=records,
         agentLogs=[
             {"agent": "ORCHESTRATOR", "log": "Initiated dummy data generation.", "timestamp": datetime.datetime.now().isoformat()},
-            {"agent": "DOCUMENT", "log": "Parsed 100 synthetic records.", "timestamp": datetime.datetime.now().isoformat()},
+            {"agent": "DOCUMENT", "log": f"Parsed {len(records)} records from database.", "timestamp": datetime.datetime.now().isoformat()},
             {"agent": "GRAPHICAL", "log": "Heatmap data aggregated.", "timestamp": datetime.datetime.now().isoformat()}
         ],
-        summary='Generated 100 dummy records for demonstration purposes.'
+        summary=f'Loaded {len(records)} records.'
     )
 
 app.add_middleware(
