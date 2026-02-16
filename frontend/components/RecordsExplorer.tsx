@@ -187,9 +187,9 @@ const RecordsExplorer: React.FC<RecordsExplorerProps> = ({ records }) => {
 
          {/* Detail Slide-over Panel */}
          {selectedRecord && (
-            <div className="w-[40%] flex-shrink-0 animate-in slide-in-from-right-10 duration-300 flex flex-col gap-4">
+            <div className="w-[40%] flex-shrink-0 animate-in slide-in-from-right-10 duration-300 flex flex-col gap-4 overflow-y-auto custom-scrollbar">
                {/* Metadata Card */}
-               <GlassCard className="p-0 border-slate-200 dark:border-emerald-500/30 shadow-lg dark:shadow-none bg-white/50 dark:bg-[#0a0a0a]/40 backdrop-blur-md">
+               <GlassCard className="flex-shrink-0 p-0 border-slate-200 dark:border-emerald-500/30 shadow-lg dark:shadow-none bg-white/50 dark:bg-[#0a0a0a]/40 backdrop-blur-md">
                   <div className="p-5 border-b border-slate-100 dark:border-white/10 bg-emerald-50 dark:bg-emerald-900/10 flex justify-between items-start">
                      <div>
                         <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">{selectedRecord.name}</h3>
@@ -338,7 +338,7 @@ const RecordsExplorer: React.FC<RecordsExplorerProps> = ({ records }) => {
                </GlassCard>
 
                {/* Agent Analysis Chat */}
-               <GlassCard className="flex-1 flex flex-col p-0 border-slate-200 dark:border-emerald-500/20 overflow-hidden shadow-lg dark:shadow-none bg-white/50 dark:bg-transparent">
+               <GlassCard className="flex-shrink-0 flex flex-col p-0 border-slate-200 dark:border-emerald-500/20 overflow-hidden shadow-lg dark:shadow-none bg-white/50 dark:bg-transparent" style={{ minHeight: '400px' }}>
                   <div className="p-3 border-b border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5 flex items-center gap-2">
                      <BrainCircuit size={16} className="text-purple-600 dark:text-purple-400" />
                      <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Agentic Preview</h4>

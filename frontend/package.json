@@ -1,5 +1,5 @@
 {
-  "name": "healthguard-ai-orchestrator",
+  "name": "vera-platform",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -9,11 +9,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@google/genai": "^1.31.0",
+    "axios": "^1.13.5",
     "lucide-react": "^0.556.0",
+    "prop-types": "^15.8.1",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
-    "recharts": "^3.5.1",
-    "@google/genai": "^1.31.0"
+    "react-is": "^19.2.4",
+    "react-simple-maps": "^3.0.0",
+    "recharts": "^3.5.1"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

@@ -155,7 +155,7 @@ function AppContent() {
                         <div className="p-1.5 rounded-lg border bg-emerald-50 border-emerald-200 dark:bg-emerald-500/10 dark:border-emerald-500/20">
                             <ShieldCheck size={20} className="text-emerald-600 dark:text-emerald-400" />
                         </div>
-                        {!isSidebarCollapsed && <h1 className="font-bold text-lg tracking-tight animate-in fade-in duration-300">Health<span className="text-emerald-600 dark:text-emerald-400">Guard</span></h1>}
+                        {!isSidebarCollapsed && <h1 className="font-bold text-lg tracking-tight animate-in fade-in duration-300"><span className="text-emerald-600 dark:text-emerald-400">VERA</span></h1>}
                     </div>
                     {!isSidebarCollapsed && <button onClick={() => setIsSidebarCollapsed(true)} className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 text-slate-400 hover:text-emerald-500 transition-colors">
                         <ChevronLeft size={16} />

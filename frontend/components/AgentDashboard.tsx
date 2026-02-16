@@ -53,7 +53,7 @@ const AgentDashboard: React.FC<AgentDashboardProps> = ({ agents }) => {
   return (
     <div className="flex flex-col gap-4 h-full">
       {/* Live Agent Conversation Log */}
-      <GlassCard className={`flex-1 border-slate-200 dark:border-emerald-500/20 bg-white/80 dark:bg-[#050505]/80 flex flex-col p-0 overflow-hidden shadow-sm dark:shadow-none transition-all duration-300 ${isCollapsed ? 'flex-grow-0' : ''}`}>
+      <GlassCard className={`border-slate-200 dark:border-emerald-500/20 bg-white/80 dark:bg-[#050505]/80 flex flex-col p-0 overflow-hidden shadow-sm dark:shadow-none transition-all duration-300 ${isCollapsed ? 'h-auto' : 'flex-1'}`}>
         <div className="p-4 border-b border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5 flex items-center justify-between cursor-pointer" onClick={() => setIsCollapsed(!isCollapsed)}>
           <div className="flex items-center gap-2">
             <Terminal size={16} className="text-emerald-600 dark:text-emerald-400" />

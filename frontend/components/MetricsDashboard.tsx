@@ -1,6 +1,7 @@
 import React from 'react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar, Cell, Treemap } from 'recharts';
 import GlassCard from './GlassCard';
+import USHeatmap from './USHeatmap';
 import { AnalysisResult } from '../types';
 import { DollarSign, ShieldAlert, Users, AlertOctagon, TrendingUp, Map, ArrowRight, ExternalLink } from 'lucide-react';
 
@@ -124,6 +125,9 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ data, onViewDetails
           </BarChart>
         </ResponsiveContainer>
       </GlassCard>
+
+      {/* US Provider Heatmap */}
+      <USHeatmap records={data.records} />
 
       {/* Agent Logs (Scrollable) */}
       <GlassCard className="lg:col-span-3 p-6 max-h-[300px] overflow-hidden flex flex-col">
