@@ -133,6 +133,36 @@ function AppContent() {
         }
     };
 
+    const handleCSVUpload = async (file: File) => {
+        setIsProcessing(true);
+        setView('dashboard');
+        setAgents(INITIAL_AGENTS.map(a => ({ ...a, status: 'idle', message: 'Standing by' })));
+
+        updateAgent(AgentType.ORCHESTRATOR, 'processing', `Uploading ${file.name}...`);
+
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch('/upload-csv', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.detail || 'Upload failed');
+            }
+
+            const result = await response.json();
+            await simulateAgentActivity(result);
+        } catch (error) {
+            console.error('CSV upload failed:', error);
+            updateAgent(AgentType.ORCHESTRATOR, 'error', `Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            setIsProcessing(false);
+        }
+    };
+
     if (view === 'landing') {
         return <LandingPage onLogin={() => setView('login')} />;
     }
@@ -313,7 +343,7 @@ function AppContent() {
                                             Upload provider data to initiate the multi-agent orchestration for fraud detection and ROI analysis.
                                         </p>
                                     </div>
-                                    <UploadSection onFilesSelected={handleFilesSelected} isProcessing={isProcessing} onLoadDemoData={loadDemoData} />
+                                    <UploadSection onFilesSelected={handleFilesSelected} isProcessing={isProcessing} onLoadDemoData={loadDemoData} onCSVUpload={handleCSVUpload} />
                                 </div>
                             </div>
                         )}
@@ -322,7 +352,7 @@ function AppContent() {
                             <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 h-full animate-in slide-in-from-bottom-8 duration-500">
                                 {/* Left Column: Upload (Compact) & Orchestration */}
                                 <div className="xl:col-span-4 flex flex-col gap-6">
-                                    <UploadSection onFilesSelected={handleFilesSelected} isProcessing={isProcessing} compact onLoadDemoData={loadDemoData} />
+                                    <UploadSection onFilesSelected={handleFilesSelected} isProcessing={isProcessing} compact onLoadDemoData={loadDemoData} onCSVUpload={handleCSVUpload} />
                                     <div className="flex-grow min-h-[400px]">
                                         <AgentDashboard agents={agents} />
                                     </div>

@@ -404,11 +404,11 @@ def generate_agent_thoughts(
             timestamp=now_str
         ))
 
-    # ─── Reachability Agent (D2) ───
+    # ─── Multi-source Validation (D2) ───
     for finding in reachability_result["findings"][:3]:
         verdict = "pass" if finding.startswith("✓") else "fail" if finding.startswith("✗") else "warn"
         thoughts.append(AgentThought(
-            agentName="Reachability Agent",
+            agentName="Multi-source Validation",
             thought=finding.replace("✓ ", "").replace("✗ ", "").replace("⚠ ", ""),
             verdict=verdict,
             timestamp=now_str
@@ -560,3 +560,161 @@ async def validate_single_provider(csv_row: Dict[str, Any], client: httpx.AsyncC
         "s3": s3,
         "lambda": lambda_penalty,
     }
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  COMPLAINT DIRECTORY — Cross-Referencing System
+# ──────────────────────────────────────────────────────────────────────────────
+
+import csv
+import os
+
+
+def load_complaints(csv_path: str) -> Dict[str, List[Dict[str, str]]]:
+    """
+    Load complaint_data.csv and return dict keyed by NPI.
+    Each NPI maps to a list of complaint records.
+    """
+    complaints: Dict[str, List[Dict[str, str]]] = {}
+    if not os.path.exists(csv_path):
+        return complaints
+
+    try:
+        with open(csv_path, "r", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                npi = str(row.get("NPI", "")).strip()
+                if npi:
+                    complaints.setdefault(npi, []).append({
+                        "field": row.get("field_reported", "general").strip().lower(),
+                        "value": row.get("reported_value", "").strip(),
+                        "date": row.get("complaint_date", "").strip(),
+                        "notes": row.get("member_notes", "").strip(),
+                    })
+    except Exception as e:
+        print(f"Warning: Could not load complaint data: {e}")
+
+    return complaints
+
+
+def load_complaints_from_text(csv_text: str) -> Dict[str, List[Dict[str, str]]]:
+    """
+    Parse complaint data from a CSV text string (from file upload).
+    Returns dict keyed by NPI.
+    """
+    import io as _io
+    complaints: Dict[str, List[Dict[str, str]]] = {}
+    try:
+        reader = csv.DictReader(_io.StringIO(csv_text))
+        for row in reader:
+            npi = str(row.get("NPI", "")).strip()
+            if npi:
+                complaints.setdefault(npi, []).append({
+                    "field": row.get("field_reported", "general").strip().lower(),
+                    "value": row.get("reported_value", "").strip(),
+                    "date": row.get("complaint_date", "").strip(),
+                    "notes": row.get("member_notes", "").strip(),
+                })
+    except Exception as e:
+        print(f"Warning: Could not parse complaint data: {e}")
+
+    return complaints
+
+def cross_reference_complaints(
+    npi: str,
+    provider_complaints: List[Dict[str, str]],
+    validation_findings: List[str],
+) -> Dict[str, Any]:
+    """
+    Cross-reference member complaints against validation agent findings.
+    Returns:
+      - lambda_boost: additional penalty for the trust score
+      - confirmed: list of confirmed complaints
+      - unconfirmed: list of unconfirmed complaints
+      - thoughts: agent thoughts to add
+    """
+    result = {
+        "lambda_boost": 0.0,
+        "confirmed": [],
+        "unconfirmed": [],
+        "thoughts": [],
+    }
+
+    if not provider_complaints:
+        return result
+
+    now_str = datetime.now().isoformat()
+
+    # Map complaint fields to validation finding keywords
+    FIELD_KEYWORDS = {
+        "phone": ["phone", "telephone"],
+        "address": ["address", "geocod", "location", "moved"],
+        "specialty": ["specialty", "specializ", "taxonomy"],
+        "name": ["name", "mismatch"],
+        "general": [],  # always unconfirmed unless other signals exist
+    }
+
+    findings_lower = " ".join(validation_findings).lower()
+
+    for complaint in provider_complaints:
+        field = complaint["field"]
+        keywords = FIELD_KEYWORDS.get(field, [])
+
+        # Check if any validation finding mentions this field's keywords.
+        # Agent thoughts have ✗/⚠ markers stripped, so we just check for
+        # keyword presence — if it appears in findings, validation flagged it.
+        is_confirmed = False
+        if keywords:
+            for kw in keywords:
+                if kw in findings_lower:
+                    is_confirmed = True
+                    break
+
+        if is_confirmed:
+            result["confirmed"].append(complaint)
+            result["lambda_boost"] += 0.15  # Confirmed complaint = significant penalty
+        else:
+            result["unconfirmed"].append(complaint)
+            result["lambda_boost"] += 0.08  # Complaint on file = meaningful signal
+
+    # Cap the boost
+    result["lambda_boost"] = round(min(result["lambda_boost"], 0.50), 2)
+
+    # Generate agent thoughts
+    total = len(provider_complaints)
+    confirmed_count = len(result["confirmed"])
+    unconfirmed_count = len(result["unconfirmed"])
+
+    if confirmed_count > 0:
+        fields_confirmed = list(set(c["field"] for c in result["confirmed"]))
+        result["thoughts"].append(AgentThought(
+            agentName="Multi-source Validation",
+            thought=f"{confirmed_count} of {total} member complaint(s) CONFIRMED by validation. Affected: {', '.join(fields_confirmed)}. Trust score penalized.",
+            verdict="fail",
+            timestamp=now_str,
+        ))
+    if unconfirmed_count > 0 and confirmed_count == 0:
+        result["thoughts"].append(AgentThought(
+            agentName="Multi-source Validation",
+            thought=f"{unconfirmed_count} member complaint(s) on file but NOT confirmed by current validation. Monitoring.",
+            verdict="warn",
+            timestamp=now_str,
+        ))
+    elif unconfirmed_count > 0:
+        result["thoughts"].append(AgentThought(
+            agentName="Multi-source Validation",
+            thought=f"Additionally, {unconfirmed_count} complaint(s) could not be confirmed by automated validation.",
+            verdict="neutral",
+            timestamp=now_str,
+        ))
+
+    if total == 0:
+        result["thoughts"].append(AgentThought(
+            agentName="Multi-source Validation",
+            thought="No member complaints on file. Clean complaint history.",
+            verdict="pass",
+            timestamp=now_str,
+        ))
+
+    return result
+

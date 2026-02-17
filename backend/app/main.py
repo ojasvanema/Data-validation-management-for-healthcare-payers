@@ -14,7 +14,10 @@ import httpx
 from typing import List
 from fastapi import UploadFile, File
 
-from .validation_service import validate_single_provider
+from .validation_service import validate_single_provider, load_complaints, load_complaints_from_text, cross_reference_complaints
+
+# Global complaint store — populated by user upload via /upload-complaints
+complaint_store: dict = {}
 
 app = FastAPI(title="VERA — Validation & Enrichment for Reliable Access", version="2.0.0")
 
@@ -43,6 +46,58 @@ async def update_status(provider_id: str, update: StatusUpdate):
         raise HTTPException(status_code=404, detail="Provider not found")
     return updated_record
 
+
+@app.post("/upload-complaints")
+async def upload_complaints(file: UploadFile = File(...)):
+    """
+    Upload a complaint directory CSV. This is separate from provider data upload.
+    The complaint data is stored in memory and used during validation to cross-reference
+    member complaints against validation findings.
+    """
+    global complaint_store
+
+    if not file.filename.lower().endswith(".csv"):
+        raise HTTPException(status_code=400, detail="Only CSV files are accepted")
+
+    content = await file.read()
+    text = content.decode("utf-8")
+
+    import io as _io
+    complaints_dict = load_complaints_from_text(text)
+
+    complaint_store = complaints_dict
+    total_complaints = sum(len(v) for v in complaints_dict.values())
+    providers_affected = len(complaints_dict)
+
+    print(f"[VERA] Complaint directory uploaded: {total_complaints} complaints across {providers_affected} providers")
+
+    return {
+        "status": "success",
+        "total_complaints": total_complaints,
+        "providers_affected": providers_affected,
+        "filename": file.filename,
+    }
+
+
+@app.get("/complaints-status")
+async def complaints_status():
+    """Check if a complaint directory has been uploaded."""
+    total = sum(len(v) for v in complaint_store.values())
+    return {
+        "loaded": len(complaint_store) > 0,
+        "total_complaints": total,
+        "providers_affected": len(complaint_store),
+    }
+
+
+@app.delete("/upload-complaints")
+async def clear_complaints():
+    """Clear the uploaded complaint directory."""
+    global complaint_store
+    complaint_store = {}
+    print("[VERA] Complaint directory cleared.")
+    return {"status": "cleared"}
+
 @app.post("/demo-data", response_model=AnalysisResult)
 async def generate_demo_data():
     """
@@ -57,6 +112,41 @@ async def generate_demo_data():
     if existing_records and len(existing_records) > 0:
         print(f"[VERA] Loading {len(existing_records)} cached records from DB")
         records = existing_records
+
+        # Re-apply complaint penalties if complaint directory is uploaded
+        complaints_dict = complaint_store
+        if complaints_dict:
+            print(f"[VERA] Re-applying complaint penalties to {len(records)} cached records...")
+            for rec in records:
+                provider_complaints = complaints_dict.get(str(rec.npi), [])
+                if provider_complaints:
+                    # Gather agent thoughts text for cross-referencing
+                    all_findings = []
+                    if rec.agentThoughts:
+                        for t in rec.agentThoughts:
+                            thought_text = t.thought if hasattr(t, 'thought') else str(t)
+                            all_findings.append(thought_text)
+                    all_findings.extend(rec.conflicts or [])
+
+                    complaint_result = cross_reference_complaints(str(rec.npi), provider_complaints, all_findings)
+
+                    if complaint_result["lambda_boost"] > 0:
+                        boost = complaint_result["lambda_boost"]
+                        current_trust = 100.0 - rec.riskScore
+                        adjusted_trust = current_trust * (1.0 - boost)
+                        rec.riskScore = round(max(0, min(100, 100.0 - adjusted_trust)), 1)
+                        print(f"[VERA]   {rec.name} (NPI: {rec.npi}): {len(provider_complaints)} complaints, boost={boost}, risk→{rec.riskScore}")
+
+                        if rec.riskScore > 70:
+                            rec.status = "Flagged"
+                        elif rec.riskScore > 35:
+                            rec.status = "Review"
+
+                    # Add complaint thoughts (avoid duplicates)
+                    existing_thoughts = {t.thought for t in (rec.agentThoughts or []) if hasattr(t, 'thought')}
+                    for thought in complaint_result["thoughts"]:
+                        if thought.thought not in existing_thoughts:
+                            rec.agentThoughts.append(thought)
     else:
         # ─── Load CSV ───
         csv_path = os.path.normpath(CSV_PATH)
@@ -73,6 +163,13 @@ async def generate_demo_data():
         csv_rows = csv_rows[:PROVIDER_LIMIT]
         total = len(csv_rows)
         print(f"[VERA] Processing {total} providers with real API validation...")
+
+        # Use uploaded complaint directory (if any)
+        complaints_dict = complaint_store
+        if complaints_dict:
+            print(f"[VERA] Using uploaded complaint directory: {sum(len(v) for v in complaints_dict.values())} complaints across {len(complaints_dict)} providers")
+        else:
+            print(f"[VERA] No complaint directory uploaded. Skipping complaint cross-referencing.")
 
         # ─── Validate each provider ───
         async with httpx.AsyncClient() as client:
@@ -105,6 +202,39 @@ async def generate_demo_data():
                         "locations": [{"address": f"{row.get('Address', '')}, {row.get('City', '')} {row.get('State', '')}", "updated": row.get("Last_Updated", "")}],
                         "contact_numbers": [{"number": row.get("Phone", ""), "type": "Office"}] if row.get("Phone") else [],
                     }
+
+                # ─── Complaint Directory Cross-Reference ───
+                provider_complaints = complaints_dict.get(str(npi), [])
+                if provider_complaints:
+                    # Collect all validation findings for cross-referencing
+                    all_findings = []
+                    if isinstance(result.get("thoughts"), list):
+                        for t in result["thoughts"]:
+                            thought_text = t.thought if hasattr(t, 'thought') else str(t)
+                            all_findings.append(thought_text)
+                    all_findings.extend(result.get("conflicts", []))
+
+                    complaint_result = cross_reference_complaints(str(npi), provider_complaints, all_findings)
+
+                    # Apply lambda boost to risk score
+                    if complaint_result["lambda_boost"] > 0:
+                        boost = complaint_result["lambda_boost"]
+                        current_trust = 100.0 - result["risk_score"]
+                        adjusted_trust = current_trust * (1.0 - boost)
+                        result["risk_score"] = round(max(0, min(100, 100.0 - adjusted_trust)), 1)
+                        print(f"[VERA]   Complaints: {len(provider_complaints)} filed, boost={boost}, risk {100-current_trust:.1f}→{result['risk_score']:.1f}")
+
+                        # Re-evaluate status after adjustment
+                        if result["risk_score"] > 70:
+                            result["status"] = "Flagged"
+                        elif result["risk_score"] > 35:
+                            result["status"] = "Review"
+
+                    # Add complaint agent thoughts
+                    if isinstance(result.get("thoughts"), list):
+                        result["thoughts"].extend(complaint_result["thoughts"])
+                    else:
+                        result["thoughts"] = complaint_result.get("thoughts", [])
 
                 # Generate feedback (simulated — no real feedback data in CSV)
                 feedback_score = round(random.uniform(2.5, 5.0), 1) if result["status"] == "Verified" else round(random.uniform(1.0, 3.5), 1)
@@ -316,3 +446,205 @@ async def get_job_status(job_id: str):
         }
     
     return {"job_id": job_id, "status": "unknown"}
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  Manual Upload Endpoints
+# ──────────────────────────────────────────────────────────────────────────────
+
+from .ocr_service import extract_text, parse_provider_fields
+
+
+@app.post("/upload-csv", response_model=AnalysisResult)
+async def upload_csv(file: UploadFile = File(...)):
+    """
+    Accept a CSV file upload, validate all providers through the same pipeline
+    as /demo-data (NPPES + Census + Medicare + Complaints), and return results.
+    """
+    if not file.filename.lower().endswith(".csv"):
+        raise HTTPException(status_code=400, detail="Only CSV files are accepted")
+
+    content = await file.read()
+    text = content.decode("utf-8")
+
+    # Parse CSV
+    import io as _io
+    reader = csv.DictReader(_io.StringIO(text))
+    csv_rows = list(reader)
+
+    if not csv_rows:
+        raise HTTPException(status_code=400, detail="CSV file is empty or has no valid rows")
+
+    csv_rows = csv_rows[:PROVIDER_LIMIT]
+    total = len(csv_rows)
+    print(f"[VERA] CSV Upload: Processing {total} providers...")
+
+    # Use uploaded complaint directory (if any)
+    complaints_dict = complaint_store
+
+    records = []
+    async with httpx.AsyncClient() as client:
+        for idx, row in enumerate(csv_rows):
+            npi = row.get("NPI", "")
+            name = f"{row.get('First_Name', '')} {row.get('Last_Name', '')}".strip()
+            print(f"[VERA] [{idx+1}/{total}] Validating {name} (NPI: {npi})...")
+
+            try:
+                result = await validate_single_provider(row, client)
+            except Exception as e:
+                print(f"[VERA] Error validating {npi}: {e}")
+                result = {
+                    "npi": npi,
+                    "name": name,
+                    "specialty": row.get("Specialty", "Unknown"),
+                    "state": row.get("State", ""),
+                    "risk_score": 50.0,
+                    "decay_prob": 0.5,
+                    "status": "Review",
+                    "conflicts": [f"Validation error: {str(e)[:80]}"],
+                    "thoughts": [AgentThought(
+                        agentName="Validation Agent",
+                        thought=f"API validation failed: {str(e)[:100]}",
+                        verdict="warn",
+                        timestamp=datetime.datetime.now().isoformat()
+                    )],
+                    "last_updated": row.get("Last_Updated", ""),
+                    "locations": [{"address": f"{row.get('Address', '')}, {row.get('City', '')} {row.get('State', '')}", "updated": row.get("Last_Updated", "")}],
+                    "contact_numbers": [{"number": row.get("Phone", ""), "type": "Office"}] if row.get("Phone") else [],
+                }
+
+            # Complaint cross-reference
+            provider_complaints = complaints_dict.get(str(npi), [])
+            if provider_complaints:
+                all_findings = []
+                if isinstance(result.get("thoughts"), list):
+                    for t in result["thoughts"]:
+                        thought_text = t.thought if hasattr(t, 'thought') else str(t)
+                        all_findings.append(thought_text)
+                all_findings.extend(result.get("conflicts", []))
+
+                complaint_result = cross_reference_complaints(str(npi), provider_complaints, all_findings)
+
+                if complaint_result["lambda_boost"] > 0:
+                    boost = complaint_result["lambda_boost"]
+                    current_trust = 100.0 - result["risk_score"]
+                    adjusted_trust = current_trust * (1.0 - boost)
+                    result["risk_score"] = round(max(0, min(100, 100.0 - adjusted_trust)), 1)
+
+                    if result["risk_score"] > 70:
+                        result["status"] = "Flagged"
+                    elif result["risk_score"] > 35:
+                        result["status"] = "Review"
+
+                if isinstance(result.get("thoughts"), list):
+                    result["thoughts"].extend(complaint_result["thoughts"])
+
+            # Feedback
+            feedback_score = round(random.uniform(2.5, 5.0), 1) if result["status"] == "Verified" else round(random.uniform(1.0, 3.5), 1)
+            feedback_data = {
+                "score": feedback_score,
+                "trend": [round(random.uniform(max(1.0, feedback_score - 1), min(5.0, feedback_score + 0.5)), 1) for _ in range(6)],
+                "recent_reviews": (
+                    ["Excellent care!", "Very professional staff."] if feedback_score > 4.0
+                    else ["Average experience."] if feedback_score > 2.5
+                    else ["Difficult to reach.", "Had issues with billing."]
+                )
+            }
+
+            rec = FrontendProviderRecord(
+                id=f"UPLOAD-{idx + 1}",
+                name=result["name"],
+                npi=str(result["npi"]),
+                specialty=result["specialty"],
+                riskScore=float(result["risk_score"]),
+                decayProb=float(result["decay_prob"]),
+                status=result["status"],
+                conflicts=result["conflicts"],
+                agentThoughts=result["thoughts"],
+                lastUpdated=result.get("last_updated", "") or datetime.datetime.now().isoformat(),
+                state=result["state"],
+                feedback=feedback_data,
+                locations=result["locations"],
+                contact_numbers=result["contact_numbers"]
+            )
+            records.append(rec)
+            save_provider(rec)
+
+            import asyncio as _asyncio
+            await _asyncio.sleep(0.5)
+
+    print(f"[VERA] CSV Upload complete. {len(records)} providers processed.")
+
+    # Aggregates
+    total_risk = sum(r.riskScore for r in records)
+    avg_risk = round(total_risk / len(records)) if records else 0
+    discrepancies = len([r for r in records if r.status != "Verified"])
+    verified_count = len([r for r in records if r.status == "Verified"])
+    roi = verified_count * 300
+
+    # Timeline
+    steps = min(6, len(records))
+    batch_size = len(records) // steps if steps > 0 else 1
+    timeline_data = []
+    for i in range(steps):
+        end_idx = min((i + 1) * batch_size, len(records))
+        batch_records = records[:end_idx]
+        batch_disc = len([r for r in batch_records if r.status != "Verified"])
+        timeline_data.append(ChartDataPoint(name=f'{i * 5:02d}:00', value=end_idx, secondaryValue=batch_disc))
+
+    risk_distribution = [
+        ChartDataPoint(name='Low (0-35)', value=len([r for r in records if r.riskScore <= 35])),
+        ChartDataPoint(name='Medium (35-70)', value=len([r for r in records if 35 < r.riskScore <= 70])),
+        ChartDataPoint(name='High (70-100)', value=len([r for r in records if r.riskScore > 70])),
+    ]
+
+    now_iso = datetime.datetime.now().isoformat()
+    return AnalysisResult(
+        roi=roi,
+        fraudRiskScore=avg_risk,
+        providersProcessed=len(records),
+        discrepanciesFound=discrepancies,
+        timelineData=timeline_data,
+        riskDistribution=risk_distribution,
+        records=records,
+        agentLogs=[
+            {"agent": "ORCHESTRATOR", "log": f"Uploaded CSV: {file.filename} ({len(records)} providers)", "timestamp": now_iso},
+            {"agent": "VALIDATION", "log": "Cross-validated against NPPES, Census Geocoder, and Medicare APIs", "timestamp": now_iso},
+            {"agent": "COMPLAINT", "log": f"Cross-referenced against complaint directory", "timestamp": now_iso},
+            {"agent": "FRAUD", "log": f"Identified {discrepancies} discrepancies via 3D Trust Score", "timestamp": now_iso},
+        ],
+        summary=f'CSV Upload: Validated {len(records)} providers. Found {discrepancies} discrepancies. Trust Score avg: {100 - avg_risk}/100.'
+    )
+
+
+@app.post("/upload-ocr")
+async def upload_ocr(file: UploadFile = File(...)):
+    """
+    Accept an image or PDF file, run OCR to extract text,
+    and parse structured provider fields from the extracted text.
+    """
+    allowed_exts = (".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".webp", ".pdf")
+    if not any(file.filename.lower().endswith(ext) for ext in allowed_exts):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported file type. Accepted: {', '.join(allowed_exts)}"
+        )
+
+    content = await file.read()
+    print(f"[VERA] OCR Upload: Processing {file.filename} ({len(content)} bytes)...")
+
+    # Extract text
+    raw_text = extract_text(content, file.filename)
+    print(f"[VERA] OCR extracted {len(raw_text)} characters")
+
+    # Parse fields
+    fields = parse_provider_fields(raw_text)
+    fields["source_filename"] = file.filename
+
+    return {
+        "status": "success",
+        "filename": file.filename,
+        "raw_text": raw_text,
+        "extracted_fields": fields,
+    }
+

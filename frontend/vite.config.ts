@@ -14,7 +14,11 @@ export default defineConfig(({ mode }) => {
         '/status': 'http://127.0.0.1:8000',
         '/docs': 'http://127.0.0.1:8000',
         '/openapi.json': 'http://127.0.0.1:8000',
-        '/providers': 'http://127.0.0.1:8000'
+        '/providers': 'http://127.0.0.1:8000',
+        '/upload-csv': 'http://127.0.0.1:8000',
+        '/upload-ocr': 'http://127.0.0.1:8000',
+        '/upload-complaints': 'http://127.0.0.1:8000',
+        '/complaints-status': 'http://127.0.0.1:8000'
       }
     },
     plugins: [react()],
