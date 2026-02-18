@@ -7,6 +7,8 @@ import datetime
 import random
 import httpx
 import asyncio
+import json
+
 
 from ..domain.models import (
     ProviderRecord, MainAgentState, AnalysisResult, 
@@ -20,6 +22,11 @@ from ..services.validation import (
 )
 from ..services.ocr import extract_text, parse_provider_fields
 from ..database.session import save_provider, get_all_providers, update_provider_status
+from ..services.detailed_agents import DetailedAgentService, ValidationOutput, PredictiveOutput, ROIOutput
+from fastapi import Form
+
+detailed_agent_service = DetailedAgentService()
+
 
 router = APIRouter()
 
@@ -651,3 +658,38 @@ async def upload_ocr(file: UploadFile = File(...)):
         "raw_text": raw_text,
         "extracted_fields": fields,
     }
+
+
+@router.post("/manual-entry/analyze")
+async def analyze_manual_entry(
+    data: str = Form(...),
+    file: UploadFile = File(None)
+):
+    """
+    Detailed analysis of a single manually entered provider.
+    Runs Validation, Predictive, and ROI agents and returns rich feedback.
+    """
+    try:
+        # Parse the JSON string form data
+        provider_data = json.loads(data)
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid JSON data")
+
+    # Handle file if present
+    file_path = None
+    if file:
+        job_id = str(uuid.uuid4())
+        upload_dir = os.path.join(os.getcwd(), "uploads", "manual", job_id)
+        os.makedirs(upload_dir, exist_ok=True)
+        file_path = os.path.join(upload_dir, file.filename)
+        with open(file_path, "wb") as f:
+            f.write(await file.read())
+
+    # Run analysis
+    try:
+        results = await detailed_agent_service.analyze_provider(provider_data, file_path)
+        return results
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
