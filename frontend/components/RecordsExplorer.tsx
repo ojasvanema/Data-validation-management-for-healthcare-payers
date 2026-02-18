@@ -5,18 +5,21 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, ReferenceL
 import { useTheme } from './ThemeContext';
 import { ProviderRecord, AgentThought } from '../types';
 
+import { updateProviderStatus } from '../services/apiService';
+
 interface RecordsExplorerProps {
    records: ProviderRecord[] | undefined;
+   onRefresh?: () => void;
 }
 
-const RecordsExplorer: React.FC<RecordsExplorerProps> = ({ records }) => {
+const RecordsExplorer: React.FC<RecordsExplorerProps> = ({ records, onRefresh }) => {
    const { theme } = useTheme();
    const isDark = theme === 'dark';
    const [searchTerm, setSearchTerm] = useState('');
    const [selectedRecord, setSelectedRecord] = useState<ProviderRecord | null>(null);
-   const [statusFilter, setStatusFilter] = useState<'All' | 'Flagged' | 'Verified' | 'Review'>('All');
+   const [statusFilter, setStatusFilter] = useState<'All' | 'Flagged' | 'Verified' | 'Review' | 'Pending'>('All');
 
-   const [pendingStatus, setPendingStatus] = useState<'Flagged' | 'Review' | 'Verified' | null>(null);
+   const [pendingStatus, setPendingStatus] = useState<'Flagged' | 'Review' | 'Verified' | 'Pending' | null>(null);
    const [showCallDropdown, setShowCallDropdown] = useState(false);
    const [isActionsCollapsed, setIsActionsCollapsed] = useState(false);
 
@@ -38,32 +41,27 @@ const RecordsExplorer: React.FC<RecordsExplorerProps> = ({ records }) => {
    };
 
    // Update local pending state
-   const handleStatusChange = (newStatus: 'Flagged' | 'Review' | 'Verified') => {
+   const handleStatusChange = (newStatus: 'Flagged' | 'Review' | 'Verified' | 'Pending') => {
       setPendingStatus(newStatus);
    };
-
-   // Import at top of file needed: import { updateProviderStatus } from '../services/apiService';
 
    // Commit status change
    const handleConfirmStatusUpdate = async () => {
       if (selectedRecord && pendingStatus) {
          try {
-            // Call API to persist change
-            // We need to dynamic import or pass this function as prop usually, but for now we'll fetch
-            // since this component doesn't have the API service imported yet, let's assume valid scope or add import
-            // For strict correctness in this edited snippet:
-
             // Optimistic update
             const updatedRecord = { ...selectedRecord, status: pendingStatus };
             setSelectedRecord(updatedRecord);
 
-            // Trigger actual API call (silently for now in this scope, or ideally propagated up)
-            // Ideally we should pass an onUpdate prop to this component to handle data refresh
-            // But to fulfill the request directly:
-            const { updateProviderStatus } = await import('../services/apiService');
+            // Call API
             await updateProviderStatus(selectedRecord.id, pendingStatus);
 
             setPendingStatus(null);
+
+            // Refresh parent data
+            if (onRefresh) {
+               onRefresh();
+            }
          } catch (error) {
             console.error("Failed to update status:", error);
             // Revert or show toast
@@ -92,7 +90,7 @@ const RecordsExplorer: React.FC<RecordsExplorerProps> = ({ records }) => {
 
                   <div className="flex items-center gap-3">
                      <div className="flex bg-slate-100 dark:bg-black/30 rounded-lg p-1 border border-slate-200 dark:border-white/10">
-                        {['All', 'Flagged', 'Review', 'Verified'].map((status) => (
+                        {['All', 'Pending', 'Flagged', 'Review', 'Verified'].map((status) => (
                            <button
                               key={status}
                               onClick={() => setStatusFilter(status as any)}
@@ -144,7 +142,7 @@ const RecordsExplorer: React.FC<RecordsExplorerProps> = ({ records }) => {
                   `}
                         >
                            <div className="col-span-4 font-medium text-slate-900 dark:text-white truncate flex items-center gap-3">
-                              <div className={`w-2 h-2 rounded-full shrink-0 ${record.status === 'Verified' ? 'bg-emerald-500' : record.status === 'Flagged' ? 'bg-red-500' : 'bg-yellow-500'}`}></div>
+                              <div className={`w-2 h-2 rounded-full shrink-0 ${record.status === 'Verified' ? 'bg-emerald-500' : record.status === 'Flagged' ? 'bg-red-500' : record.status === 'Review' ? 'bg-yellow-500' : 'bg-blue-500'}`}></div>
                               <span className="truncate">{record.name}</span>
                            </div>
 
@@ -173,6 +171,11 @@ const RecordsExplorer: React.FC<RecordsExplorerProps> = ({ records }) => {
                               {record.status === 'Review' && (
                                  <span className="flex items-center gap-1.5 text-yellow-700 dark:text-yellow-400 text-xs bg-yellow-50 dark:bg-yellow-500/10 px-2 py-1 rounded w-fit">
                                     <AlertTriangle size={12} /> Review
+                                 </span>
+                              )}
+                              {record.status === 'Pending' && (
+                                 <span className="flex items-center gap-1.5 text-blue-700 dark:text-blue-400 text-xs bg-blue-50 dark:bg-blue-500/10 px-2 py-1 rounded w-fit">
+                                    <Clock size={12} /> Pending
                                  </span>
                               )}
                            </div>
@@ -383,11 +386,13 @@ const RecordsExplorer: React.FC<RecordsExplorerProps> = ({ records }) => {
                                     <option value="Review">Review Pending</option>
                                     <option value="Flagged">Flagged for Correction</option>
                                     <option value="Verified">Verified</option>
+                                    <option value="Pending">Validation Pending</option>
                                  </select>
                                  <div className="flex justify-between mt-1 px-1">
                                     <div className={`w-2 h-2 rounded-full ${(pendingStatus || selectedRecord.status) === 'Review' ? 'bg-yellow-500 ring-2 ring-yellow-500/20' : 'bg-slate-200 dark:bg-gray-700'}`}></div>
                                     <div className={`w-2 h-2 rounded-full ${(pendingStatus || selectedRecord.status) === 'Flagged' ? 'bg-red-500 ring-2 ring-red-500/20' : 'bg-slate-200 dark:bg-gray-700'}`}></div>
                                     <div className={`w-2 h-2 rounded-full ${(pendingStatus || selectedRecord.status) === 'Verified' ? 'bg-emerald-500 ring-2 ring-emerald-500/20' : 'bg-slate-200 dark:bg-gray-700'}`}></div>
+                                    <div className={`w-2 h-2 rounded-full ${(pendingStatus || selectedRecord.status) === 'Pending' ? 'bg-blue-500 ring-2 ring-blue-500/20' : 'bg-slate-200 dark:bg-gray-700'}`}></div>
                                  </div>
 
                                  {pendingStatus && pendingStatus !== selectedRecord.status && (

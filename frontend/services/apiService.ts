@@ -45,7 +45,9 @@ const generateMockResult = (): AnalysisResult => {
                 agentThoughts: [
                     { agentName: "Validation Agent", thought: "NPI confirmed in CMS Registry. Active status.", verdict: "pass", timestamp: new Date().toISOString() },
                     { agentName: "Fraud Detection", thought: "No abnormal billing patterns found in last 12 months.", verdict: "pass", timestamp: new Date().toISOString() }
-                ]
+                ],
+                locations: [],
+                contact_numbers: []
             },
             {
                 id: "2",
@@ -62,7 +64,9 @@ const generateMockResult = (): AnalysisResult => {
                     { agentName: "Validation Agent", thought: "CRITICAL: State License expired 45 days ago.", verdict: "fail", timestamp: new Date().toISOString() },
                     { agentName: "Document Parser", thought: "OCR mismatch: Uploaded PDF shows different practice address than registry.", verdict: "warn", timestamp: new Date().toISOString() },
                     { agentName: "Predictive Degradation", thought: "High probability of credential lapse spreading to other network participations.", verdict: "fail", timestamp: new Date().toISOString() }
-                ]
+                ],
+                locations: [],
+                contact_numbers: []
             },
             {
                 id: "3",
@@ -78,7 +82,9 @@ const generateMockResult = (): AnalysisResult => {
                 agentThoughts: [
                     { agentName: "Validation Agent", thought: "Primary license valid. DEA registration query timed out.", verdict: "warn", timestamp: new Date().toISOString() },
                     { agentName: "Business Impact", thought: "Potential delayed reimbursement revenue if DEA not verified.", verdict: "neutral", timestamp: new Date().toISOString() }
-                ]
+                ],
+                locations: [],
+                contact_numbers: []
             },
             {
                 id: "4",
@@ -95,7 +101,9 @@ const generateMockResult = (): AnalysisResult => {
                     { agentName: "Fraud Detection", thought: "ALERT: Name matches OIG exclusion list entry.", verdict: "fail", timestamp: new Date().toISOString() },
                     { agentName: "Fraud Detection", thought: "Billing frequency 400% above regional average.", verdict: "fail", timestamp: new Date().toISOString() },
                     { agentName: "Communicator", thought: "Drafted immediate suspension notice.", verdict: "neutral", timestamp: new Date().toISOString() }
-                ]
+                ],
+                locations: [],
+                contact_numbers: []
             },
             {
                 id: "5",
@@ -110,7 +118,9 @@ const generateMockResult = (): AnalysisResult => {
                 lastUpdated: new Date().toISOString(),
                 agentThoughts: [
                     { agentName: "Validation Agent", thought: "All credentials verified across 15 sources.", verdict: "pass", timestamp: new Date().toISOString() }
-                ]
+                ],
+                locations: [],
+                contact_numbers: []
             }
         ]
     };
@@ -131,6 +141,11 @@ export const fetchDemoData = async (): Promise<AnalysisResult> => {
 
 export const updateProviderStatus = async (id: string, status: string): Promise<ProviderRecord> => {
     const response = await api.put<ProviderRecord>(`/providers/${id}/status`, { status });
+    return response.data;
+};
+
+export const bulkApproveSafe = async (): Promise<{ count: number, message: string }> => {
+    const response = await api.post<{ count: number, message: string }>('/bulk-approve', {});
     return response.data;
 };
 

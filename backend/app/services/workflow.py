@@ -1,12 +1,12 @@
 from typing import TypedDict, Annotated, List, Union
 from langgraph.graph import StateGraph, END
-from .models import MainAgentState, ProviderRecord, ValidationResult, FraudAnalysis, DegradationPrediction, BusinessImpact, FraudRiskLevel
+from ..domain.models import MainAgentState, ProviderRecord, ValidationResult, FraudAnalysis, DegradationPrediction, BusinessImpact, FraudRiskLevel
 import asyncio
 import random
 
 # --- Node Implementation (Stubs for Now) ---
 
-from .agents.parser_agent import LangGraphFileAgent
+from ..agents.parser_agent import LangGraphFileAgent
 
 # Global parser instance (singleton for efficiency)
 # In production, this might be per-request or pooled

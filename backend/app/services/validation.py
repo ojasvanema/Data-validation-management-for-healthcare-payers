@@ -12,7 +12,7 @@ import re
 from datetime import datetime
 from difflib import SequenceMatcher
 from typing import Dict, Any, List, Tuple, Optional
-from .models import AgentThought
+from ..domain.models import AgentThought
 
 # ─── API Endpoints ───
 NPPES_API = "https://npiregistry.cms.hhs.gov/api/"

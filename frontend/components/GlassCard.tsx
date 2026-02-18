@@ -20,7 +20,7 @@ const GlassCard: React.FC<GlassCardProps> = ({ children, className = '', hoverEf
         border
         
         ${hoverEffect || onClick ?
-          'cursor-pointer hover:shadow-md dark:hover:bg-[#0a0a0a]/90 hover:border-emerald-500/30 dark:hover:border-emerald-500/20 dark:hover:shadow-[0_8px_40px_0_rgba(16,185,129,0.1)] hover:scale-[1.01]'
+          'cursor-pointer hover:shadow-lg dark:hover:bg-[#0a0a0a]/90 hover:border-emerald-500/30 dark:hover:border-emerald-500/30 dark:hover:shadow-[0_0_30px_-5px_rgba(16,185,129,0.15)] hover:scale-[1.01]'
           : ''}
         
         ${className}

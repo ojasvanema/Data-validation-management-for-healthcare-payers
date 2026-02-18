@@ -38,7 +38,7 @@ export interface ProviderRecord {
   specialty: string;
   riskScore: number; // 0-100
   decayProb: number; // 0-1
-  status: 'Verified' | 'Flagged' | 'Review';
+  status: 'Verified' | 'Flagged' | 'Review' | 'Pending';
   conflicts: string[];
   agentThoughts: AgentThought[];
   lastUpdated: string;

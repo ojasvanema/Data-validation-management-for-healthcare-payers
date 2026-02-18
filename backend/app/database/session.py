@@ -1,6 +1,7 @@
 import sqlite3
 import json
-from .models import FrontendProviderRecord
+import datetime
+from ..domain.models import FrontendProviderRecord
 
 DB_NAME = "providers.db"
 
@@ -54,6 +55,7 @@ def update_provider_status(provider_id: str, status: str):
     record = get_provider(provider_id)
     if record:
         record.status = status
+        record.lastUpdated = datetime.datetime.now().isoformat()
         save_provider(record)
         return record
     return None

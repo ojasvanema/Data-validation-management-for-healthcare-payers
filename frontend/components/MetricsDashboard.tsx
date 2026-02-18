@@ -11,6 +11,77 @@ interface MetricsDashboardProps {
 }
 
 import { useTheme } from './ThemeContext';
+import { bulkApproveSafe } from '../services/apiService';
+import { useState } from 'react';
+import { CheckCircle } from 'lucide-react';
+
+const BatchApproveButton = ({ onRefresh, pendingCount }: { onRefresh?: () => void, pendingCount: number }) => {
+  const [status, setStatus] = useState<'idle' | 'pushing' | 'success'>('idle');
+
+  const handleApprove = async () => {
+    if (status !== 'idle') return;
+
+    // Start "Pushing" state
+    setStatus('pushing');
+
+    try {
+      // Artificial delay to show the "Pushing to DB" visual
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Actual API call
+      await bulkApproveSafe();
+
+      // Show success
+      setStatus('success');
+
+      // Wait a bit on success before refreshing
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      if (onRefresh && typeof onRefresh === 'function') {
+        // onRefresh logic
+      }
+    } catch (e) {
+      console.error("Bulk approve failed", e);
+      setStatus('idle');
+    } finally {
+      if (status !== 'idle') {
+        window.location.reload();
+      }
+    }
+  };
+
+  const isDisabled = (status !== 'idle' && status !== 'success') || (pendingCount === 0 && status === 'idle');
+
+  return (
+    <button
+      onClick={handleApprove}
+      disabled={isDisabled}
+      className={`
+        flex items-center gap-2 px-4 py-2 rounded-lg shadow-md transition-all 
+        ${isDisabled && status === 'idle'
+          ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-gray-500 cursor-not-allowed opacity-70'
+          : status === 'success'
+            ? 'bg-emerald-500 text-white'
+            : 'bg-emerald-600 hover:bg-emerald-700 text-white animate-in fade-in zoom-in-95'}
+      `}
+    >
+      {status === 'pushing' ? (
+        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+      ) : status === 'success' ? (
+        <CheckCircle size={16} className="animate-bounce" />
+      ) : (
+        <CheckCircle size={16} />
+      )}
+      <span>
+        {status === 'pushing' ? 'Pushing Verification to DB...' :
+          status === 'success' ? 'Synced to Database!' :
+            pendingCount > 0
+              ? `Batch Approve ${pendingCount} Safe Records`
+              : 'No Pending Safe Records to Approve'}
+      </span>
+    </button>
+  );
+};
 
 const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ data, onViewDetails }) => {
   const { theme } = useTheme();
@@ -47,6 +118,16 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ data, onViewDetails
           </button>
         )}
       </div>
+
+      {/* Batch Approve Action */}
+      {data && (
+        <div className="lg:col-span-3 mb-2 flex justify-end">
+          <BatchApproveButton
+            onRefresh={onViewDetails}
+            pendingCount={data.records.filter(r => r.status === 'Pending' && r.riskScore <= 35).length}
+          />
+        </div>
+      )}
 
       {/* KPIs */}
       <div className="lg:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-4">
