@@ -12,6 +12,7 @@ interface LandingPageProps {
 }
 
 const LandingPage: React.FC<LandingPageProps> = ({ onLogin }) => {
+    console.log("LandingPage rendering...");
     return (
         <div className="min-h-screen text-slate-900 dark:text-gray-200 font-sans selection:bg-emerald-500/30 selection:text-emerald-700 dark:selection:text-emerald-200">
             <BackgroundGrid />

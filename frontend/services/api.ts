@@ -9,10 +9,13 @@ const api = {
         return { data: await response.json() as T };
     },
     post: async <T>(url: string, body: any) => {
+        const isFormData = body instanceof FormData;
+        const headers: HeadersInit = isFormData ? {} : { 'Content-Type': 'application/json' };
+
         const response = await fetch(`${API_BASE_URL}${url}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
+            headers,
+            body: isFormData ? body : JSON.stringify(body)
         });
         if (!response.ok) throw new Error(response.statusText);
         return { data: await response.json() as T };
@@ -114,7 +117,9 @@ const mapBackendResponse = (data: any): AnalysisResult => {
                 verdict: (f.risk_level === "HIGH" ? "fail" : "pass") as "pass" | "fail",
                 timestamp: new Date().toISOString()
             }
-        ]
+        ],
+        locations: [],
+        contact_numbers: []
     };
 
     return {

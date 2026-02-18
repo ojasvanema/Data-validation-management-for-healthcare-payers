@@ -8,8 +8,10 @@ if (!rootElement) {
 }
 
 const root = ReactDOM.createRoot(rootElement);
+console.log("Mounting React App...");
 root.render(
   <React.StrictMode>
     <App />
   </React.StrictMode>
 );
+console.log("React App mounted call complete.");

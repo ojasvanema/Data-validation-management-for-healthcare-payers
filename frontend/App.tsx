@@ -13,13 +13,15 @@ import { ThemeProvider } from './components/ThemeContext';
 import LandingPage from './components/LandingPage';
 import LoginTransition from './components/LoginTransition';
 import Sidebar from './components/Sidebar';
+import ManualEntryExplorer from './components/ManualEntryExplorer';
 
 function AppContent() {
+    console.log("AppContent rendering...");
     const [agents, setAgents] = useState<AgentStatus[]>(INITIAL_AGENTS);
     const [isProcessing, setIsProcessing] = useState(false);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
-    const [view, setView] = useState<'landing' | 'login' | 'home' | 'dashboard' | 'explorer'>('landing');
+    const [view, setView] = useState<'landing' | 'login' | 'home' | 'dashboard' | 'explorer' | 'manual'>('landing');
     const [history, setHistory] = useState<HistoryItem[]>([]);
 
     // Function to simulate agent activity step-by-step
@@ -275,6 +277,12 @@ function AppContent() {
                         {view === 'explorer' && (
                             <div className="h-full">
                                 <RecordsExplorer records={analysisResult?.records} onRefresh={refreshData} />
+                            </div>
+                        )}
+
+                        {view === 'manual' && (
+                            <div className="h-full">
+                                <ManualEntryExplorer />
                             </div>
                         )}
 

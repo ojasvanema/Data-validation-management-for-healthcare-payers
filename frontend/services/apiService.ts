@@ -149,6 +149,18 @@ export const bulkApproveSafe = async (): Promise<{ count: number, message: strin
     return response.data;
 };
 
+// Manual Entry Analysis
+export const analyzeManualEntry = async (data: any, file?: File): Promise<any> => {
+    const formData = new FormData();
+    formData.append('data', JSON.stringify(data));
+    if (file) {
+        formData.append('file', file);
+    }
+    const response = await api.post('/manual-entry/analyze', formData);
+    return response.data;
+};
+
+
 export const analyzeFilesWithAgents = async (files: FileUpload[]): Promise<AnalysisResult> => {
     console.log("Analyzing files via REAL BACKEND:", files);
 

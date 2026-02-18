@@ -97,6 +97,17 @@ const Sidebar: React.FC<SidebarProps> = ({
                     <Database size={18} className="shrink-0" />
                     {!isCollapsed && <span className="animate-in fade-in duration-300">Data Explorer</span>}
                 </button>
+                <button
+                    onClick={() => setCurrentView('manual')}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-sm font-medium group relative
+                ${currentView === 'manual'
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30 border'
+                            : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white'}`}
+                    title={isCollapsed ? "Manual Entry" : ""}
+                >
+                    <LayoutDashboard size={18} className="shrink-0" />
+                    {!isCollapsed && <span className="animate-in fade-in duration-300">Detailed Agent Demo</span>}
+                </button>
 
                 <div className={`pt-6 pb-2 ${isCollapsed ? 'hidden' : 'block'}`}>
                     <h3 className="text-xs font-semibold uppercase tracking-wider px-2 mb-2 flex items-center gap-2 text-slate-400 dark:text-gray-500 animate-in fade-in duration-300">
