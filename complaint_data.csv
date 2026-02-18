@@ -1,0 +1,18 @@
+NPI,field_reported,reported_value,complaint_date,member_notes
+1666582767,address,Provider office not at listed address,2025-11-10,Went to listed address but no medical office found
+1666582767,name,Cannot find this provider anywhere,2025-12-01,NPI search returns nothing - may not be a real provider
+1982133112,phone,Phone number goes to wrong office,2025-10-15,Called listed number and reached a different practice
+1982133112,address,Address on file seems incorrect,2025-09-20,Mail returned as undeliverable from listed address
+1689004079,address,Office moved to new location,2025-11-25,Provider relocated but directory still shows old address
+1689004079,phone,Reached voicemail for different doctor,2025-12-10,Phone connects to someone else entirely
+1154947851,specialty,Provider does not practice listed specialty,2025-10-05,Was told provider is a Nurse Practitioner not Registered Nurse
+1154947851,address,Cannot find office at listed address,2025-11-15,GPS leads to wrong location
+1124641113,address,Address appears to be residential not medical,2025-09-30,Listed ZIP code does not match the city
+1124641113,phone,Office says they do not know this provider,2025-10-20,Called and staff had no record of provider
+1962156869,address,Address is outdated,2025-11-05,Building has been demolished according to neighbors
+1962156869,specialty,Provider changed specialization,2025-12-15,Was told provider no longer practices in listed area
+1740788023,general,Possible ghost provider,2026-01-05,Claims billed but no one has seen this provider
+1801355538,phone,Cannot reach provider at listed number,2025-10-30,Phone disconnected
+1295174694,address,Old address on record,2025-11-20,Provider moved two years ago
+1477048697,specialty,Not practicing claimed specialty,2025-12-08,Provider says they switched to a different field
+1336590834,general,Suspicious billing pattern reported,2026-01-12,Billing for services not actually provided

@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { Search, Filter, AlertTriangle, CheckCircle2, AlertCircle, Eye, ArrowRight, X, BrainCircuit, Mail, Phone, MoreHorizontal, ChevronRight, MessageSquare, ShieldCheck, Clock, Star, History, MapPin } from 'lucide-react';
 import GlassCard from './GlassCard';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, ReferenceLine } from 'recharts';
+import { useTheme } from './ThemeContext';
 import { ProviderRecord, AgentThought } from '../types';
 
 interface RecordsExplorerProps {
@@ -8,6 +10,8 @@ interface RecordsExplorerProps {
 }
 
 const RecordsExplorer: React.FC<RecordsExplorerProps> = ({ records }) => {
+   const { theme } = useTheme();
+   const isDark = theme === 'dark';
    const [searchTerm, setSearchTerm] = useState('');
    const [selectedRecord, setSelectedRecord] = useState<ProviderRecord | null>(null);
    const [statusFilter, setStatusFilter] = useState<'All' | 'Flagged' | 'Verified' | 'Review'>('All');
@@ -257,6 +261,70 @@ const RecordsExplorer: React.FC<RecordsExplorerProps> = ({ records }) => {
                               </div>
                            ))}
                         </div>
+                     </div>
+
+                     {/* Predictive Degradation — Survival Curve */}
+                     <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                           <div className="flex items-center gap-2 text-slate-900 dark:text-white text-xs font-semibold">
+                              <Clock size={12} /> Decay Curve
+                           </div>
+                           <span className="text-[10px] text-purple-500 dark:text-purple-400 font-semibold uppercase tracking-wider bg-purple-50 dark:bg-purple-500/10 px-1.5 py-0.5 rounded-full border border-purple-100 dark:border-purple-500/20">
+                              PDA
+                           </span>
+                        </div>
+                        {(() => {
+                           const dp = Math.min(Math.max(selectedRecord.decayProb, 0.01), 0.99);
+                           const lambda = -Math.log(1 - dp) / 90;
+                           const curveData = [];
+                           for (let t = 0; t <= 180; t += 5) {
+                              curveData.push({ day: t, accuracy: Math.round(Math.exp(-lambda * t) * 1000) / 10 });
+                           }
+                           const reVerifyDay = curveData.find(p => p.accuracy < 70)?.day || 180;
+                           const reVerifyDate = new Date();
+                           reVerifyDate.setDate(reVerifyDate.getDate() + reVerifyDay);
+                           const reVerifyStr = reVerifyDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                           const tooltipBg = isDark ? '#022c22' : '#ffffff';
+                           const tooltipBorder = isDark ? '#064e3b' : '#e2e8f0';
+                           const tooltipText = isDark ? '#fff' : '#0f172a';
+                           const axisColor = isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.3)';
+
+                           return (
+                              <div className="bg-slate-50 dark:bg-white/5 rounded-lg p-3 border border-slate-100 dark:border-white/5">
+                                 <ResponsiveContainer width="100%" height={130}>
+                                    <AreaChart data={curveData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                                       <defs>
+                                          <linearGradient id="decayCurveGrad" x1="0" y1="0" x2="0" y2="1">
+                                             <stop offset="5%" stopColor="#a855f7" stopOpacity={0.25} />
+                                             <stop offset="95%" stopColor="#a855f7" stopOpacity={0} />
+                                          </linearGradient>
+                                       </defs>
+                                       <XAxis dataKey="day" stroke={axisColor} fontSize={9} tickLine={false} axisLine={false} />
+                                       <YAxis domain={[0, 100]} stroke={axisColor} fontSize={9} tickLine={false} axisLine={false} tickFormatter={(v: number) => `${v}%`} />
+                                       <Tooltip
+                                          contentStyle={{ backgroundColor: tooltipBg, borderColor: tooltipBorder, color: tooltipText, borderRadius: '6px', fontSize: '11px' }}
+                                          formatter={(value: number) => [`${value.toFixed(1)}%`, 'Accuracy']}
+                                          labelFormatter={(label: number) => `Day ${label}`}
+                                       />
+                                       <ReferenceLine y={70} stroke={isDark ? 'rgba(239,68,68,0.5)' : 'rgba(239,68,68,0.35)'} strokeDasharray="4 3" />
+                                       <Area type="monotone" dataKey="accuracy" stroke="#a855f7" strokeWidth={2} fillOpacity={1} fill="url(#decayCurveGrad)" dot={false} />
+                                    </AreaChart>
+                                 </ResponsiveContainer>
+                                 <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-white/5">
+                                    <div>
+                                       <div className="text-[10px] text-slate-400 dark:text-gray-500 uppercase tracking-wider">Re-verify by</div>
+                                       <div className={`text-xs font-bold ${dp >= 0.6 ? 'text-red-500' : dp >= 0.3 ? 'text-amber-500' : 'text-emerald-500'
+                                          }`}>{reVerifyStr}</div>
+                                    </div>
+                                    <div className="text-right">
+                                       <div className="text-[10px] text-slate-400 dark:text-gray-500 uppercase tracking-wider">90-day Fail Prob</div>
+                                       <div className={`text-xs font-bold ${dp >= 0.6 ? 'text-red-500' : dp >= 0.3 ? 'text-amber-500' : 'text-emerald-500'
+                                          }`}>{(dp * 100).toFixed(0)}%</div>
+                                    </div>
+                                 </div>
+                              </div>
+                           );
+                        })()}
                      </div>
 
                      {/* Actions & Status (Collapsible) */}
