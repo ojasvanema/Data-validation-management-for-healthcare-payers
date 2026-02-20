@@ -97,8 +97,8 @@ async def clear_complaints():
     return {"status": "cleared"}
 
 
-@router.post("/demo-data", response_model=AnalysisResult)
-async def generate_demo_data():
+@router.post("/historical-data", response_model=AnalysisResult)
+async def generate_historical_data(run_efficiently: bool = True):
     """
     Load providers from test_dirty_providers.csv, validate each against
     NPPES + Census Geocoder + Medicare APIs, compute 3D Trust Score,
@@ -178,11 +178,49 @@ async def generate_demo_data():
                 name = f"{row.get('First_Name', '')} {row.get('Last_Name', '')}".strip()
                 print(f"[VERA] [{idx+1}/{total}] Validating {name} (NPI: {npi})...")
 
+                provider_input = {
+                    "npi": npi,
+                    "first_name": row.get("First_Name", ""),
+                    "last_name": row.get("Last_Name", ""),
+                    "specialty": row.get("Specialty", ""),
+                    "state": row.get("State", ""),
+                    "address": row.get("Address", ""),
+                    "city": row.get("City", ""),
+                    "phone": row.get("Phone", "")
+                }
+                
                 try:
-                    result = await validate_single_provider(row, client)
-                    # Force "Verified" to "Pending" for initial review
-                    if result["status"] == "Verified":
-                        result["status"] = "Pending"
+                    res = await detailed_agent_service.analyze_provider(provider_input, None, run_efficiently)
+                    
+                    if "predictive" in res:
+                        risk_score = res["predictive"].get("risk_score", 0)
+                        conflicts = res["predictive"].get("factors", [])
+                        decay_prob = res["predictive"].get("decay_probability", 0.1)
+                    else:
+                        risk_score = res.get("risk_score", 0)
+                        conflicts = res.get("discrepancies", [])
+                        decay_prob = res.get("fraud_probability", 10.0) / 100.0
+                        
+                    status = "Pending"
+                    if risk_score > 70:
+                        status = "Flagged"
+                    elif risk_score > 35:
+                        status = "Review"
+
+                    result = {
+                        "npi": npi,
+                        "name": name,
+                        "specialty": row.get("Specialty", "Unknown"),
+                        "state": row.get("State", ""),
+                        "risk_score": float(risk_score),
+                        "decay_prob": float(decay_prob),
+                        "status": status,
+                        "conflicts": conflicts,
+                        "thoughts": res.get("agent_thoughts", []),
+                        "last_updated": row.get("Last_Updated", ""),
+                        "locations": [{"address": f"{row.get('Address', '')}, {row.get('City', '')} {row.get('State', '')}", "updated": row.get("Last_Updated", "")}],
+                        "contact_numbers": [{"number": row.get("Phone", ""), "type": "Office"}] if row.get("Phone") else [],
+                    }
                 except Exception as e:
                     print(f"[VERA] Error validating {npi}: {e}")
                     # Create a fallback record with error status
@@ -358,7 +396,15 @@ async def ingest_provider_data(files: List[UploadFile], background_tasks: Backgr
     job_id = str(uuid.uuid4())
     upload_dir = os.path.join(os.getcwd(), "uploads", job_id)
     os.makedirs(upload_dir, exist_ok=True)
-    
+    # Load entire dirty dataset
+    csv_file_path = os.path.join("data", "csvs", "test_dirty_providers_with_docs.csv")
+    if not os.path.exists(csv_file_path):
+        # Fallback to the original dirty one if with_docs doesn't exist
+        csv_file_path = os.path.join("data", "csvs", "test_dirty_providers.csv")
+        if not os.path.exists(csv_file_path):
+            csv_file_path = "test_dirty_providers.csv"
+
+    providers = []
     saved_files = []
     for file in files:
         file_path = os.path.join(upload_dir, file.filename)
@@ -445,7 +491,7 @@ async def get_job_status(job_id: str):
 
 
 @router.post("/upload-csv", response_model=AnalysisResult)
-async def upload_csv(file: UploadFile = File(...)):
+async def upload_csv(file: UploadFile = File(...), run_efficiently: bool = True):
     """
     Accept a CSV file upload, validate all providers through the same pipeline
     as /demo-data (NPPES + Census + Medicare + Complaints), and return results.
@@ -478,8 +524,48 @@ async def upload_csv(file: UploadFile = File(...)):
             name = f"{row.get('First_Name', '')} {row.get('Last_Name', '')}".strip()
             print(f"[VERA] [{idx+1}/{total}] Validating {name} (NPI: {npi})...")
 
+            provider_input = {
+                "npi": npi,
+                "first_name": row.get("First_Name", ""),
+                "last_name": row.get("Last_Name", ""),
+                "specialty": row.get("Specialty", ""),
+                "state": row.get("State", ""),
+                "address": row.get("Address", ""),
+                "city": row.get("City", ""),
+                "phone": row.get("Phone", "")
+            }
             try:
-                result = await validate_single_provider(row, client)
+                res = await detailed_agent_service.analyze_provider(provider_input, None, run_efficiently)
+                
+                if "predictive" in res:
+                    risk_score = res["predictive"].get("risk_score", 0)
+                    conflicts = res["predictive"].get("factors", [])
+                    decay_prob = res["predictive"].get("decay_probability", 0.1)
+                else:
+                    risk_score = res.get("risk_score", 0)
+                    conflicts = res.get("discrepancies", [])
+                    decay_prob = res.get("fraud_probability", 10.0) / 100.0
+                    
+                status = "Pending"
+                if risk_score > 70:
+                    status = "Flagged"
+                elif risk_score > 35:
+                    status = "Review"
+
+                result = {
+                    "npi": npi,
+                    "name": name,
+                    "specialty": row.get("Specialty", "Unknown"),
+                    "state": row.get("State", ""),
+                    "risk_score": float(risk_score),
+                    "decay_prob": float(decay_prob),
+                    "status": status,
+                    "conflicts": conflicts,
+                    "thoughts": res.get("agent_thoughts", []),
+                    "last_updated": row.get("Last_Updated", ""),
+                    "locations": [{"address": f"{row.get('Address', '')}, {row.get('City', '')} {row.get('State', '')}", "updated": row.get("Last_Updated", "")}],
+                    "contact_numbers": [{"number": row.get("Phone", ""), "type": "Office"}] if row.get("Phone") else [],
+                }
             except Exception as e:
                 print(f"[VERA] Error validating {npi}: {e}")
                 result = {
@@ -663,7 +749,8 @@ async def upload_ocr(file: UploadFile = File(...)):
 @router.post("/manual-entry/analyze")
 async def analyze_manual_entry(
     data: str = Form(...),
-    file: UploadFile = File(None)
+    file: UploadFile = File(None),
+    run_efficiently: bool = True
 ):
     """
     Detailed analysis of a single manually entered provider.
@@ -687,8 +774,44 @@ async def analyze_manual_entry(
 
     # Run analysis
     try:
-        results = await detailed_agent_service.analyze_provider(provider_data, file_path)
-        return results
+        results = await detailed_agent_service.analyze_provider(provider_data, file_path, run_efficiently)
+        
+        # Format the result into a FrontendProviderRecord standard
+        status = "Verified"
+        
+        # Handle fast-path vs immersive-path return shapes
+        if "predictive" in results:
+            risk_score = results["predictive"].get("risk_score", 0)
+            conflicts = results["predictive"].get("factors", [])
+            decay_prob = results["predictive"].get("decay_probability", 0.1)
+        else:
+            risk_score = results.get("risk_score", 0)
+            conflicts = results.get("discrepancies", [])
+            decay_prob = results.get("fraud_probability", 10.0) / 100.0
+            
+        if risk_score > 70:
+            status = "Flagged"
+        elif risk_score > 35:
+            status = "Review"
+            
+        record = {
+            "id": f"MANUAL-{str(uuid.uuid4())[:8]}",
+            "name": f"{provider_data.get('first_name', '')} {provider_data.get('last_name', '')}".strip() or "Unknown Provider",
+            "npi": provider_data.get("npi", "N/A"),
+            "specialty": provider_data.get("specialty", "Unknown"),
+            "riskScore": float(risk_score),
+            "decayProb": float(decay_prob),
+            "status": status,
+            "state": provider_data.get("state", ""),
+            "conflicts": conflicts,
+            "lastUpdated": datetime.datetime.now().isoformat(),
+            "agentThoughts": results.get("agent_thoughts", []),
+            "complaints": [],
+            "locations": [{"address": f"Unknown Location, {provider_data.get('state', '')}", "updated": datetime.datetime.now().isoformat()}],
+            "contact_numbers": []
+        }
+        
+        return {"record": record}
     except Exception as e:
         import traceback
         traceback.print_exc()

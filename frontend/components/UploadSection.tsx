@@ -5,11 +5,12 @@ import { FileUpload } from '../types';
 
 interface UploadSectionProps {
   onFilesSelected: (files: FileUpload[]) => void;
-  onLoadDemoData?: () => void;
+  onLoadHistoricalData?: (runEfficiently: boolean) => void;
   onCSVUpload?: (file: File) => void;
   onOCRUpload?: (file: File) => void;
   isProcessing: boolean;
   compact?: boolean;
+  totalRecords?: number;
 }
 
 interface OCRResult {
@@ -31,19 +32,20 @@ interface OCRResult {
   };
 }
 
-const UploadSection: React.FC<UploadSectionProps> = ({ onFilesSelected, onLoadDemoData, onCSVUpload, onOCRUpload, isProcessing, compact = false }) => {
+const UploadSection: React.FC<UploadSectionProps> = ({ onFilesSelected, onLoadHistoricalData, onCSVUpload, onOCRUpload, isProcessing, compact = false, totalRecords }) => {
   const [showFetchModal, setShowFetchModal] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [fetchType, setFetchType] = useState<'recent' | 'flagged' | 'all'>('recent');
+  const [runEfficiently, setRunEfficiently] = useState(true);
   const [uploadTab, setUploadTab] = useState<'csv' | 'ocr'>('csv');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
   const [ocrResult, setOcrResult] = useState<OCRResult | null>(null);
   const [ocrLoading, setOcrLoading] = useState(false);
   const [complaintStatus, setComplaintStatus] = useState<{ loaded: boolean; total: number; filename: string } | null>(null);
   const [complaintUploading, setComplaintUploading] = useState(false);
   const complaintInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const handleFetchClick = () => {
     setShowFetchModal(true);
@@ -51,8 +53,9 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFilesSelected, onLoadDe
 
   const handleConfirmFetch = () => {
     setShowFetchModal(false);
-    if (onLoadDemoData) {
-      onLoadDemoData();
+    // Passing the flag indicating whether to run efficiently
+    if (onLoadHistoricalData) {
+      onLoadHistoricalData(runEfficiently);
     }
   };
 
@@ -68,6 +71,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFilesSelected, onLoadDe
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsDragging(false);
     const file = e.dataTransfer.files[0];
     if (file) {
@@ -181,7 +185,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFilesSelected, onLoadDe
         <div className="grid grid-cols-2 gap-2 mt-1">
           <div className="bg-slate-50 border border-slate-200 dark:bg-white/5 dark:border-white/10 rounded-lg p-2">
             <div className="text-[10px] text-slate-500 dark:text-gray-400">Records</div>
-            <div className="text-lg font-bold text-slate-900 dark:text-white">1,240</div>
+            <div className="text-lg font-bold text-slate-900 dark:text-white">{totalRecords != null ? totalRecords.toLocaleString() : '0'}</div>
           </div>
           <div className="bg-slate-50 border border-slate-200 dark:bg-white/5 dark:border-white/10 rounded-lg p-2">
             <div className="text-[10px] text-slate-500 dark:text-gray-400">Batch ID</div>
@@ -201,7 +205,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFilesSelected, onLoadDe
             <div className="flex justify-between items-center mb-6 border-b border-slate-100 dark:border-white/10 pb-4">
               <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <Settings className="text-emerald-600 dark:text-emerald-400" size={20} />
-                Configure Data Fetch
+                Load Historical Data
               </h3>
               <button onClick={() => setShowFetchModal(false)} className="text-slate-400 hover:text-slate-600 dark:text-gray-400 dark:hover:text-white transition-colors">
                 <X size={20} />
@@ -245,6 +249,26 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFilesSelected, onLoadDe
                   </button>
                 </div>
               </div>
+
+              <div className="pt-2">
+                <label className="flex items-center space-x-3 cursor-pointer group">
+                  <div className="relative flex items-center justify-center">
+                    <input
+                      type="checkbox"
+                      className="peer sr-only"
+                      checked={runEfficiently}
+                      onChange={(e) => setRunEfficiently(e.target.checked)}
+                    />
+                    <div className="w-5 h-5 border-2 border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-800 peer-checked:bg-emerald-500 peer-checked:border-emerald-500 transition-colors"></div>
+                    <svg className="absolute w-3 h-3 text-white pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div className="flex flex-col justify-center">
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">Run Agents Efficiently</span>
+                  </div>
+                </label>
+              </div>
             </div>
 
             <button
@@ -252,7 +276,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFilesSelected, onLoadDe
               className="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20 dark:shadow-emerald-900/40 transition-all transform active:scale-[0.98] flex items-center justify-center gap-2"
             >
               <Database size={18} />
-              Fetch & Analyze Records
+              Load Historical Batch
             </button>
           </GlassCard>
         </div>
@@ -439,7 +463,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFilesSelected, onLoadDe
         </p>
       </div>
 
-      {/* Complaint Directory Upload Banner */}
+      {/* Member Complaints Upload Banner */}
       <div className="mb-4">
         <input
           ref={complaintInputRef}
@@ -469,7 +493,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFilesSelected, onLoadDe
           </div>
           <div className="flex-1 min-w-0">
             <div className="text-xs font-semibold text-slate-700 dark:text-gray-300">
-              {complaintStatus?.loaded ? 'Complaint Directory Loaded' : 'Upload Complaint Directory'}
+              {complaintStatus?.loaded ? 'Member Complaints Loaded' : 'Upload Member Complaints'}
             </div>
             <div className="text-[10px] text-slate-400 dark:text-gray-600 truncate">
               {complaintStatus?.loaded
@@ -490,7 +514,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFilesSelected, onLoadDe
                 }
               }}
               className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-500/10 transition-colors"
-              title="Remove complaint directory"
+              title="Remove member complaints"
             >
               <X size={14} className="text-slate-400 hover:text-red-500 transition-colors" />
             </button>

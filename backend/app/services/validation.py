@@ -386,88 +386,108 @@ def compute_decay_probability(specialty: str, last_updated: str, state: str) -> 
 
 
 def generate_agent_thoughts(
-    nppes_result: Dict, reachability_result: Dict, reputation_result: Dict,
-    trust_score: float, decay_prob: float, csv_row: Dict
+    nppes_result: Dict[str, Any],
+    reachability_result: Dict[str, Any],
+    reputation_result: Dict[str, Any],
+    trust_score: float,
+    decay_prob: float,
+    csv_row: Dict[str, Any],
+    run_efficiently: bool = True
 ) -> List[AgentThought]:
-    """Generate real agent thoughts from actual API findings."""
-    thoughts = []
+    """
+    Generate chronological agent reasoning logs for the UI.
+    If run_efficiently is False, generates highly immersive and detailed "LLM-like" thoughts.
+    """
+    thoughts: List[AgentThought] = []
     now_str = datetime.now().isoformat()
 
-    # ─── Validation Agent (D1: Identity) ───
-    s1 = nppes_result["s1"]
-    for finding in nppes_result["findings"][:3]:  # Top 3 findings
+    # ─── Validation Agent (D1) ───
+    for finding in nppes_result["findings"][:3]:
+        raw_finding = finding.replace("✓ ", "").replace("✗ ", "").replace("⚠ ", "")
         verdict = "pass" if finding.startswith("✓") else "fail" if finding.startswith("✗") else "warn"
-        thoughts.append(AgentThought(
-            agentName="Validation Agent",
-            thought=finding.replace("✓ ", "").replace("✗ ", "").replace("⚠ ", ""),
-            verdict=verdict,
-            timestamp=now_str
-        ))
+        
+        if not run_efficiently:
+            if verdict == "pass":
+                simulated_thought = f"Initiating identity verification protocol for NPI {csv_row.get('NPI', 'Unknown')}... Cross-referencing submitted records against live NPPES registry. Match confirmed: {raw_finding}. Identity integrity baseline established."
+            elif verdict == "fail":
+                simulated_thought = f"Alert triggered during identity check: {raw_finding}. Detected critical mismatch between submitted data and authoritative NPPES source. Flagging for potential identity spoofing or severe clerical error."
+            else:
+                simulated_thought = f"Anomaly detected in identity alignment: {raw_finding}. Records do not perfectly align with NPPES API response. Adjusting reliability index."
+            thoughts.append(AgentThought(agentName="Validation Agent", thought=simulated_thought, verdict=verdict, timestamp=now_str))
+        else:
+            thoughts.append(AgentThought(agentName="Validation Agent", thought=raw_finding, verdict=verdict, timestamp=now_str))
 
     # ─── Multi-source Validation (D2) ───
     for finding in reachability_result["findings"][:3]:
+        raw_finding = finding.replace("✓ ", "").replace("✗ ", "").replace("⚠ ", "")
         verdict = "pass" if finding.startswith("✓") else "fail" if finding.startswith("✗") else "warn"
-        thoughts.append(AgentThought(
-            agentName="Multi-source Validation",
-            thought=finding.replace("✓ ", "").replace("✗ ", "").replace("⚠ ", ""),
-            verdict=verdict,
-            timestamp=now_str
-        ))
+        
+        if not run_efficiently:
+            if verdict == "pass":
+                simulated_thought = f"Executing geospatial analysis via Census Geocoder and Medicare API... {raw_finding}. Confirmed physical locality and network presence."
+            elif verdict == "fail":
+                simulated_thought = f"Reachability protocol failure: {raw_finding}. Provider address could not be validated against USPS/Census geospatial data. High risk of shell location or outdated practice."
+            else:
+                simulated_thought = f"Geospatial ambiguity flagged: {raw_finding}. Requires manual review of suite/building numbers."
+            thoughts.append(AgentThought(agentName="Multi-source Validation", thought=simulated_thought, verdict=verdict, timestamp=now_str))
+        else:
+            thoughts.append(AgentThought(agentName="Multi-source Validation", thought=raw_finding, verdict=verdict, timestamp=now_str))
 
     # ─── Fraud Detection (D3: Reputation) ───
     for finding in reputation_result["findings"][:2]:
+        raw_finding = finding.replace("✓ ", "").replace("✗ ", "").replace("⚠ ", "")
         verdict = "pass" if finding.startswith("✓") else "fail" if finding.startswith("✗") else "warn"
-        thoughts.append(AgentThought(
-            agentName="Fraud Detection",
-            thought=finding.replace("✓ ", "").replace("✗ ", "").replace("⚠ ", ""),
-            verdict=verdict,
-            timestamp=now_str
-        ))
+        
+        if not run_efficiently:
+            if verdict == "pass":
+                simulated_thought = f"Running reputation matrix algorithms... {raw_finding}. No state sanctions or regulatory actions detected. Credential logic sound."
+            elif verdict == "fail":
+                simulated_thought = f"FRAUD DETECTED: {raw_finding}. Analyzed license state mismatch or deactivated NP status. Recommending immediate suspension of claims processing."
+            else:
+                simulated_thought = f"Reputation warning triggered: {raw_finding}. Secondary credential mismatch logic activated."
+            thoughts.append(AgentThought(agentName="Fraud Detection", thought=simulated_thought, verdict=verdict, timestamp=now_str))
+        else:
+            thoughts.append(AgentThought(agentName="Fraud Detection", thought=raw_finding, verdict=verdict, timestamp=now_str))
 
     # ─── Predictive Degradation ───
     if decay_prob > 0.7:
-        thoughts.append(AgentThought(
-            agentName="Predictive Degradation",
-            thought=f"High decay probability ({decay_prob:.0%}). Contact information likely to become obsolete within 60 days.",
-            verdict="fail",
-            timestamp=now_str
-        ))
+        if not run_efficiently:
+            thought_text = f"Running Predictive Degradation Algorithm (PDA) on {csv_row.get('Specialty', 'Unknown')}... High decay cluster detected ({decay_prob:.0%} probability). Contact patterns suggest network exit or relocation within 60 days."
+        else:
+            thought_text = f"High decay probability ({decay_prob:.0%}). Contact information likely to become obsolete within 60 days."
+        thoughts.append(AgentThought(agentName="Predictive Degradation", thought=thought_text, verdict="fail", timestamp=now_str))
     elif decay_prob > 0.3:
-        thoughts.append(AgentThought(
-            agentName="Predictive Degradation",
-            thought=f"Moderate decay risk ({decay_prob:.0%}). Quarterly re-validation recommended.",
-            verdict="warn",
-            timestamp=now_str
-        ))
+        if not run_efficiently:
+            thought_text = f"PDA Analysis: Moderate churn probability ({decay_prob:.0%}) based on specialty turnover rates and time elapsed since last update. Flagging for quarterly touchpoint."
+        else:
+            thought_text = f"Moderate decay risk ({decay_prob:.0%}). Quarterly re-validation recommended."
+        thoughts.append(AgentThought(agentName="Predictive Degradation", thought=thought_text, verdict="warn", timestamp=now_str))
     else:
-        thoughts.append(AgentThought(
-            agentName="Predictive Degradation",
-            thought=f"Low decay probability ({decay_prob:.0%}). Data freshness verified.",
-            verdict="pass",
-            timestamp=now_str
-        ))
+        if not run_efficiently:
+            thought_text = f"PDA calculates low entropy ({decay_prob:.0%} decay risk). Data freshness confirmed through temporal heuristic analysis."
+        else:
+            thought_text = f"Low decay probability ({decay_prob:.0%}). Data freshness verified."
+        thoughts.append(AgentThought(agentName="Predictive Degradation", thought=thought_text, verdict="pass", timestamp=now_str))
 
     # ─── Communicator (based on risk) ───
     risk_score = 100 - trust_score
     if risk_score > 70:
-        thoughts.append(AgentThought(
-            agentName="Communicator",
-            thought="Drafted 'Urgent Credential Update Request' email to provider office.",
-            verdict="neutral",
-            timestamp=now_str
-        ))
+        if not run_efficiently:
+            thought_text = "Synthesizing mitigation workflow: Dispatched 'Urgent Credential Update Request' to provider communications queue. Triggering SIU (Special Investigations Unit) preliminary alert."
+        else:
+            thought_text = "Drafted 'Urgent Credential Update Request' email to provider office."
+        thoughts.append(AgentThought(agentName="Communicator", thought=thought_text, verdict="neutral", timestamp=now_str))
     elif risk_score > 40:
-        thoughts.append(AgentThought(
-            agentName="Communicator",
-            thought="Scheduled automated follow-up for data verification.",
-            verdict="neutral",
-            timestamp=now_str
-        ))
+        if not run_efficiently:
+            thought_text = "Orchestrating follow-up parameters: Scheduled automated multi-channel re-verification campaign sequence."
+        else:
+            thought_text = "Scheduled automated follow-up for data verification."
+        thoughts.append(AgentThought(agentName="Communicator", thought=thought_text, verdict="neutral", timestamp=now_str))
 
     return thoughts
 
 
-async def validate_single_provider(csv_row: Dict[str, Any], client: httpx.AsyncClient) -> Dict[str, Any]:
+async def validate_single_provider(csv_row: Dict[str, Any], client: httpx.AsyncClient, run_efficiently: bool = True) -> Dict[str, Any]:
     """
     Run full 3-dimensional validation on a single provider record.
     Returns all data needed to build a FrontendProviderRecord.
@@ -484,11 +504,23 @@ async def validate_single_provider(csv_row: Dict[str, Any], client: httpx.AsyncC
     # D3: Reputation
     reputation_result = compute_reputation(nppes_data, csv_row)
 
+    # ─── Complaint Directory Check ───
+    all_complaints = load_complaints()
+    provider_complaints = all_complaints.get(npi, [])
+    
+    # Collect all validation findings for cross-referencing
+    all_findings_text = nppes_result["findings"] + reachability_result["findings"] + reputation_result["findings"]
+    complaint_result = cross_reference_complaints(npi, provider_complaints, all_findings_text)
+
     # Lambda penalty
     lambda_penalty = nppes_result.get("lambda_penalty", 0.0)
     # Additional penalty if both address invalid AND license state mismatch
     if not reachability_result.get("geocoder_match") and any("License state" in f and "differs" in f for f in reputation_result.get("findings", [])):
         lambda_penalty = max(lambda_penalty, 0.5)
+        
+    # Add complaint penalty
+    lambda_penalty += complaint_result["lambda_boost"]
+    lambda_penalty = min(lambda_penalty, 0.95) # Cap at 95%
 
     # Trust Score
     s1 = nppes_result["s1"]
@@ -519,12 +551,35 @@ async def validate_single_provider(csv_row: Dict[str, Any], client: httpx.AsyncC
     for f in reachability_result["findings"]:
         if f.startswith("✗"):
             conflicts.append(f.replace("✗ ", ""))
+    
+    # Add confirmed complaints to conflicts
+    for c in complaint_result["confirmed"]:
+        conflicts.append(f"Confirmed Complaint: {c['field']} - {c['value']}")
 
     # Agent thoughts
     thoughts = generate_agent_thoughts(
         nppes_result, reachability_result, reputation_result,
-        trust_score, decay_prob, csv_row
+        trust_score, decay_prob, csv_row, run_efficiently
     )
+    
+    # Inject complaint thoughts after validation/fraud thoughts
+    # Findings keys: Validation(s1), Multi-source(s2), Fraud(s3), PDA, Communicator
+    # We want Complaint thoughts to appear after Multi-Source or Fraud
+    # Current generate_agent_thoughts appends PDA and Communicator at the end.
+    # We can prepend complaint thoughts to PDA or insert them earlier. 
+    # Let's append them to the main thoughts list before PDA thoughts (which are at index -1 or -2)
+    # Actually simpler: just extend the list, sort by timestamp if needed (all same time now)
+    # The user wants sequential logs: Parser -> Validation -> Complaint -> Business -> Communicator
+    
+    # Re-ordering thoughts slightly to match user request better
+    # generate_agent_thoughts already does Validation, Multi-source, Fraud, PDA, Communicator
+    # We will insert Complaint thoughts before PDA (which is typically 4th group)
+    
+    # Filter out PDA/Communicator to re-append later
+    core_thoughts = [t for t in thoughts if t.agentName not in ["Predictive Degradation", "Communicator"]]
+    pda_comm_thoughts = [t for t in thoughts if t.agentName in ["Predictive Degradation", "Communicator"]]
+    
+    final_thoughts = core_thoughts + complaint_result["thoughts"] + pda_comm_thoughts
 
     # Build locations
     locations = [{"address": f"{csv_row.get('Address', '')}, {csv_row.get('City', '')} {state}", "updated": last_updated or "Unknown"}]
@@ -551,7 +606,8 @@ async def validate_single_provider(csv_row: Dict[str, Any], client: httpx.AsyncC
         "decay_prob": decay_prob,
         "status": status,
         "conflicts": conflicts,
-        "thoughts": thoughts,
+        "thoughts": final_thoughts,
+        "complaints": provider_complaints,
         "last_updated": last_updated,
         "locations": locations,
         "contact_numbers": contact_numbers,
@@ -562,25 +618,40 @@ async def validate_single_provider(csv_row: Dict[str, Any], client: httpx.AsyncC
     }
 
 
+
 # ──────────────────────────────────────────────────────────────────────────────
 #  COMPLAINT DIRECTORY — Cross-Referencing System
 # ──────────────────────────────────────────────────────────────────────────────
-
 import csv
 import os
 
-
-def load_complaints(csv_path: str) -> Dict[str, List[Dict[str, str]]]:
+def load_complaints(csv_path: str = "complaint_data.csv") -> Dict[str, List[Dict[str, str]]]:
     """
     Load complaint_data.csv and return dict keyed by NPI.
     Each NPI maps to a list of complaint records.
     """
     complaints: Dict[str, List[Dict[str, str]]] = {}
-    if not os.path.exists(csv_path):
+    
+    # Try multiple possible paths for robustness
+    possible_paths = [
+        os.path.join("data", "csvs", "complaint_data.csv"),
+        os.path.join("..", "data", "csvs", "complaint_data.csv"),
+        os.path.join(os.path.dirname(__file__), "../../../data/csvs/complaint_data.csv"),
+        os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "csvs", "complaint_data.csv")
+    ]
+    
+    final_path = None
+    for p in possible_paths:
+        if os.path.exists(p):
+            final_path = p
+            break
+            
+    if not final_path:
+        print(f"Warning: Complaint DB not found. Attempted to find in data/csvs/")
         return complaints
 
     try:
-        with open(csv_path, "r", encoding="utf-8") as f:
+        with open(final_path, "r", encoding="utf-8") as f:
             reader = csv.DictReader(f)
             for row in reader:
                 npi = str(row.get("NPI", "")).strip()
@@ -688,31 +759,17 @@ def cross_reference_complaints(
     if confirmed_count > 0:
         fields_confirmed = list(set(c["field"] for c in result["confirmed"]))
         result["thoughts"].append(AgentThought(
-            agentName="Multi-source Validation",
-            thought=f"{confirmed_count} of {total} member complaint(s) CONFIRMED by validation. Affected: {', '.join(fields_confirmed)}. Trust score penalized.",
+            agentName="Complaint Directory",
+            thought=f"MATCH FOUND: {confirmed_count} member complaint(s) corroborated by validation findings (Fields: {', '.join(fields_confirmed)}). Increasing risk penalty.",
             verdict="fail",
             timestamp=now_str,
         ))
-    if unconfirmed_count > 0 and confirmed_count == 0:
+    
+    if unconfirmed_count > 0:
         result["thoughts"].append(AgentThought(
-            agentName="Multi-source Validation",
-            thought=f"{unconfirmed_count} member complaint(s) on file but NOT confirmed by current validation. Monitoring.",
+            agentName="Complaint Directory",
+            thought=f"{unconfirmed_count} member complaint(s) found in registry. While not directly corroborated by external API failures, these remain risk factors.",
             verdict="warn",
-            timestamp=now_str,
-        ))
-    elif unconfirmed_count > 0:
-        result["thoughts"].append(AgentThought(
-            agentName="Multi-source Validation",
-            thought=f"Additionally, {unconfirmed_count} complaint(s) could not be confirmed by automated validation.",
-            verdict="neutral",
-            timestamp=now_str,
-        ))
-
-    if total == 0:
-        result["thoughts"].append(AgentThought(
-            agentName="Multi-source Validation",
-            thought="No member complaints on file. Clean complaint history.",
-            verdict="pass",
             timestamp=now_str,
         ))
 

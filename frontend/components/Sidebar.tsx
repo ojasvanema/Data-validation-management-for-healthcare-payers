@@ -106,7 +106,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                     title={isCollapsed ? "Manual Entry" : ""}
                 >
                     <LayoutDashboard size={18} className="shrink-0" />
-                    {!isCollapsed && <span className="animate-in fade-in duration-300">Detailed Agent Demo</span>}
+                    {!isCollapsed && <span className="animate-in fade-in duration-300">Single Entry Verification</span>}
                 </button>
 
                 <div className={`pt-6 pb-2 ${isCollapsed ? 'hidden' : 'block'}`}>

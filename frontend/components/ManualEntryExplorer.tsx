@@ -4,43 +4,14 @@ import { Upload, FileText, CheckCircle, AlertTriangle, AlertCircle, TrendingUp, 
 import GlassCard from './GlassCard';
 import { analyzeManualEntry } from '../services/apiService';
 
-interface ValidationStep {
-    step: string;
-    status: string;
-    reasoning: string;
+import { ProviderRecord, AgentThought } from '../types';
+import ProviderDetailView from './ProviderDetailView';
+
+interface ManualEntryExplorerProps {
+    onAddRecord?: (record: ProviderRecord) => void;
 }
 
-interface ValidationResult {
-    verdict: string;
-    confidence: number;
-    steps: ValidationStep[];
-    summary: string;
-}
-
-interface PredictiveResult {
-    risk_score: number;
-    risk_level: string;
-    factors: string[];
-    decay_probability: number;
-    explanation: string;
-}
-
-interface ROIResult {
-    cost_saving: number;
-    processing_time_saved: number;
-    error_prevention_value: number;
-    graph_points: { x: number; y: number }[];
-}
-
-interface DetailedAnalysis {
-    validation: ValidationResult;
-    predictive: PredictiveResult;
-    roi: ROIResult;
-    raw_data: any;
-    ocr_text?: string;
-}
-
-const ManualEntryExplorer = () => {
+const ManualEntryExplorer: React.FC<ManualEntryExplorerProps> = ({ onAddRecord }) => {
     const [formData, setFormData] = useState({
         first_name: '',
         last_name: '',
@@ -51,8 +22,8 @@ const ManualEntryExplorer = () => {
     });
     const [file, setFile] = useState<File | null>(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
-    const [result, setResult] = useState<DetailedAnalysis | null>(null);
-    const [activeTab, setActiveTab] = useState<'validation' | 'predictive' | 'roi'>('validation');
+    const [runEfficiently, setRunEfficiently] = useState(true);
+    const [result, setResult] = useState<ProviderRecord | null>(null);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -70,8 +41,13 @@ const ManualEntryExplorer = () => {
         setResult(null);
 
         try {
-            const analysisData = await analyzeManualEntry(formData, file || undefined);
-            setResult(analysisData);
+            const analysisData = await analyzeManualEntry(formData, file || undefined, runEfficiently);
+            if (analysisData && analysisData.record) {
+                setResult(analysisData.record);
+                if (onAddRecord) {
+                    onAddRecord(analysisData.record);
+                }
+            }
         } catch (error) {
             console.error("Analysis failed:", error);
             // Todo: Show error toast
@@ -189,6 +165,26 @@ const ManualEntryExplorer = () => {
                             </div>
                         </div>
 
+                        <div className="pt-2">
+                            <label className="flex items-center space-x-3 cursor-pointer group">
+                                <div className="relative flex items-center justify-center">
+                                    <input
+                                        type="checkbox"
+                                        className="peer sr-only"
+                                        checked={runEfficiently}
+                                        onChange={(e) => setRunEfficiently(e.target.checked)}
+                                    />
+                                    <div className="w-5 h-5 border-2 border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-800 peer-checked:bg-emerald-500 peer-checked:border-emerald-500 transition-colors"></div>
+                                    <svg className="absolute w-3 h-3 text-white pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                                <div className="flex flex-col justify-center">
+                                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">Run Agents Efficiently</span>
+                                </div>
+                            </label>
+                        </div>
+
                         <button
                             type="submit"
                             disabled={isAnalyzing}
@@ -208,18 +204,6 @@ const ManualEntryExplorer = () => {
                         </button>
                     </form>
                 </GlassCard>
-
-                {/* Context / Instructions */}
-                <div className="p-4 bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 rounded-lg">
-                    <h3 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2">
-                        <Activity size={14} />
-                        Agent Demonstration Mode
-                    </h3>
-                    <p className="text-xs text-blue-700 dark:text-blue-200/80 leading-relaxed">
-                        This mode bypasses the batch pipeline to show you exactly how each agent thinks.
-                        Enter provider details (even fake ones) to see the Validation, Predictive, and ROI agents reason in real-time.
-                    </p>
-                </div>
             </div>
 
             {/* Results Column */}
@@ -252,195 +236,10 @@ const ManualEntryExplorer = () => {
                 )}
 
                 {result && (
-                    <div className="flex flex-col h-full">
-                        {/* Tabs */}
-                        <div className="flex border-b border-slate-200 dark:border-white/10 bg-white dark:bg-white/5">
-                            <button
-                                onClick={() => setActiveTab('validation')}
-                                className={`flex-1 py-4 text-sm font-medium border-b-2 transition-colors ${activeTab === 'validation' ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-500/10' : 'border-transparent text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-200'}`}
-                            >
-                                Validation Agent
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('predictive')}
-                                className={`flex-1 py-4 text-sm font-medium border-b-2 transition-colors ${activeTab === 'predictive' ? 'border-blue-500 text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-500/10' : 'border-transparent text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-200'}`}
-                            >
-                                Predictive Agent
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('roi')}
-                                className={`flex-1 py-4 text-sm font-medium border-b-2 transition-colors ${activeTab === 'roi' ? 'border-purple-500 text-purple-600 dark:text-purple-400 bg-purple-50/50 dark:bg-purple-500/10' : 'border-transparent text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-200'}`}
-                            >
-                                ROI & Business Agent
-                            </button>
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1 overflow-y-auto p-6 scroll-smooth">
-
-                            {/* Validation View */}
-                            {activeTab === 'validation' && (
-                                <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">Validation Verdict</h3>
-                                            <p className="text-slate-500 dark:text-gray-400 text-sm">Cross-referencing integrity check</p>
-                                        </div>
-                                        <div className={`px-4 py-2 rounded-lg text-lg font-bold flex items-center gap-2 ${result.validation.verdict === 'Verified' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' :
-                                            result.validation.verdict === 'Flagged' ? 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400' :
-                                                'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-400'
-                                            }`}>
-                                            {result.validation.verdict === 'Verified' ? <CheckCircle /> : <AlertTriangle />}
-                                            {result.validation.verdict}
-                                        </div>
-                                    </div>
-
-                                    <div className="bg-white dark:bg-black/40 rounded-xl p-6 border border-slate-200 dark:border-white/10">
-
-                                        {result.ocr_text && (
-                                            <div className="mb-6 p-4 bg-slate-100 dark:bg-white/5 rounded-lg border border-slate-200 dark:border-white/10">
-                                                <h4 className="font-semibold mb-2 text-xs uppercase tracking-wider text-slate-500">OCR Extracted Evidence</h4>
-                                                <pre className="text-xs font-mono text-slate-700 dark:text-gray-300 whitespace-pre-wrap">{result.ocr_text}</pre>
-                                            </div>
-                                        )}
-
-                                        <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider text-slate-500">Agent Reasoning Steps</h4>
-                                        <div className="space-y-4">
-                                            {result.validation.steps.map((step, idx) => (
-                                                <div key={idx} className="flex gap-4">
-                                                    <div className="flex flex-col items-center">
-                                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${step.status === 'Pass' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400' :
-                                                            step.status === 'Fail' ? 'bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400' :
-                                                                'bg-yellow-100 text-yellow-600 dark:bg-yellow-500/20 dark:text-yellow-400'
-                                                            }`}>
-                                                            {step.status === 'Pass' ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
-                                                        </div>
-                                                        {idx < result.validation.steps.length - 1 && <div className="w-0.5 h-full bg-slate-200 dark:bg-white/10 my-2"></div>}
-                                                    </div>
-                                                    <div className="pb-6">
-                                                        <h5 className="font-semibold text-slate-800 dark:text-white text-sm">{step.step}</h5>
-                                                        <p className="text-slate-600 dark:text-gray-400 text-sm mt-1 leading-relaxed">{step.reasoning}</p>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div className="p-4 bg-slate-50 dark:bg-white/5 rounded-lg border border-slate-200 dark:border-white/10">
-                                        <h4 className="font-semibold mb-2 text-sm">Executive Summary</h4>
-                                        <p className="text-sm text-slate-600 dark:text-gray-300">{result.validation.summary}</p>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Predictive View */}
-                            {activeTab === 'predictive' && (
-                                <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">Risk Assessment</h3>
-                                            <p className="text-slate-500 dark:text-gray-400 text-sm">Predictive Fraud & Decay Analysis</p>
-                                        </div>
-                                        <div className="text-right">
-                                            <div className="text-3xl font-bold text-slate-900 dark:text-white">{result.predictive.risk_score}<span className="text-lg text-slate-400 font-normal">/100</span></div>
-                                            <div className={`text-sm font-medium ${result.predictive.risk_level === 'Low' ? 'text-emerald-500' :
-                                                result.predictive.risk_level === 'High' ? 'text-red-500' : 'text-yellow-500'
-                                                }`}>Risk Level: {result.predictive.risk_level}</div>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="p-5 bg-white dark:bg-black/40 rounded-xl border border-slate-200 dark:border-white/10">
-                                            <h4 className="font-semibold mb-3 text-sm text-slate-500 uppercase">Risk Factors</h4>
-                                            <ul className="space-y-2">
-                                                {result.predictive.factors.map((factor, i) => (
-                                                    <li key={i} className="flex items-start gap-2 text-sm text-slate-700 dark:text-gray-300">
-                                                        <AlertTriangle size={14} className="text-amber-500 mt-0.5 shrink-0" />
-                                                        {factor}
-                                                    </li>
-                                                ))}
-                                                {result.predictive.factors.length === 0 && <li className="text-sm text-slate-400 italic">No significant risk factors identified.</li>}
-                                            </ul>
-                                        </div>
-                                        <div className="p-5 bg-white dark:bg-black/40 rounded-xl border border-slate-200 dark:border-white/10">
-                                            <h4 className="font-semibold mb-3 text-sm text-slate-500 uppercase">Data Decay Velocity</h4>
-                                            <div className="flex items-center gap-4 mb-2">
-                                                <TrendingUp className="text-purple-500" size={24} />
-                                                <div>
-                                                    <div className="text-2xl font-bold text-slate-900 dark:text-white">{(result.predictive.decay_probability * 100).toFixed(1)}%</div>
-                                                    <div className="text-xs text-slate-500">Prob. of 90-day obsolescence</div>
-                                                </div>
-                                            </div>
-                                            <div className="w-full bg-slate-100 dark:bg-white/10 h-2 rounded-full overflow-hidden">
-                                                <div className="h-full bg-purple-500" style={{ width: `${result.predictive.decay_probability * 100}%` }}></div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="p-6 bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/10">
-                                        <h4 className="font-semibold mb-3 text-sm flex items-center gap-2">
-                                            <Activity size={16} className="text-blue-500" />
-                                            AI Agent Analysis
-                                        </h4>
-                                        <p className="text-slate-700 dark:text-gray-300 text-sm leading-relaxed whitespace-pre-line">
-                                            {result.predictive.explanation}
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* ROI View */}
-                            {activeTab === 'roi' && (
-                                <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">Business Impact</h3>
-                                            <p className="text-slate-500 dark:text-gray-400 text-sm">ROI & Efficiency Metrics</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-3 gap-4">
-                                        <div className="p-4 bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-500/20 rounded-xl text-center">
-                                            <DollarSign className="mx-auto text-emerald-600 dark:text-emerald-400 mb-2" />
-                                            <div className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 uppercase">Cost Savings</div>
-                                            <div className="text-2xl font-bold text-slate-900 dark:text-white">${result.roi.cost_saving.toLocaleString()}</div>
-                                        </div>
-                                        <div className="p-4 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-500/20 rounded-xl text-center">
-                                            <Activity className="mx-auto text-blue-600 dark:text-blue-400 mb-2" />
-                                            <div className="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase">Time Saved</div>
-                                            <div className="text-2xl font-bold text-slate-900 dark:text-white">{result.roi.processing_time_saved.toFixed(1)} hrs</div>
-                                        </div>
-                                        <div className="p-4 bg-purple-50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-500/20 rounded-xl text-center">
-                                            <ShieldCheck className="mx-auto text-purple-600 dark:text-purple-400 mb-2" />
-                                            <div className="text-xs font-semibold text-purple-700 dark:text-purple-300 uppercase">Risk Value</div>
-                                            <div className="text-2xl font-bold text-slate-900 dark:text-white">${result.roi.error_prevention_value.toLocaleString()}</div>
-                                        </div>
-                                    </div>
-
-                                    <div className="bg-white dark:bg-black/40 rounded-xl p-6 border border-slate-200 dark:border-white/10">
-                                        <h4 className="font-semibold mb-6 text-sm">Projected Cumulative Savings (1000 records)</h4>
-                                        <div className="h-64 flex items-end gap-2 justify-between px-4 pb-4 border-b border-l border-slate-200 dark:border-white/10 relative">
-                                            {result.roi.graph_points.map((pt, i) => {
-                                                const maxVal = Math.max(...result.roi.graph_points.map(p => p.y));
-                                                const height = (pt.y / maxVal) * 100;
-                                                return (
-                                                    <div key={i} className="flex flex-col items-center gap-2 flex-1 group">
-                                                        <div className="w-full bg-emerald-500/20 dark:bg-emerald-500/10 rounded-t-sm relative transition-all duration-500 group-hover:bg-emerald-500/40" style={{ height: `${height}%` }}>
-                                                            <div className="absolute top-0 w-full h-1 bg-emerald-500"></div>
-                                                            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                ${pt.y.toLocaleString()}
-                                                            </div>
-                                                        </div>
-                                                        <span className="text-xs text-slate-500">Month {pt.x}</span>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                        </div>
+                    <div className="h-full overflow-y-auto">
+                        <ProviderDetailView
+                            selectedRecord={result}
+                        />
                     </div>
                 )}
             </div>

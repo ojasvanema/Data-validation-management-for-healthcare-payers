@@ -12,6 +12,7 @@ from langgraph.graph import StateGraph, END
 from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage, HumanMessage
 from dotenv import load_dotenv
+from .validation import load_complaints, cross_reference_complaints
 
 load_dotenv()
 
@@ -118,35 +119,74 @@ def investigator_node(state: VeraState) -> Dict[str, Any]:
         mock_source["sanctions"] = [{"action": "Probation", "date": "2023-01-01", "reason": "Administrative"}]
         mock_source["reviews"] = ["Billing issues reported", "Hard to reach"]
 
+    # Complaint Directory Check
+    logs.append(f"Investigator: Checking Complaint Directory for NPI {npi}...")
+    complaints_db = load_complaints()
+    provider_complaints = complaints_db.get(str(npi), [])
+    
+    mock_source["complaints"] = provider_complaints
+    if provider_complaints:
+         logs.append(f"Investigator: Found {len(provider_complaints)} complaints for this provider.")
+    else:
+         logs.append("Investigator: No complaints found in directory.")
+
     return {"authoritative_source": mock_source, "logs": logs}
+
+def _build_prompt() -> str:
+    """
+    Constructs the prompt for VERA. Includes instructions on formatting the JSON output
+    and the requirement to produce a 3D Trust Score and Risk Score.
+    """
+    system_template = """
+    You are VERA (Validation, Evidence, Risk, Analysis), an elite automated healthcare credentialing analyst.
+    Your job is to cross-reference the submitted provider data against the exact findings provided by the Verification Engine.
+
+    CRITICAL INSTRUCTION:
+    You MUST output highly immersive, continuous narrative logs in the 'thoughts' array.
+    Do NOT output brief bullet points or simple "pass/fail" statements.
+    Write your logs as if you are a human analyst actively investigating the file. 
+    Use phrases like "Cross-referencing submitted NPI with federal registry...", "Anomaly detected in geospatial data...", "Executing Predictive Degradation Algorithm...".
+    Make the logs feel like a live, deep-dive investigation.
+    
+    You calculate a 3D Trust Score (0-100) based on:
+    1. Identity Integrity: Does NPPES data match the submission?
+    2. Reachability: Does the address match USPS/Census data? Is the phone valid?
+    3. Reputation: Are there sanctions? Are licenses active?
+
+    You also calculate a Risk Score (0-100) which is generally (100 - Trust Score).
+    Over 70 Risk = FLAGGED for manual review.
+
+    Return your analysis strictly in this JSON structure:
+    {{
+        "thoughts": [
+            {{"agent": "Identity_Verification", "log": "<verbose, immersive analyst thought process here>", "timestamp": "<iso format>"}},
+            {{"agent": "Geospatial_Analysis", "log": "<verbose, immersive analyst thought process here>", "timestamp": "<iso format>"}},
+            {{"agent": "Risk_Assessment", "log": "<verbose, immersive analyst thought process here>", "timestamp": "<iso format>"}}
+        ],
+        "final_report": {{
+            "trust_score": <float>,
+            "risk_score": <float>,
+            "risk_level": "<LOW/MEDIUM/HIGH/CRITICAL>",
+            "breakdown": {{
+                "identity": "<summary of identity match>",
+                "reachability": "<summary of location/contact match>",
+                "reputation": "<summary of credential/sanction checks>"
+            }}
+        }}
+    }}
+    """
+    return system_template
 
 def semantic_analysis_node(state: VeraState) -> Dict[str, Any]:
     """
-    Uses LLM to evaluate D1, D2, D3 dimensions.
+    Uses LLM to evaluate D1, D2, D3 dimensions and output immersive logs.
     """
     row = state["csv_row"]
     ocr = state["ocr_text"]
     auth = state["authoritative_source"]
     
     # Construct the Prompt
-    system_prompt = """You are the VERA Semantic Analysis Engine. 
-Your job is to evaluate a Provider Candidate against Authoritative Sources and Evidence (OCR).
-Decompose the risk into 3 dimensions:
-1. Identity Integrity (D1): Does the candidate match the official recoords? (Consider Name, NPI, Credential, OCR evidence).
-2. Reachability (D2): Is the provider reachable? (Consider Address/Phone history vs Official records).
-3. Reputation (D3): Are there trust signals or red flags? (Sanctions, Reviews).
-
-Output JSON ONLY:
-{
-  "dimensions": {
-    "identity": { "score": float (0.0-1.0), "reasoning": "string" },
-    "reachability": { "score": float (0.0-1.0), "reasoning": "string" },
-    "reputation": { "score": float (0.0-1.0), "reasoning": "string" }
-  },
-  "critical_flags": ["string"],
-  "derived_risk_level": "LOW" | "MEDIUM" | "HIGH" | "CRITICAL"
-}
-"""
+    system_prompt = _build_prompt()
 
     user_payload = json.dumps({
         "provider_candidate": {
@@ -179,59 +219,50 @@ Output JSON ONLY:
             "raw_response": content
         }
 
-    logs = state.get("logs", [])
-    logs.append("Semantic Analysis: LLM evaluation complete.")
-    logs.append(f"LLM Raw Output: {content[:200]}...") # Log first 200 chars
+    # Extract thoughts and report
+    thoughts_raw = analysis.get("thoughts", [])
+    report = analysis.get("final_report", {})
+    
+    # Map raw dict thoughts to ValidationStep objects for the state
+    thoughts = []
+    for t in thoughts_raw:
+         thoughts.append(ValidationStep(
+             agent=t.get("agent", "Analysis Agent"),
+             log=t.get("log", "Processing..."),
+             timestamp=t.get("timestamp", datetime.now().isoformat())
+         ))
 
-    return {"semantic_analysis": analysis, "logs": logs}
+    return {"semantic_analysis": report, "thoughts": thoughts}
 
 def scoring_node(state: VeraState) -> Dict[str, Any]:
     """
-    Deterministic Math Scoring: T = 100 * (w1*s1 + w2*s2 + w3*s3) * (1 - lambda)
+    Applies the LLM's final assessment and overrides with critical penalties if needed.
     """
-    analysis = state["semantic_analysis"]
+    report = state["semantic_analysis"]
     
-    if "error" in analysis:
-        return {"trust_score": 0.0, "risk_level": "UNKNOWN", "final_report": {"error": analysis["error"]}}
+    if "error" in report:
+        return {"trust_score": 0.0, "risk_level": "UNKNOWN", "final_report": {"error": report["error"]}}
 
-    dims = analysis.get("dimensions", {})
-    s1 = dims.get("identity", {}).get("score", 0.0)
-    s2 = dims.get("reachability", {}).get("score", 0.0)
-    s3 = dims.get("reputation", {}).get("score", 0.0)
+    trust_score = report.get("trust_score", 0.0)
+    risk_level = report.get("risk_level", "UNKNOWN")
     
-    flags = analysis.get("critical_flags", [])
-    
-    # Weights
-    w1 = 0.40
-    w2 = 0.30
-    w3 = 0.30
-    
-    # Lambda Penalty
-    lambda_val = 0.0
-    if "POTENTIAL_FRAUD" in flags or "SANCTION" in flags:
-        lambda_val = 0.9
-    elif len(flags) > 0:
-        lambda_val = 0.5
+    # Add OCR warnings to the report
+    ocr_text = state.get("ocr_text", "").upper()
+    if "EXPIRED" in ocr_text or "SUSPENDED" in ocr_text or "WARNING" in ocr_text:
+        trust_score *= 0.8  # Penalty
+        risk_level = "HIGH"
         
-    # Calculate
-    raw_score = (w1 * s1) + (w2 * s2) + (w3 * s3)
-    trust_score = 100 * raw_score * (1.0 - lambda_val)
-    
-    logs = state.get("logs", [])
-    logs.append(f"Scoring: s1={s1}, s2={s2}, s3={s3}, lambda={lambda_val} => T={trust_score}")
-
     final_report = {
         "trust_score": round(trust_score, 1),
-        "breakdown": dims,
-        "critical_flags": flags,
-        "logs": logs
+        "breakdown": report.get("breakdown", {}),
+        "critical_flags": [],
+        "risk_level": risk_level
     }
     
     return {
         "trust_score": trust_score, 
-        "risk_level": analysis.get("derived_risk_level", "UNKNOWN"),
-        "final_report": final_report,
-        "logs": logs
+        "risk_level": risk_level,
+        "final_report": final_report
     }
 
 # ─── GRAPH CONSTRUCTION ───

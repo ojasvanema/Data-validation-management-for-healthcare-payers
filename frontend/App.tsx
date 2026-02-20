@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { INITIAL_AGENTS } from './constants';
 import { AgentStatus, AnalysisResult, FileUpload, AgentType, HistoryItem } from './types';
 import UploadSection from './components/UploadSection';
@@ -6,6 +6,7 @@ import AgentDashboard from './components/AgentDashboard';
 import MetricsDashboard from './components/MetricsDashboard';
 import RecordsExplorer from './components/RecordsExplorer';
 import { analyzeFilesWithAgents } from './services/apiService';
+import api from './services/api';
 import { Activity, LayoutDashboard, History, PlusCircle, ChevronRight, ChevronLeft, Leaf, Database, LogOut, ShieldCheck, PlayCircle } from 'lucide-react';
 import GlassCard from './components/GlassCard';
 import { ThemeProvider } from './components/ThemeContext';
@@ -15,43 +16,78 @@ import LoginTransition from './components/LoginTransition';
 import Sidebar from './components/Sidebar';
 import ManualEntryExplorer from './components/ManualEntryExplorer';
 
+type ViewType = 'landing' | 'login' | 'home' | 'dashboard' | 'explorer' | 'manual';
+
 function AppContent() {
     console.log("AppContent rendering...");
     const [agents, setAgents] = useState<AgentStatus[]>(INITIAL_AGENTS);
     const [isProcessing, setIsProcessing] = useState(false);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
-    const [view, setView] = useState<'landing' | 'login' | 'home' | 'dashboard' | 'explorer' | 'manual'>('landing');
     const [history, setHistory] = useState<HistoryItem[]>([]);
 
+    const [view, setView] = useState<ViewType>(() => {
+        const hash = window.location.hash.replace('#', '');
+        if (['landing', 'login', 'home', 'dashboard', 'explorer', 'manual'].includes(hash)) {
+            return hash as ViewType;
+        }
+        return 'landing';
+    });
+
+    useEffect(() => {
+        window.location.hash = view;
+    }, [view]);
+
+    useEffect(() => {
+        const handleHashChange = () => {
+            const hash = window.location.hash.replace('#', '');
+            if (['landing', 'login', 'home', 'dashboard', 'explorer', 'manual'].includes(hash)) {
+                setView(hash as ViewType);
+            }
+        };
+        window.addEventListener('hashchange', handleHashChange);
+        return () => window.removeEventListener('hashchange', handleHashChange);
+    }, []);
+
     // Function to simulate agent activity step-by-step
-    const simulateAgentActivity = async (finalResult: AnalysisResult) => {
-        // 1. Activate Orchestrator
-        updateAgent(AgentType.ORCHESTRATOR, 'processing', 'Dispatching tasks to specialists...');
-        await delay(800);
+    const simulateAgentActivity = async (finalResult: AnalysisResult, runEfficiently: boolean = false) => {
+        const d = (ms: number) => delay(runEfficiently ? Math.max(50, ms / 10) : ms);
 
-        // 2. Parallel processing: Document & Validation
-        updateAgent(AgentType.DOCUMENT, 'processing', 'OCRing PDFs and extracting entities...');
-        updateAgent(AgentType.VALIDATION, 'processing', 'Querying NPI registry...');
-        await delay(1500);
+        // 1. Activate Orchestrator & Parser
+        updateAgent(AgentType.ORCHESTRATOR, 'processing', 'Dispatching tasks to specialized agents...');
+        await d(500);
+        updateAgent(AgentType.DOCUMENT, 'processing', 'Parser Agent: Ingesting documents and extracting entities...');
+        await d(1200);
+        updateAgent(AgentType.DOCUMENT, 'completed', 'Parser Agent: Extraction complete. Structured query ready.');
 
-        updateAgent(AgentType.DOCUMENT, 'completed', 'Extraction complete. Records indexed.');
-        updateAgent(AgentType.VALIDATION, 'completed', 'Cross-reference complete.');
+        // 2. Validation & Complaint
+        updateAgent(AgentType.VALIDATION, 'processing', 'Validation Agent: Querying NPPES, Geocoder, and VERA...');
+        await d(1000);
+        updateAgent(AgentType.VALIDATION, 'processing', 'VERA: Analyzing risk dimensions (Identity, Reachability, Reputation)...');
+        await d(1000);
+        updateAgent(AgentType.VALIDATION, 'processing', 'Discrepancy Analysis: Cross-referencing member feedback...');
+        await d(800);
+        updateAgent(AgentType.VALIDATION, 'completed', 'Validation Complete. Risk scores assigned.');
 
-        // 3. Fraud Detection
-        updateAgent(AgentType.FRAUD, 'processing', 'Analyzing patterns against fraud database...');
-        await delay(1200);
-        updateAgent(AgentType.FRAUD, 'completed', 'Flagged suspicious billing cycles.');
+        // 3. Fraud Detection (simulated as part of validation/risk)
+        updateAgent(AgentType.FRAUD, 'processing', 'Fraud Agent: checking exclusion lists...');
+        await d(800);
+        updateAgent(AgentType.FRAUD, 'completed', 'Fraud Analysis Complete.');
 
         // 4. Business & Degradation
-        updateAgent(AgentType.BUSINESS, 'processing', 'Calculating ROI and impact...');
-        updateAgent(AgentType.DEGRADATION, 'processing', 'Predicting data decay velocity...');
-        await delay(1000);
+        updateAgent(AgentType.BUSINESS, 'processing', 'ROI Agent: Calculating cost savings and prevention value...');
+        updateAgent(AgentType.DEGRADATION, 'processing', 'Predictive Agent: Assessing data decay velocity...');
+        await d(1000);
 
         updateAgent(AgentType.BUSINESS, 'completed', 'ROI Calculation finalized.');
         updateAgent(AgentType.DEGRADATION, 'completed', 'Degradation report generated.');
 
-        // 5. Finalize Orchestrator
+        // 5. Communicator
+        updateAgent(AgentType.COMMUNICATOR, 'processing', 'Communicator: Drafted notifications for flagged records.');
+        await d(500);
+        updateAgent(AgentType.COMMUNICATOR, 'completed', 'Notifications queued.');
+
+        // 6. Finalize Orchestrator
         updateAgent(AgentType.ORCHESTRATOR, 'completed', 'Orchestration complete.');
 
         // Set other idle agents to complete or idle
@@ -115,7 +151,7 @@ function AppContent() {
         setAgents(INITIAL_AGENTS.map(a => ({ ...a, status: 'idle', message: 'Standing by' })));
     };
 
-    const loadDemoData = async () => {
+    const loadHistoricalData = async (runEfficiently: boolean = true) => {
         setIsProcessing(true);
         setView('dashboard');
         setAgents(INITIAL_AGENTS.map(a => ({ ...a, status: 'idle', message: 'Standing by' })));
@@ -124,14 +160,11 @@ function AppContent() {
         updateAgent(AgentType.ORCHESTRATOR, 'processing', 'Initiating demo sequence...');
 
         try {
-            const response = await fetch('/demo-data', {
-                method: 'POST'
-            });
-            const dummyResult = await response.json();
-            await simulateAgentActivity(dummyResult);
+            const response = await api.post<AnalysisResult>(`/historical-data?run_efficiently=${runEfficiently}`, {});
+            await simulateAgentActivity(response.data, runEfficiently);
         } catch (error) {
-            console.error("Failed to load demo data:", error);
-            updateAgent(AgentType.ORCHESTRATOR, 'error', 'Failed to load demo data.');
+            console.error("Failed to load historical data:", error);
+            updateAgent(AgentType.ORCHESTRATOR, 'error', 'Failed to load historical data.');
             setIsProcessing(false);
         }
     };
@@ -147,18 +180,8 @@ function AppContent() {
             const formData = new FormData();
             formData.append('file', file);
 
-            const response = await fetch('/upload-csv', {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (!response.ok) {
-                const err = await response.json();
-                throw new Error(err.detail || 'Upload failed');
-            }
-
-            const result = await response.json();
-            await simulateAgentActivity(result);
+            const response = await api.post<AnalysisResult>('/upload-csv', formData);
+            await simulateAgentActivity(response.data);
         } catch (error) {
             console.error('CSV upload failed:', error);
             updateAgent(AgentType.ORCHESTRATOR, 'error', `Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -252,7 +275,7 @@ function AppContent() {
                                             Upload provider data to initiate the multi-agent orchestration for fraud detection and ROI analysis.
                                         </p>
                                     </div>
-                                    <UploadSection onFilesSelected={handleFilesSelected} isProcessing={isProcessing} onLoadDemoData={loadDemoData} onCSVUpload={handleCSVUpload} />
+                                    <UploadSection onFilesSelected={handleFilesSelected} isProcessing={isProcessing} onLoadHistoricalData={loadHistoricalData} onCSVUpload={handleCSVUpload} totalRecords={analysisResult ? analysisResult.records.length : 0} />
                                 </div>
                             </div>
                         )}
@@ -261,7 +284,7 @@ function AppContent() {
                             <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 h-full animate-in slide-in-from-bottom-8 duration-500">
                                 {/* Left Column: Upload (Compact) & Orchestration */}
                                 <div className="xl:col-span-4 flex flex-col gap-6">
-                                    <UploadSection onFilesSelected={handleFilesSelected} isProcessing={isProcessing} compact onLoadDemoData={loadDemoData} onCSVUpload={handleCSVUpload} />
+                                    <UploadSection onFilesSelected={handleFilesSelected} isProcessing={isProcessing} compact onLoadHistoricalData={loadHistoricalData} onCSVUpload={handleCSVUpload} totalRecords={analysisResult ? analysisResult.records.length : 0} />
                                     <div className="flex-grow min-h-[400px]">
                                         <AgentDashboard agents={agents} />
                                     </div>
@@ -282,7 +305,34 @@ function AppContent() {
 
                         {view === 'manual' && (
                             <div className="h-full">
-                                <ManualEntryExplorer />
+                                <ManualEntryExplorer
+                                    onAddRecord={(record) => {
+                                        setAnalysisResult(prev => {
+                                            if (!prev) {
+                                                return {
+                                                    roi: 0,
+                                                    fraudRiskScore: record.riskScore,
+                                                    providersProcessed: 1,
+                                                    discrepanciesFound: record.status === 'Verified' ? 0 : 1,
+                                                    timelineData: [],
+                                                    riskDistribution: [],
+                                                    agentLogs: [],
+                                                    summary: 'Manual Entry Verification',
+                                                    records: [record]
+                                                };
+                                            }
+                                            return {
+                                                ...prev,
+                                                providersProcessed: prev.providersProcessed + 1,
+                                                discrepanciesFound: prev.discrepanciesFound + (record.status === 'Verified' ? 0 : 1),
+                                                records: [record, ...prev.records]
+                                            };
+                                        });
+                                        // Auto-transition user to Data Explorer if they want to see it contextually?
+                                        // Wait, the requirement says "the pipeline run fro single entry only and got added to data explorer tab, note for the analysis we see in the right hand side of this single entry tab that we see in data explorer..."
+                                        // So we DO NOT transition the view. We stay on the Manual Entry view so they can see the RHS ProviderDetailView!
+                                    }}
+                                />
                             </div>
                         )}
 

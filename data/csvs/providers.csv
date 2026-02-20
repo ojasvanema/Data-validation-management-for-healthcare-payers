@@ -1,0 +1,405 @@
+id,name,address,gender,dob,phone,adhaar_id,pan_id,degree,institute,adhaar_file,pan_file,degree_file,id_card_file,note_file
+1,Dr. Neel Narain,"964, Chowdhury Path, Durgapur 736496",M,1981-07-22,9738273896,515733166321,LOWRS7982H,BAMS,Sandhu-Chadha Medical College,adhaar_1.png,pan_1.png,degree_1.pdf,id_1.png,note_1.png
+2,Dr. Libni Manda,"09/08
+Bali Marg
+Hubli–Dharwad-072033",F,2001-06-23,+914998577963,645310491391,UOGFH8116S,MBBS,Seth Group Medical College,adhaar_2.png,pan_2.png,degree_2.pdf,id_2.png,note_2.png
+3,Dr. Michael Subramaniam,"830
+Sinha Circle
+Bhiwani-435440",M,1971-01-27,+913780733048,044697589066,VANAT7030N,MBBS,"Zacharia, Narain and Hegde Medical College",adhaar_3.png,pan_3.png,degree_3.pdf,id_3.png,note_3.png
+4,Dr. Kala Goda,"89, Pingle Marg
+Siliguri 957455",F,2014-08-16,3785586642,185400103263,BDZYT0280H,BAMS,Bhardwaj Group Medical College,adhaar_4.png,pan_4.png,degree_4.pdf,id_4.png,note_4.png
+5,Dr. Aarini Contractor,"052, Loyal Chowk, Bellary 982167",F,1918-02-01,9875142320,625284147820,YKYAI4396S,BAMS,Sandhu-Kannan Medical College,adhaar_5.png,pan_5.png,degree_5.pdf,id_5.png,note_5.png
+6,Dr. Dhruv Varma,"79, Srinivasan Street
+Gudivada-774444",M,1946-02-01,04926737128,518809985732,GJIHY7498X,MD,"Loyal, Nazareth and Saini Medical College",adhaar_6.png,pan_6.png,degree_6.pdf,id_6.png,note_6.png
+7,Dr. Devika Sundaram,"545
+Divan Nagar, Kishanganj-056556",F,1912-06-19,1384581148,596351056789,OWHCC7903A,MBBS,Mand-Varkey Medical College,adhaar_7.png,pan_7.png,degree_7.pdf,id_7.png,note_7.png
+8,Dr. Samaksh Mahajan,"H.No. 42
+Sathe Path
+Chandigarh 163479",M,2024-11-12,0036216639,785332795598,TGODV3657S,MBBS,Kota-Badal Medical College,adhaar_8.png,pan_8.png,degree_8.pdf,id_8.png,note_8.png
+9,Dr. Saanvi Khalsa,"37/81, Sathe Road
+Jehanabad-812321",F,1923-06-02,6878407640,864908091159,OTWDJ4717I,BHMS,Karan-Biswas Medical College,adhaar_9.png,pan_9.png,degree_9.pdf,id_9.png,note_9.png
+10,Dr. Samar Suri,"38/02, Padmanabhan
+Surat 912751",M,1989-06-24,+916859349992,432633450963,KWRNF9115V,MD,"Mital, Sheth and Oak Medical College",adhaar_10.png,pan_10.png,degree_10.pdf,id_10.png,note_10.png
+11,Dr. William Rout,"84
+Pathak Marg, Machilipatnam 300020",M,2004-04-21,+912390780680,916589476631,THCLP8468W,MBBS,Mohanty-Muni Medical College,adhaar_11.png,pan_11.png,degree_11.pdf,id_11.png,note_11.png
+12,Dr. Avni De,"22/97
+Majumdar Zila
+Nandyal 088827",F,1914-09-05,+917387679502,070635036144,JSAJW8698T,BAMS,Murthy-Bose Medical College,adhaar_12.png,pan_12.png,degree_12.pdf,id_12.png,note_12.png
+13,Dr. Vanya Chatterjee,"H.No. 794
+Radhakrishnan Zila, Raipur-255408",F,1923-06-16,+916633452659,629685280784,MXIIO5746U,MBBS,Kunda Inc Medical College,adhaar_13.png,pan_13.png,degree_13.pdf,id_13.png,note_13.png
+14,Dr. Amol D’Alia,"18/86
+Ranganathan Circle
+Kishanganj 646676",M,1979-05-03,02679854050,584917866244,ZKPJI5174Y,MBBS,Lad PLC Medical College,adhaar_14.png,pan_14.png,degree_14.pdf,id_14.png,note_14.png
+15,Dr. Vasatika Chatterjee,"73/36, Rana Marg
+Nagpur 238799",F,1947-11-26,07701672071,582100761101,AQRGA1360M,MD,Chaudhari-Dora Medical College,adhaar_15.png,pan_15.png,degree_15.pdf,id_15.png,note_15.png
+16,Dr. Ekavir Bhardwaj,"39
+Modi Chowk, Ratlam 861386",M,1959-02-23,08239132091,147458251627,ZMPEG2252Z,MD,Agate Group Medical College,adhaar_16.png,pan_16.png,degree_16.pdf,id_16.png,note_16.png
+17,Dr. Nitara Bhavsar,"H.No. 725, Dash Nagar, Kharagpur-992200",F,1990-12-13,+919905574266,392874723499,COLKB8136G,MD,"Dugal, Shenoy and Samra Medical College",adhaar_17.png,pan_17.png,degree_17.pdf,id_17.png,note_17.png
+18,Dr. Radha Nadig,"H.No. 55, Saxena Zila, Dharmavaram 561321",F,2019-05-23,+915954750847,546213175233,ALXJR6321N,BHMS,Kibe Group Medical College,adhaar_18.png,pan_18.png,degree_18.pdf,id_18.png,note_18.png
+19,Dr. Janaki Sehgal,"16, Bose Nagar
+Sonipat-706020",F,1937-04-05,+913475964754,455646528687,GQVJJ2258V,MD,Toor-Raghavan Medical College,adhaar_19.png,pan_19.png,degree_19.pdf,id_19.png,note_19.png
+20,Dr. Christopher Sule,"H.No. 299
+Mital Road
+Korba 422207",M,1947-09-01,06228462143,881778706137,HPZRU8147M,MD,"Sharma, Shenoy and Walla Medical College",adhaar_20.png,pan_20.png,degree_20.pdf,id_20.png,note_20.png
+21,Dr. Anamika Garde,"H.No. 670, Lad Circle
+Bhilai 589798",F,1913-01-03,01674416531,223974872996,XSSWE4457B,MD,Gola-Soni Medical College,adhaar_21.png,pan_21.png,degree_21.pdf,id_21.png,note_21.png
+22,Dr. Gunbir Nadig,"H.No. 444
+Hora Ganj, Chapra 514981",M,1992-03-31,2528175398,089996603582,MCKDR8234T,BAMS,Sampath-Vala Medical College,adhaar_22.png,pan_22.png,degree_22.pdf,id_22.png,note_22.png
+23,Dr. Ekanta Saha,"831
+Dyal Marg, Miryalaguda 868049",F,1978-01-19,08948909857,935707279380,SHFOM2200J,BHMS,Narasimhan-Natarajan Medical College,adhaar_23.png,pan_23.png,degree_23.pdf,id_23.png,note_23.png
+24,Dr. Lakshit Hari,"239, Ratta Path, Vasai-Virar-181401",M,1911-12-27,9110201566,435709855422,KUFPA9829P,BAMS,Walia Ltd Medical College,adhaar_24.png,pan_24.png,degree_24.pdf,id_24.png,note_24.png
+25,Dr. Harshil Tiwari,"H.No. 363, Khurana Circle, Coimbatore 648875",M,2014-12-05,06964316766,239862868485,MIOYT2291E,MD,Kaur-Chakrabarti Medical College,adhaar_25.png,pan_25.png,degree_25.pdf,id_25.png,note_25.png
+26,Dr. Bhanumati Mani,"65
+Saha Road
+Shahjahanpur 651215",F,1988-03-04,03842983786,080469888395,GYTJQ8276N,MD,Uppal LLC Medical College,adhaar_26.png,pan_26.png,degree_26.pdf,id_26.png,note_26.png
+27,Dr. Yauvani Kanda,"H.No. 355, Patil Path, Noida 293873",F,1949-03-23,7156044710,561126217684,YWRUX8349U,BHMS,Bains Group Medical College,adhaar_27.png,pan_27.png,degree_27.pdf,id_27.png,note_27.png
+28,Dr. Ijaya Mani,"H.No. 922, Wadhwa Nagar, Anand-920911",F,1968-05-11,+914642052184,773984943884,TXANN1967V,MBBS,Chatterjee-Nagarajan Medical College,adhaar_28.png,pan_28.png,degree_28.pdf,id_28.png,note_28.png
+29,Dr. Fiyaz Loke,"H.No. 464
+Wadhwa Zila, Dibrugarh-317170",M,2025-03-05,+910645387592,391124128288,CIJXX9411N,MD,Madan-Ramakrishnan Medical College,adhaar_29.png,pan_29.png,degree_29.pdf,id_29.png,note_29.png
+30,Dr. Kashvi Pandya,"198
+Kala
+Jodhpur-344703",F,2022-11-02,08390749024,127247231494,RMLOK0519C,BAMS,Karpe Ltd Medical College,adhaar_30.png,pan_30.png,degree_30.pdf,id_30.png,note_30.png
+31,Dr. Eesha Kurian,"17, Raju Marg, Orai 322878",F,1913-04-17,08178808403,497111935519,RQFMR2277R,MD,Sachdeva-Rao Medical College,adhaar_31.png,pan_31.png,degree_31.pdf,id_31.png,note_31.png
+32,Dr. Kashish Kari,"91/706
+Din Nagar
+Pimpri-Chinchwad 645573",F,1910-12-29,1875440576,983913525853,WHZJE6526I,BAMS,"Sama, Mand and Warrior Medical College",adhaar_32.png,pan_32.png,degree_32.pdf,id_32.png,note_32.png
+33,Dr. Ekanta Ratti,"84/04
+Bath Marg
+Kollam 773797",F,2002-01-12,0452290868,643655429794,USKIY9928A,BAMS,"Ganesh, Dass and Bakshi Medical College",adhaar_33.png,pan_33.png,degree_33.pdf,id_33.png,note_33.png
+34,Dr. Xiti Chatterjee,"084, Rao Nagar, North Dumdum-242329",F,1933-10-13,08057981986,662107480370,AIIAG1308V,BHMS,Nagy Inc Medical College,adhaar_34.png,pan_34.png,degree_34.pdf,id_34.png,note_34.png
+35,Dr. Kevin Magar,"H.No. 90
+Sridhar Road
+Shivpuri-470479",M,1950-04-30,08199981963,453183968564,YIAKN4430S,MBBS,Khosla-Ramachandran Medical College,adhaar_35.png,pan_35.png,degree_35.pdf,id_35.png,note_35.png
+36,Dr. Diya Mangat,"H.No. 287, Nagi Path, Rajkot 999797",F,1949-05-02,01268251347,720457593919,CTOXZ4901J,MD,"Patil, Thakkar and Rajan Medical College",adhaar_36.png,pan_36.png,degree_36.pdf,id_36.png,note_36.png
+37,Dr. Balendra Bahl,"59/095
+Ram Path, Danapur-191092",M,1911-08-24,4090827304,454346611743,FOGNY7162B,BAMS,Dora PLC Medical College,adhaar_37.png,pan_37.png,degree_37.pdf,id_37.png,note_37.png
+38,Dr. Nidra Andra,"867, Das Path, Ludhiana-024516",F,1937-07-04,8009788715,208991296677,SYNWV1500R,BHMS,Mane Group Medical College,adhaar_38.png,pan_38.png,degree_38.pdf,id_38.png,note_38.png
+39,Dr. Reva Sheth,"926
+Bassi Zila, Shimla 043223",F,1931-04-16,7097978823,890960698943,QTFPX6429B,BAMS,Ganesh Ltd Medical College,adhaar_39.png,pan_39.png,degree_39.pdf,id_39.png,note_39.png
+40,Dr. Anita Barman,"208, Thakur Path, Kirari Suleman Nagar-104541",F,1992-10-14,07131932391,250011869759,TWVOB4853K,BHMS,Handa-Hora Medical College,adhaar_40.png,pan_40.png,degree_40.pdf,id_40.png,note_40.png
+41,Dr. Vaishnavi Bhatia,"H.No. 39
+Subramaniam Chowk, Ichalkaranji 915033",F,1911-07-19,4496524566,308139012156,JXAFB6389I,BHMS,Sachdev PLC Medical College,adhaar_41.png,pan_41.png,degree_41.pdf,id_41.png,note_41.png
+42,Dr. Abeer Chokshi,"75/983
+Wali Zila, Chennai 610536",M,1979-11-20,9393315739,713710410280,ANIGP6372P,MBBS,"Pradhan, Mall and Sodhi Medical College",adhaar_42.png,pan_42.png,degree_42.pdf,id_42.png,note_42.png
+43,Dr. Widisha Varma,"H.No. 36, Banerjee Street, Udupi 715175",F,1983-06-11,+919782022819,148052121518,JRSKW0047X,BHMS,"Saxena, Kapoor and Parmar Medical College",adhaar_43.png,pan_43.png,degree_43.pdf,id_43.png,note_43.png
+44,Dr. Henry Master,"H.No. 79, Subramaniam Nagar
+Tumkur-746360",M,1940-08-11,+916475898860,083672690194,UDHEH1940F,MBBS,Borra-Behl Medical College,adhaar_44.png,pan_44.png,degree_44.pdf,id_44.png,note_44.png
+45,Dr. Yatin Mukherjee,"172, Ganesh Chowk
+Avadi-095981",M,1988-02-18,+910424231308,402356884772,IGRCW6570J,MBBS,"Krishnamurthy, Trivedi and Krish Medical College",adhaar_45.png,pan_45.png,degree_45.pdf,id_45.png,note_45.png
+46,Dr. Raksha Murty,"68/846, Bhatnagar Chowk, Dhule-674569",F,1938-04-15,07764157010,029728442357,YMJBZ1642L,BHMS,"Gala, Sane and Garde Medical College",adhaar_46.png,pan_46.png,degree_46.pdf,id_46.png,note_46.png
+47,Dr. Jason Anne,"H.No. 325, Nagi Street, Unnao 384381",M,1952-07-01,7936579919,644456853741,IDZAR1001K,MD,"Nadkarni, Minhas and Kuruvilla Medical College",adhaar_47.png,pan_47.png,degree_47.pdf,id_47.png,note_47.png
+48,Dr. Robert Bhargava,"H.No. 94
+Singhal Nagar, Bhiwani 740460",M,1954-10-22,6243139471,964284925323,UIZZB2055P,BAMS,Patil-Chakrabarti Medical College,adhaar_48.png,pan_48.png,degree_48.pdf,id_48.png,note_48.png
+49,Dr. Darsh Khare,"71/52, Dara Ganj
+Nellore-409363",M,1912-01-02,+910307066384,135826931106,PMKDT2668W,MD,Buch Ltd Medical College,adhaar_49.png,pan_49.png,degree_49.pdf,id_49.png,note_49.png
+50,Dr. Brijesh Swaminathan,"H.No. 714
+Ganesh Circle, Ongole-492492",M,1922-02-10,+918425177380,924566504903,ZKGXA0622V,MD,"Sagar, Kade and Goel Medical College",adhaar_50.png,pan_50.png,degree_50.pdf,id_50.png,note_50.png
+51,Dr. Watika Gole,"72
+Comar Chowk
+Durgapur-573413",F,1999-02-15,08347704098,007508406256,ELLMY5570G,MBBS,Loyal Ltd Medical College,adhaar_51.png,pan_51.png,degree_51.pdf,id_51.png,note_51.png
+52,Dr. Harsh Sankar,"522, Nagar Marg
+Gandhidham 728782",M,2016-08-01,4094589899,322018805753,PKNVH4884K,BAMS,"Divan, Sehgal and Bandi Medical College",adhaar_52.png,pan_52.png,degree_52.pdf,id_52.png,note_52.png
+53,Dr. Shivansh Sunder,"10/56, Dhillon Zila, Kanpur 186968",M,1948-08-19,03024257172,655525014504,BNPHC2981Y,BAMS,Solanki Inc Medical College,adhaar_53.png,pan_53.png,degree_53.pdf,id_53.png,note_53.png
+54,Dr. Ojas Badal,"H.No. 92, Ramakrishnan Road
+Bhimavaram 541945",M,1921-06-23,6468702389,789233970377,CJWWC4951B,BAMS,Verma PLC Medical College,adhaar_54.png,pan_54.png,degree_54.pdf,id_54.png,note_54.png
+55,Dr. Bhavna Ravel,"85/225
+Dayal Ganj
+Solapur-791190",F,1930-02-01,07800536630,137857773838,XBRSQ2644H,MBBS,Sidhu-Gara Medical College,adhaar_55.png,pan_55.png,degree_55.pdf,id_55.png,note_55.png
+56,Dr. Indrajit Setty,"H.No. 11
+Padmanabhan Circle, Indore 698632",M,1982-02-04,06144425169,166581552704,VOOOA6357S,MD,Sur-Devi Medical College,adhaar_56.png,pan_56.png,degree_56.pdf,id_56.png,note_56.png
+57,Dr. Idika Bhatt,"54/88
+Morar Ganj, Malda-705899",F,1984-04-19,09308314502,306294542059,OGCOK2800P,BAMS,Sarma Group Medical College,adhaar_57.png,pan_57.png,degree_57.pdf,id_57.png,note_57.png
+58,Dr. Orinder Basu,"H.No. 667
+Agate Marg, Bijapur-683065",M,2016-06-22,01408237728,794711863068,LCQGA9514C,MD,"Dixit, Kumer and Golla Medical College",adhaar_58.png,pan_58.png,degree_58.pdf,id_58.png,note_58.png
+59,Dr. Qasim Rau,"H.No. 899, Jaggi Path, Madhyamgram 194543",M,1995-02-24,+915825664512,899250025734,ONLEL3745N,MBBS,Sharma Inc Medical College,adhaar_59.png,pan_59.png,degree_59.pdf,id_59.png,note_59.png
+60,Dr. Andrew Sastry,"91
+Garg Marg, Karawal Nagar-650619",M,1938-04-07,06270103925,755155370273,OIDQW5222V,BAMS,"Pandey, Shetty and Prakash Medical College",adhaar_60.png,pan_60.png,degree_60.pdf,id_60.png,note_60.png
+61,Dr. Charvi Das,"24/02
+Sachar Marg, Navi Mumbai-996812",F,1974-07-23,04786425447,525188125717,XGKNR5513N,MD,Singhal Group Medical College,adhaar_61.png,pan_61.png,degree_61.pdf,id_61.png,note_61.png
+62,Dr. Osha Pall,"10/294, Vora Chowk, Machilipatnam-884333",F,1964-11-03,1801541094,217265886767,MQONA0933M,BHMS,Kamdar LLC Medical College,adhaar_62.png,pan_62.png,degree_62.pdf,id_62.png,note_62.png
+63,Dr. Saksham Gala,"99/02
+Datta Path, Allahabad-901615",M,2014-04-16,+914729292874,711536725509,ORNIU1678X,BAMS,"Divan, Natarajan and Baral Medical College",adhaar_63.png,pan_63.png,degree_63.pdf,id_63.png,note_63.png
+64,Dr. Madhavi Khanna,"018, Brar Path
+Gangtok-185632",F,2012-12-28,6278723039,122362114243,FQELK2883Q,BHMS,Saran-Tak Medical College,adhaar_64.png,pan_64.png,degree_64.pdf,id_64.png,note_64.png
+65,Dr. Rishi Deo,"494
+Chand Chowk
+Danapur 877281",M,2001-03-10,00643639555,268934002516,IODWV2881S,MD,Kanda-Vig Medical College,adhaar_65.png,pan_65.png,degree_65.pdf,id_65.png,note_65.png
+66,Dr. Jonathan Bhat,"H.No. 91, Swaminathan Ganj
+Surendranagar Dudhrej 944270",M,1945-12-15,+917684480863,043334369358,QVIYE8116E,MBBS,"Maharaj, Yogi and Bir Medical College",adhaar_66.png,pan_66.png,degree_66.pdf,id_66.png,note_66.png
+67,Dr. Gunbir Sarraf,"00/328
+Chaudhary Road
+Rajkot 610511",M,1988-12-22,+910725889455,013124334719,HJBXB0222K,BAMS,Nanda Ltd Medical College,adhaar_67.png,pan_67.png,degree_67.pdf,id_67.png,note_67.png
+68,Dr. Wishi Dubey,"H.No. 095
+Krish Circle, Junagadh-809407",F,2010-01-11,1606633410,669940995053,DHWLB6726D,BHMS,Deep-Mani Medical College,adhaar_68.png,pan_68.png,degree_68.pdf,id_68.png,note_68.png
+69,Dr. Shaurya Khare,"H.No. 279
+Konda Nagar, Aizawl 667943",M,1910-07-19,07517448276,020401427298,ZXOWR2453V,BHMS,"Batta, Kunda and Issac Medical College",adhaar_69.png,pan_69.png,degree_69.pdf,id_69.png,note_69.png
+70,Dr. Yoshita Uppal,"819, Mall Zila, Baranagar 500614",F,1982-06-10,+916370534414,340637380980,AIWIG9664L,BHMS,"Dasgupta, Chad and Kata Medical College",adhaar_70.png,pan_70.png,degree_70.pdf,id_70.png,note_70.png
+71,Dr. Aishani Gala,"H.No. 91, Dani Road, Panihati 074147",F,1956-11-10,2197892566,421014315659,EZCRV5197U,MD,"Mutti, Raj and Sathe Medical College",adhaar_71.png,pan_71.png,degree_71.pdf,id_71.png,note_71.png
+72,Dr. Bimala Batra,"13/326
+Mody, Eluru 877103",F,2021-11-16,+910400593329,720415871209,XAWGZ3622U,MBBS,"Chopra, Chanda and Oak Medical College",adhaar_72.png,pan_72.png,degree_72.pdf,id_72.png,note_72.png
+73,Dr. Ansh Patla,"59/71
+Rout Chowk
+Shivpuri-231125",M,1923-05-22,+912343843300,140627270847,TGEBD5390P,BAMS,Mishra-Pai Medical College,adhaar_73.png,pan_73.png,degree_73.pdf,id_73.png,note_73.png
+74,Dr. Neel Gupta,"13/52
+Ranganathan Marg
+Jamnagar 240701",M,1928-02-13,9978188719,795003607946,OLILG6810W,MD,Wason and Sons Medical College,adhaar_74.png,pan_74.png,degree_74.pdf,id_74.png,note_74.png
+75,Dr. Kiaan Dutta,"H.No. 30, Khalsa Street
+Madanapalle-646419",M,1925-09-17,+913566053020,010455699080,GPQBB8417O,BHMS,Bhalla Inc Medical College,adhaar_75.png,pan_75.png,degree_75.pdf,id_75.png,note_75.png
+76,Dr. Falak Bahri,"H.No. 59
+Sibal Nagar, Navi Mumbai 760816",F,1932-04-22,8392287447,493925785457,EKKUD2364F,MBBS,"Comar, Trivedi and Kara Medical College",adhaar_76.png,pan_76.png,degree_76.pdf,id_76.png,note_76.png
+77,Dr. Prisha Sami,"41
+Kaur Chowk
+Satna-950411",F,2015-02-06,1904083714,096537998867,XSXQG3869X,MBBS,Chopra-Chanda Medical College,adhaar_77.png,pan_77.png,degree_77.pdf,id_77.png,note_77.png
+78,Dr. Vinaya Dhingra,"73/44, Chopra Ganj, Pondicherry-219654",F,1949-09-18,2295836057,999134230586,AUKWG5027G,BHMS,Goel and Sons Medical College,adhaar_78.png,pan_78.png,degree_78.pdf,id_78.png,note_78.png
+79,Dr. Nitara Sehgal,"58
+Kala Road
+Rajpur Sonarpur 144708",F,1967-03-05,3876875700,674943484026,NDNDS4664X,MD,"Parsa, Bail and Master Medical College",adhaar_79.png,pan_79.png,degree_79.pdf,id_79.png,note_79.png
+80,Dr. Sathvik Kalita,"30, Bhandari Path
+New Delhi-718153",M,1965-06-29,+913848093686,076551037475,ITOCT3055D,MD,Pillai Ltd Medical College,adhaar_80.png,pan_80.png,degree_80.pdf,id_80.png,note_80.png
+81,Dr. Yutika Bhatt,"819, Ghose Marg
+Raiganj-442881",F,1971-06-27,9960787739,395465635111,UXRPB1266S,MD,"Salvi, Pathak and Vala Medical College",adhaar_81.png,pan_81.png,degree_81.pdf,id_81.png,note_81.png
+82,Dr. Rayaan Madan,"50/331
+Amble Chowk, Jodhpur 116005",M,1965-03-15,4753737486,409476350347,MTQYE6450R,BAMS,"Raghavan, Sampath and Raman Medical College",adhaar_82.png,pan_82.png,degree_82.pdf,id_82.png,note_82.png
+83,Dr. Hredhaan Tandon,"10/33
+Dhar Nagar, Patna-741852",M,1979-08-29,+914191402635,352764798932,IEYMB2909I,MD,Wali-Savant Medical College,adhaar_83.png,pan_83.png,degree_83.pdf,id_83.png,note_83.png
+84,Dr. Wakeeta Venkataraman,"H.No. 275
+Gala Marg
+Yamunanagar-094268",F,1934-05-17,7718005722,372079315731,EBVYM8889G,BHMS,Bath LLC Medical College,adhaar_84.png,pan_84.png,degree_84.pdf,id_84.png,note_84.png
+85,Dr. Amruta Nanda,"797
+Dalal Road
+Eluru 737717",F,1971-01-16,4799350785,133515603397,SLEZW5505A,BAMS,Vora Group Medical College,adhaar_85.png,pan_85.png,degree_85.pdf,id_85.png,note_85.png
+86,Dr. Wakeeta Oommen,"15/61
+Minhas Ganj, Barasat 603948",F,1993-10-18,4290341402,234022534099,PWHCQ2424G,BAMS,Sibal-Jain Medical College,adhaar_86.png,pan_86.png,degree_86.pdf,id_86.png,note_86.png
+87,Dr. Nitesh Toor,"H.No. 914, Swaminathan Circle, Bijapur-280886",M,2023-02-14,+918517206020,976291908419,QABFZ3605S,MD,Prabhu Inc Medical College,adhaar_87.png,pan_87.png,degree_87.pdf,id_87.png,note_87.png
+88,Dr. Devansh Badal,"05
+Saran
+Rohtak-727536",M,1966-03-17,9718884042,055299841542,GSESW4246F,BAMS,Suresh Ltd Medical College,adhaar_88.png,pan_88.png,degree_88.pdf,id_88.png,note_88.png
+89,Dr. Nathaniel Sharma,"96/43, Rattan Path
+Warangal-049017",M,1954-03-19,3371912754,990626254974,OLXKN9383H,BHMS,"Tella, Sangha and Chandran Medical College",adhaar_89.png,pan_89.png,degree_89.pdf,id_89.png,note_89.png
+90,Dr. Samarth Narain,"39
+Dara Circle, Lucknow 544839",M,1959-05-06,01419503984,192732159398,WCKJD3195P,BHMS,"Kashyap, Raju and Kota Medical College",adhaar_90.png,pan_90.png,degree_90.pdf,id_90.png,note_90.png
+91,Dr. Aarnav Narang,"59
+Badal Road, Imphal-655280",M,1917-07-19,2621398612,110318745787,SJUZJ0260O,BAMS,Chand Ltd Medical College,adhaar_91.png,pan_91.png,degree_91.pdf,id_91.png,note_91.png
+92,Dr. Aayush Balan,"H.No. 436, Murty Nagar
+Pallavaram 305442",M,1970-06-29,+913120496445,523400194270,SULJN5429S,MBBS,Bhatia PLC Medical College,adhaar_92.png,pan_92.png,degree_92.pdf,id_92.png,note_92.png
+93,Dr. Ekaja Oak,"669
+Sahni Zila, Thiruvananthapuram 166335",F,2016-06-27,7496130788,106286766899,JLRUT3359H,MBBS,"Chatterjee, Khalsa and Tiwari Medical College",adhaar_93.png,pan_93.png,degree_93.pdf,id_93.png,note_93.png
+94,Dr. Charita Bahl,"88/53
+Kamdar Path
+South Dumdum-694080",F,1917-07-10,+915086257141,391938477491,EATIB0011S,BHMS,"Manda, Dara and Subramanian Medical College",adhaar_94.png,pan_94.png,degree_94.pdf,id_94.png,note_94.png
+95,Dr. Manya Chauhan,"71/10
+Deo, Eluru-083857",F,1939-02-21,05281371173,862025568429,RDYLW8831K,MBBS,Puri Ltd Medical College,adhaar_95.png,pan_95.png,degree_95.pdf,id_95.png,note_95.png
+96,Dr. Vansha Mukherjee,"14, Sharma Path, Hubli–Dharwad 354809",F,1914-07-29,8039095340,208034807865,YHXCU0569F,MD,Rajagopalan PLC Medical College,adhaar_96.png,pan_96.png,degree_96.pdf,id_96.png,note_96.png
+97,Dr. Praneel Pillay,"358, Tailor Nagar, Vijayanagaram-849193",M,1938-12-02,5611178882,957415757672,CDZMX0455M,BAMS,Apte Inc Medical College,adhaar_97.png,pan_97.png,degree_97.pdf,id_97.png,note_97.png
+98,Dr. Vedhika Ben,"904, Gole Nagar
+Davanagere 755940",F,1986-08-28,+917453238677,370521128968,DOQLS9464G,MD,Gopal-Dass Medical College,adhaar_98.png,pan_98.png,degree_98.pdf,id_98.png,note_98.png
+99,Dr. Falak Gandhi,"H.No. 186
+Pai Chowk, Khora  591478",F,1943-10-13,09670098479,066384123651,KTVWA5184L,MD,Shankar-Samra Medical College,adhaar_99.png,pan_99.png,degree_99.pdf,id_99.png,note_99.png
+100,Dr. Upasna Kakar,"781
+Setty Street
+Bongaigaon 195327",F,1928-11-24,+917762095865,827131235100,RIGKM3653M,BAMS,Kothari Inc Medical College,adhaar_100.png,pan_100.png,degree_100.pdf,id_100.png,note_100.png
+101,Dr. Yatin Golla,"H.No. 46
+Walla Road
+Medininagar 110589",M,2013-03-29,9833043032,549287642298,WGBCU5193R,BHMS,"Vora, Cheema and Sharma Medical College",adhaar_101.png,pan_101.png,degree_101.pdf,id_101.png,note_101.png
+102,Dr. Nandini Contractor,"99/10, Thakur Road, Bathinda-761186",F,2007-12-12,4561244534,653611749021,BJAHS3337C,BAMS,Srivastava-Tara Medical College,adhaar_102.png,pan_102.png,degree_102.pdf,id_102.png,note_102.png
+103,Dr. Mohini Shan,"255
+Karan Chowk
+Rampur-212390",F,1971-05-14,+913052737858,549226502997,RVKIN3414G,BAMS,"Keer, Kaur and Tank Medical College",adhaar_103.png,pan_103.png,degree_103.pdf,id_103.png,note_103.png
+104,Dr. Ranveer Nanda,"938, Gokhale
+Thiruvananthapuram-943828",M,1940-12-13,09330932483,954543644318,DZGVP3189L,MBBS,"Ratta, Taneja and Sarkar Medical College",adhaar_104.png,pan_104.png,degree_104.pdf,id_104.png,note_104.png
+105,Dr. Gaurangi Ray,"90/29, Thakkar Road, Jhansi-287099",F,1952-03-08,03191809924,763536322853,LRCEF9619D,BAMS,"Rau, Prabhu and Ben Medical College",adhaar_105.png,pan_105.png,degree_105.pdf,id_105.png,note_105.png
+106,Dr. Jeet Madan,"02, Boase Circle, Motihari-846839",M,1950-07-05,05792059366,918467199387,MYDSF0609T,BHMS,Radhakrishnan PLC Medical College,adhaar_106.png,pan_106.png,degree_106.pdf,id_106.png,note_106.png
+107,Dr. Ekansh Kota,"96
+Bhakta Zila
+Kottayam 886418",M,1973-09-28,05159651660,408137247777,VFMZJ3067T,BAMS,"Hayre, Kannan and Sami Medical College",adhaar_107.png,pan_107.png,degree_107.pdf,id_107.png,note_107.png
+108,Dr. Triveni Kara,"H.No. 97
+Kannan Road, Bulandshahr-478155",F,1927-11-24,+910525067657,300577806266,ZFJWT3257H,BHMS,"Natarajan, Koshy and Mani Medical College",adhaar_108.png,pan_108.png,degree_108.pdf,id_108.png,note_108.png
+109,Dr. Ekani Pandey,"266
+Mall Path
+Mysore 792065",F,1992-08-28,9327507478,901721051368,HCMKB1211N,MBBS,Buch-Nagarajan Medical College,adhaar_109.png,pan_109.png,degree_109.pdf,id_109.png,note_109.png
+110,Dr. Yashica Ahluwalia,"929
+Sunder Zila, Rewa 554000",F,1978-04-01,03796508702,582463010277,APVJG3799M,MD,Dutta-Mishra Medical College,adhaar_110.png,pan_110.png,degree_110.pdf,id_110.png,note_110.png
+111,Dr. Raagini Golla,"02/44
+Luthra Chowk, Rajkot-322930",F,2024-06-20,+917410965840,506193619065,XBTZL8101C,BAMS,Dara LLC Medical College,adhaar_111.png,pan_111.png,degree_111.pdf,id_111.png,note_111.png
+112,Dr. Pavani Mall,"H.No. 83, Shan Road, Baranagar-513558",F,2019-10-24,09502472620,471091396216,PZYJU3311I,BHMS,De-Bahl Medical College,adhaar_112.png,pan_112.png,degree_112.pdf,id_112.png,note_112.png
+113,Dr. Ekani Chowdhury,"84/254
+De Ganj
+Rajpur Sonarpur-432494",F,1948-02-05,06397657545,875756113483,MMJSN7129J,MBBS,Goswami LLC Medical College,adhaar_113.png,pan_113.png,degree_113.pdf,id_113.png,note_113.png
+114,Dr. Indira Kakar,"589
+Sant Chowk, Sangli-Miraj & Kupwad-751235",F,1939-09-02,04252197026,737788031969,THQXD7291X,MD,"Dayal, Jaggi and Goel Medical College",adhaar_114.png,pan_114.png,degree_114.pdf,id_114.png,note_114.png
+115,Dr. Dominic Kulkarni,"H.No. 961, Guha Road, Etawah 468012",M,1925-07-27,03821503618,129912179941,MXGUF2779J,MBBS,Bhatti Group Medical College,adhaar_115.png,pan_115.png,degree_115.pdf,id_115.png,note_115.png
+116,Dr. Pahal Dua,"639
+Gupta Chowk
+Surat 225094",F,1978-04-07,1211149514,656140702836,NQZEW2088V,BHMS,Baria-Iyengar Medical College,adhaar_116.png,pan_116.png,degree_116.pdf,id_116.png,note_116.png
+117,Dr. Nandini Boase,"H.No. 48, Basu Street
+Rourkela-271694",F,1941-02-02,09082278403,457210761365,PDXAA2370R,BAMS,"Sharma, Kumer and Om Medical College",adhaar_117.png,pan_117.png,degree_117.pdf,id_117.png,note_117.png
+118,Dr. Aryan Kapoor,"H.No. 663
+Bobal Street
+Hubli–Dharwad-311708",M,1955-01-13,6181621376,201917121857,HZQYM1723I,MBBS,Vasa-Balay Medical College,adhaar_118.png,pan_118.png,degree_118.pdf,id_118.png,note_118.png
+119,Dr. Dalaja Uppal,"21/717, Kunda Marg, Aurangabad 393401",F,1927-12-15,09050422702,955492816319,HCEWG1257Y,BHMS,"Bala, Narayanan and Soni Medical College",adhaar_119.png,pan_119.png,degree_119.pdf,id_119.png,note_119.png
+120,Dr. Manbir Gulati,"12/200
+Hans Road
+Thrissur-496843",M,1953-04-11,02612313459,112506892782,YUJPB8488V,BAMS,Zacharia Inc Medical College,adhaar_120.png,pan_120.png,degree_120.pdf,id_120.png,note_120.png
+121,Dr. Niharika Parmar,"H.No. 15, Dyal Circle, Nangloi Jat-107303",F,2019-09-17,07840259190,010785062678,FGVNZ8999K,BHMS,Tank and Sons Medical College,adhaar_121.png,pan_121.png,degree_121.pdf,id_121.png,note_121.png
+122,Dr. Jeevika Pall,"525
+Deep Nagar, Tirupati-630402",F,1914-12-14,+911273838100,837923396626,UHNFN6952C,MBBS,Sinha-Garg Medical College,adhaar_122.png,pan_122.png,degree_122.pdf,id_122.png,note_122.png
+123,Dr. Gauri Sarna,"18, Chandran Chowk
+Karnal 733118",F,1919-04-25,4918722339,471797680080,OIKXV0786U,BAMS,"Babu, Kapur and Virk Medical College",adhaar_123.png,pan_123.png,degree_123.pdf,id_123.png,note_123.png
+124,Dr. Faras Mander,"36/105
+Saran Nagar, Gangtok-743910",M,2014-11-25,02411791227,694778465721,YMYCM6761Z,BAMS,Bhargava and Sons Medical College,adhaar_124.png,pan_124.png,degree_124.pdf,id_124.png,note_124.png
+125,Dr. Lohit Kuruvilla,"H.No. 01
+Bedi Circle
+Motihari 271702",M,1915-02-21,+917090496807,291606508887,WRFKU7540B,BHMS,Ben-Ganesh Medical College,adhaar_125.png,pan_125.png,degree_125.pdf,id_125.png,note_125.png
+126,Dr. Dalaja Sahota,"38/610
+Chaudry Path, Delhi 076944",F,2018-03-21,2237154307,212236406036,TMKXQ9065O,MBBS,Lal LLC Medical College,adhaar_126.png,pan_126.png,degree_126.pdf,id_126.png,note_126.png
+127,Dr. Arin Chakrabarti,"H.No. 73
+Rana Circle, Bellary-136059",M,2011-08-27,05277751335,699700830300,BJAIB8943R,MD,Sandal PLC Medical College,adhaar_127.png,pan_127.png,degree_127.pdf,id_127.png,note_127.png
+128,Dr. Yuvraj Murty,"08, Sheth Street, Phusro 416554",M,1968-07-06,00554856525,385205569523,LIKFE2718Z,MBBS,"Basak, Swaminathan and Lata Medical College",adhaar_128.png,pan_128.png,degree_128.pdf,id_128.png,note_128.png
+129,Dr. Krisha Munshi,"55, Chadha Road
+Bijapur 454235",F,1968-05-18,+918557454814,760615778477,WZRMW9147B,MBBS,Barad Ltd Medical College,adhaar_129.png,pan_129.png,degree_129.pdf,id_129.png,note_129.png
+130,Dr. Neha Prabhakar,"39/630, Lalla Chowk
+Faridabad 125089",F,1952-12-15,02748664329,894950202642,LQYZI5389L,MBBS,"Bandi, Sarna and Sankar Medical College",adhaar_130.png,pan_130.png,degree_130.pdf,id_130.png,note_130.png
+131,Dr. Tejas Panchal,"26
+Krish Street, Madurai-860162",M,2002-12-22,7560553826,034582105339,MNOGD2575O,MD,"Ramaswamy, Venkataraman and Sem Medical College",adhaar_131.png,pan_131.png,degree_131.pdf,id_131.png,note_131.png
+132,Dr. Siddharth Date,"H.No. 229
+Dewan Path
+Alappuzha-801792",M,1917-05-09,7995179966,479029159208,IQLRA7257F,MBBS,Chawla LLC Medical College,adhaar_132.png,pan_132.png,degree_132.pdf,id_132.png,note_132.png
+133,Dr. Pranav Warrior,"50/674, Bansal Marg
+Bhagalpur 856836",M,1957-02-16,03194961741,117677516571,UVVXJ4802F,BHMS,Shankar and Sons Medical College,adhaar_133.png,pan_133.png,degree_133.pdf,id_133.png,note_133.png
+134,Dr. Xalak Goswami,"36, Dube Ganj
+Miryalaguda-453651",F,1955-01-31,04902997587,442302798958,VIVWI6960B,MBBS,Bhatti-Mukherjee Medical College,adhaar_134.png,pan_134.png,degree_134.pdf,id_134.png,note_134.png
+135,Dr. Jasmit Nayar,"H.No. 65
+Dey Marg
+Kharagpur 077311",F,1961-09-04,1162780881,192809151670,HSJAH7558V,BHMS,Bhatt LLC Medical College,adhaar_135.png,pan_135.png,degree_135.pdf,id_135.png,note_135.png
+136,Dr. Chaman Nori,"H.No. 678, Dutta Circle
+Panvel 611563",F,2012-10-25,+915669804027,289658084105,KFWKN6825R,MD,Parmar Ltd Medical College,adhaar_136.png,pan_136.png,degree_136.pdf,id_136.png,note_136.png
+137,Dr. Forum Pai,"18, Nazareth Path
+Orai-827173",F,2020-09-25,04863993008,924984928785,UJERZ1145G,MBBS,Khurana-Ratta Medical College,adhaar_137.png,pan_137.png,degree_137.pdf,id_137.png,note_137.png
+138,Dr. Jai Dhawan,"37, Majumdar Path
+Aizawl 602171",M,1979-04-28,4019162825,996287087671,QTXXU3474A,BHMS,"Mammen, Saxena and Dalal Medical College",adhaar_138.png,pan_138.png,degree_138.pdf,id_138.png,note_138.png
+139,Dr. Jhalak Gara,"048, Khatri Street, Kalyan-Dombivli-367775",F,1919-03-13,02126525527,555056696050,MEMBJ1509A,BHMS,"Kalla, Wali and Chada Medical College",adhaar_139.png,pan_139.png,degree_139.pdf,id_139.png,note_139.png
+140,Dr. Garima Nigam,"67, Reddy Marg, Hapur 813516",F,1926-05-16,02929932630,788117653058,EIVCV2101R,MD,"Kothari, Vasa and Sengupta Medical College",adhaar_140.png,pan_140.png,degree_140.pdf,id_140.png,note_140.png
+141,Dr. Manthan Comar,"H.No. 12
+Krishnan Ganj, Sasaram 517210",M,1996-08-29,2634101771,142019483388,OYRXZ2376R,MD,"Panchal, Magar and Chaudhry Medical College",adhaar_141.png,pan_141.png,degree_141.pdf,id_141.png,note_141.png
+142,Dr. Luke Chhabra,"85/361, Dey Path
+Phagwara 640287",M,1976-11-20,+918405567159,463145141479,PFLNC6555K,BAMS,Balakrishnan-Datta Medical College,adhaar_142.png,pan_142.png,degree_142.pdf,id_142.png,note_142.png
+143,Dr. Robert Raghavan,"H.No. 036
+Sinha Circle, Aurangabad 353154",M,2008-10-01,1121234911,818048478422,MQYGI0379T,BAMS,Dyal-Suri Medical College,adhaar_143.png,pan_143.png,degree_143.pdf,id_143.png,note_143.png
+144,Dr. Garima Sengupta,"H.No. 13
+Gade Path, Imphal-181277",F,2015-11-29,5425554217,296677335810,ODLPI6920B,MBBS,Sandal-Bhargava Medical College,adhaar_144.png,pan_144.png,degree_144.pdf,id_144.png,note_144.png
+145,Dr. Mekhala Pradhan,"37/98
+Mohanty Road
+Nagpur 162368",F,1941-09-29,+913117460924,018601359246,LZTFK4677D,BHMS,Buch Ltd Medical College,adhaar_145.png,pan_145.png,degree_145.pdf,id_145.png,note_145.png
+146,Dr. Kiaan Solanki,"H.No. 33
+Narasimhan Nagar
+Jamalpur-648564",M,1921-06-08,2063959125,212119910494,CUKPM6740J,MBBS,"Iyer, Pillay and Rama Medical College",adhaar_146.png,pan_146.png,degree_146.pdf,id_146.png,note_146.png
+147,Dr. Zansi Sahota,"52/544
+Sura Road
+Thoothukudi 379812",F,1943-08-13,05048266924,273111040194,GNIRA5583E,BHMS,"Sundaram, Gupta and Mane Medical College",adhaar_147.png,pan_147.png,degree_147.pdf,id_147.png,note_147.png
+148,Dr. Ekbal Subramanian,"70/555, Majumdar Nagar, Madurai-971045",M,1931-12-25,+917641387384,644921978757,UETAO4645C,BAMS,Narang-Kannan Medical College,adhaar_148.png,pan_148.png,degree_148.pdf,id_148.png,note_148.png
+149,Dr. Aishani Hegde,"H.No. 776
+Dara Circle
+Singrauli-199788",F,2002-05-07,08686634924,222242114153,LNMUJ0691B,BAMS,Mand Ltd Medical College,adhaar_149.png,pan_149.png,degree_149.pdf,id_149.png,note_149.png
+150,Dr. Frederick Lad,"635, Swaminathan
+Jammu-807610",M,1943-04-30,01255277626,154966130401,ZKDUB7054L,BAMS,Zacharia-Kuruvilla Medical College,adhaar_150.png,pan_150.png,degree_150.pdf,id_150.png,note_150.png
+151,Dr. Sneha Khanna,"581, Chana Street, Morbi-138120",F,1944-10-31,03161629298,591996273912,QPPAM1005J,BHMS,Kohli PLC Medical College,adhaar_151.png,pan_151.png,degree_151.pdf,id_151.png,note_151.png
+152,Dr. Bahadurjit Agarwal,"H.No. 55, Sandal Circle, Phagwara 867799",M,1929-04-22,5796837928,826990945566,LXQNW6381V,BHMS,Handa LLC Medical College,adhaar_152.png,pan_152.png,degree_152.pdf,id_152.png,note_152.png
+153,Dr. Jeet Prabhakar,"H.No. 597
+Pau Marg, Giridih 819211",M,1984-04-24,05641829102,586526206351,NYRIK9347I,MD,Shere-Sood Medical College,adhaar_153.png,pan_153.png,degree_153.pdf,id_153.png,note_153.png
+154,Dr. Anay Shroff,"75/178
+Buch Circle
+Anantapuram 552800",M,2023-05-09,01088137068,192053153553,WUTAA7693R,BHMS,Shere and Sons Medical College,adhaar_154.png,pan_154.png,degree_154.pdf,id_154.png,note_154.png
+155,Dr. Yashica Nazareth,"03/454
+Gulati Street
+Ichalkaranji 526193",F,1976-05-18,+918583898192,677050896087,ZQMVN5034L,BAMS,More LLC Medical College,adhaar_155.png,pan_155.png,degree_155.pdf,id_155.png,note_155.png
+156,Dr. Jagat Mitter,"58/07, Dewan Nagar, Ongole 956133",M,1927-05-28,9562224604,612295883074,OHIDV9955K,MBBS,Sarin-Brar Medical College,adhaar_156.png,pan_156.png,degree_156.pdf,id_156.png,note_156.png
+157,Dr. Maya Badami,"30
+Chaudhary Zila
+Fatehpur-584076",F,2018-08-27,03724307718,518837474636,YFQQT7083Z,BAMS,"Nath, Jaggi and Patla Medical College",adhaar_157.png,pan_157.png,degree_157.pdf,id_157.png,note_157.png
+158,Dr. Eta Virk,"46/937, Mitter Chowk, Sonipat-045151",F,2004-05-29,04733917906,632157020378,UFJXI6667F,BAMS,Sankaran-Sibal Medical College,adhaar_158.png,pan_158.png,degree_158.pdf,id_158.png,note_158.png
+159,Dr. Sneha Merchant,"H.No. 47
+Bhattacharyya Road
+Kottayam 518599",F,1966-03-15,3331090442,803975857247,INFKV4077S,MBBS,Andra-Verma Medical College,adhaar_159.png,pan_159.png,degree_159.pdf,id_159.png,note_159.png
+160,Dr. Anjali Bhatnagar,"H.No. 74
+Roy Circle
+Korba-993422",F,2023-07-15,08185656396,986947517111,XYAKD4827W,MD,"Sunder, Baria and Nadig Medical College",adhaar_160.png,pan_160.png,degree_160.pdf,id_160.png,note_160.png
+161,Dr. Hemani Raj,"414
+Shankar Road, Chittoor 926208",F,1970-01-02,+914540197596,037909918146,BHIFM8074L,MD,Mallick-Bali Medical College,adhaar_161.png,pan_161.png,degree_161.pdf,id_161.png,note_161.png
+162,Dr. Edhitha Vohra,"99/564
+Gade Zila
+Sirsa-979308",F,2025-12-10,6150994973,272360070867,BJZOL7170J,BHMS,"Pandya, Sachdev and Tiwari Medical College",adhaar_162.png,pan_162.png,degree_162.pdf,id_162.png,note_162.png
+163,Dr. Daksh Kamdar,"H.No. 66
+Bains Zila, Bhubaneswar-443026",M,1941-03-08,+914183511357,404817081418,NEPHU4796U,MD,"D’Alia, Pall and Dani Medical College",adhaar_163.png,pan_163.png,degree_163.pdf,id_163.png,note_163.png
+164,Dr. Damyanti Mani,"05/20, Bassi Zila, Lucknow 161477",F,1919-07-07,2962050962,885219970432,ESLNF5177D,BHMS,"Patla, Mangal and Mander Medical College",adhaar_164.png,pan_164.png,degree_164.pdf,id_164.png,note_164.png
+165,Dr. Balendra Morar,"H.No. 958
+Dara Street
+Panchkula 825708",M,1991-06-15,9198735894,202338770077,ZUEAT8912O,BHMS,Tailor Group Medical College,adhaar_165.png,pan_165.png,degree_165.pdf,id_165.png,note_165.png
+166,Dr. Yashasvi Pant,"11
+Dhawan, Aurangabad 460049",F,1914-02-02,04115294950,663636880230,DIMKE6995K,BHMS,"Rajan, Butala and Shenoy Medical College",adhaar_166.png,pan_166.png,degree_166.pdf,id_166.png,note_166.png
+167,Dr. Advay Om,"00/879, Virk Zila, Ajmer-111633",M,1987-11-10,7939124332,302615210984,FMRMB5653S,MBBS,Chaudhari Group Medical College,adhaar_167.png,pan_167.png,degree_167.pdf,id_167.png,note_167.png
+168,Dr. Yashoda Dua,"92, Gala Path, Kumbakonam-480677",F,2012-08-28,01019951162,069489317753,SBCRF5150U,BAMS,Bal-Dugal Medical College,adhaar_168.png,pan_168.png,degree_168.pdf,id_168.png,note_168.png
+169,Dr. Zashil Anne,"75
+Thaman Road, Eluru-032935",M,1963-08-17,7242308998,401813488030,HBLMU5113I,BAMS,"Barad, Maharaj and Mody Medical College",adhaar_169.png,pan_169.png,degree_169.pdf,id_169.png,note_169.png
+170,Dr. Suhani Nayak,"H.No. 084, Narain
+Thane-798216",F,1929-01-29,6086598513,558175584729,CXJNO3657A,MBBS,Minhas PLC Medical College,adhaar_170.png,pan_170.png,degree_170.pdf,id_170.png,note_170.png
+171,Dr. Aarna Sarraf,"H.No. 33, Ganesh Street, Khammam-163751",F,1997-10-24,+916005145587,775745816454,DQHFW7840D,BAMS,Ahuja-Chaudhuri Medical College,adhaar_171.png,pan_171.png,degree_171.pdf,id_171.png,note_171.png
+172,Dr. Janaki Bora,"62, Pal Road, Mahbubnagar 991247",F,1958-06-18,2929212581,415254533563,HLKXT8300L,MD,Prabhu and Sons Medical College,adhaar_172.png,pan_172.png,degree_172.pdf,id_172.png,note_172.png
+173,Dr. Darpan Kumar,"54, Srinivasan Marg
+Bihar Sharif-592358",M,1967-02-25,1431161230,992405778900,UXSFE7795Q,MD,Bassi-Sandal Medical College,adhaar_173.png,pan_173.png,degree_173.pdf,id_173.png,note_173.png
+174,Dr. Liam Bala,"22, Bora, Ulhasnagar 617039",M,1949-08-12,+914192785525,728671352151,ZTPAE4474X,BAMS,"Khanna, Din and Samra Medical College",adhaar_174.png,pan_174.png,degree_174.pdf,id_174.png,note_174.png
+175,Dr. Yashawini Tripathi,"15/76, Virk Nagar
+Etawah-743754",F,1971-01-28,+919392977357,935286071460,AVXKM6222P,MBBS,Iyengar-Kapadia Medical College,adhaar_175.png,pan_175.png,degree_175.pdf,id_175.png,note_175.png
+176,Dr. Banjeet Mallick,"H.No. 624, Sama Ganj
+Kishanganj 418422",M,2007-12-10,8792923121,543662062283,TMRDP3665F,BHMS,Ray Group Medical College,adhaar_176.png,pan_176.png,degree_176.pdf,id_176.png,note_176.png
+177,Dr. Hemangini Dara,"85/03
+Bawa
+Mumbai-592903",F,1980-03-07,02566006094,036489375782,WCZKW4662X,MBBS,Sule and Sons Medical College,adhaar_177.png,pan_177.png,degree_177.pdf,id_177.png,note_177.png
+178,Dr. Pratyush Borra,"H.No. 942
+Uppal Zila
+Sambalpur-534042",M,2021-08-01,+919239568606,752368281125,HXZXG2111R,BAMS,"Shanker, Srinivas and Chokshi Medical College",adhaar_178.png,pan_178.png,degree_178.pdf,id_178.png,note_178.png
+179,Dr. Lakshmi Kade,"045, Raj Circle
+Solapur 226702",F,1979-07-10,5826006609,009170819865,DZZWG3587R,BHMS,Raval-Deep Medical College,adhaar_179.png,pan_179.png,degree_179.pdf,id_179.png,note_179.png
+180,Dr. Dipta Apte,"H.No. 52, Agate Road, Khammam-674587",F,2004-04-18,+915836678063,977085208350,ESVEC6512G,MD,"Lad, Rout and Khatri Medical College",adhaar_180.png,pan_180.png,degree_180.pdf,id_180.png,note_180.png
+181,Dr. Omisha Rege,"H.No. 57, Sahni Ganj
+Danapur 965975",F,1946-01-14,3865971399,682907864953,XZLEP7810E,BAMS,Agate LLC Medical College,adhaar_181.png,pan_181.png,degree_181.pdf,id_181.png,note_181.png
+182,Dr. Ucchal Deo,"19
+Dubey Zila, Bijapur-410426",F,1969-09-20,03866485255,492724034130,ZWNFE2430X,MD,Magar LLC Medical College,adhaar_182.png,pan_182.png,degree_182.pdf,id_182.png,note_182.png
+183,Dr. Samarth Majumdar,"12/39
+Badami Chowk, Srinagar 093750",M,2010-03-18,08046756497,203755340852,QJPLM5444K,BAMS,"Dara, Panchal and Handa Medical College",adhaar_183.png,pan_183.png,degree_183.pdf,id_183.png,note_183.png
+184,Dr. Raagini Raj,"03, Shroff Circle
+Gwalior-950152",F,1965-04-12,06880786932,772149514004,LYZXL0707F,BAMS,Upadhyay Ltd Medical College,adhaar_184.png,pan_184.png,degree_184.pdf,id_184.png,note_184.png
+185,Dr. Ikbal Randhawa,"48
+Hans Zila
+Howrah-888098",M,1966-06-17,08021959745,741285990876,ANKVU4799K,BAMS,"Karan, Prakash and Nagy Medical College",adhaar_185.png,pan_185.png,degree_185.pdf,id_185.png,note_185.png
+186,Dr. Kala Hayre,"H.No. 954, Padmanabhan Road
+Sambalpur-377605",F,1937-06-06,1241045511,989796713284,UPDBY5809E,MD,"Sathe, Ganesh and Babu Medical College",adhaar_186.png,pan_186.png,degree_186.pdf,id_186.png,note_186.png
+187,Dr. Bhavya Palla,"37/796
+Tank
+Nagaon-167929",F,1928-04-03,6021056510,182208300144,RLAJG2076D,MBBS,Golla-Yohannan Medical College,adhaar_187.png,pan_187.png,degree_187.pdf,id_187.png,note_187.png
+188,Dr. Nandini Krishnamurthy,"982, Sachdev Chowk
+Amaravati 225955",F,1995-01-23,06984234418,854829228113,PJFRM4647G,BHMS,"Chad, Nadig and Sampath Medical College",adhaar_188.png,pan_188.png,degree_188.pdf,id_188.png,note_188.png
+189,Dr. Zayyan Krishna,"H.No. 967
+Vora Road
+Rajkot 697103",M,1917-09-22,+913037973379,079885196143,UKJLO7039O,MBBS,Narayanan-Jayaraman Medical College,adhaar_189.png,pan_189.png,degree_189.pdf,id_189.png,note_189.png
+190,Dr. Gaurangi Dayal,"73/345
+Dhar Zila, Bulandshahr 938454",F,1924-07-13,01519041851,597637830171,NEZII4710B,MD,Cheema-Joshi Medical College,adhaar_190.png,pan_190.png,degree_190.pdf,id_190.png,note_190.png
+191,Dr. Neel Mody,"150
+Sant Ganj, Panipat-812153",M,1974-07-03,+919613183251,713518070901,EWOKS1647N,BAMS,Taneja-Majumdar Medical College,adhaar_191.png,pan_191.png,degree_191.pdf,id_191.png,note_191.png
+192,Dr. Charles Mukhopadhyay,"H.No. 06, Baral Circle
+Raiganj-290595",M,1941-12-08,09488964770,510615542387,SOAXL2247P,BHMS,"Wable, Wadhwa and Samra Medical College",adhaar_192.png,pan_192.png,degree_192.pdf,id_192.png,note_192.png
+193,Dr. Sachi Karpe,"H.No. 804
+Seshadri Nagar, Adoni 540436",F,1926-09-17,7973535120,775435142284,ETMCD8185X,MD,Bhatti PLC Medical College,adhaar_193.png,pan_193.png,degree_193.pdf,id_193.png,note_193.png
+194,Dr. Yadavi Shankar,"H.No. 24
+Naidu Zila, Chennai-266551",F,1935-12-05,04233896065,944232896830,RONKL5272K,MBBS,"Pandey, Mittal and Borah Medical College",adhaar_194.png,pan_194.png,degree_194.pdf,id_194.png,note_194.png
+195,Dr. Tristan Pandit,"35/743
+Dhar Circle, Raipur-763606",M,1987-10-04,2961426090,482727233268,FELDP9696N,MBBS,Chowdhury-Mahajan Medical College,adhaar_195.png,pan_195.png,degree_195.pdf,id_195.png,note_195.png
+196,Dr. Falguni Mall,"933
+Brar Path, Chittoor 004356",F,1993-10-22,02289420915,428516714967,FNVVW5108R,MD,Sahni Group Medical College,adhaar_196.png,pan_196.png,degree_196.pdf,id_196.png,note_196.png
+197,Dr. Udant Behl,"42, Sastry Chowk, Giridih 413064",M,1992-05-26,09004802434,621172151308,GVCFL8131S,MD,"Agarwal, Warrior and Hora Medical College",adhaar_197.png,pan_197.png,degree_197.pdf,id_197.png,note_197.png
+198,Dr. Idika Hari,"23, Bajwa Road
+Machilipatnam 429629",F,1963-03-23,+918456540584,075915329866,PYSHI6756G,BAMS,Chaudhary PLC Medical College,adhaar_198.png,pan_198.png,degree_198.pdf,id_198.png,note_198.png
+199,Dr. Laban Bhavsar,"09/389
+Pradhan Path
+Burhanpur 827314",M,1941-11-09,9907783757,755809788968,UPVNB2634Q,BHMS,"Dua, Pradhan and Dara Medical College",adhaar_199.png,pan_199.png,degree_199.pdf,id_199.png,note_199.png
+200,Dr. Samuel Sur,"52, Brahmbhatt
+Jabalpur 040382",M,1936-08-21,07124317753,720375829186,KULNA5245W,BHMS,Acharya Group Medical College,adhaar_200.png,pan_200.png,degree_200.pdf,id_200.png,note_200.png
