@@ -169,7 +169,7 @@ function AppContent() {
         }
     };
 
-    const handleCSVUpload = async (file: File) => {
+    const handleCSVUpload = async (file: File, runEfficiently: boolean = true) => {
         setIsProcessing(true);
         setView('dashboard');
         setAgents(INITIAL_AGENTS.map(a => ({ ...a, status: 'idle', message: 'Standing by' })));
@@ -180,7 +180,7 @@ function AppContent() {
             const formData = new FormData();
             formData.append('file', file);
 
-            const response = await api.post<AnalysisResult>('/upload-csv', formData);
+            const response = await api.post<AnalysisResult>(`/upload-csv?run_efficiently=${runEfficiently}`, formData);
             await simulateAgentActivity(response.data);
         } catch (error) {
             console.error('CSV upload failed:', error);

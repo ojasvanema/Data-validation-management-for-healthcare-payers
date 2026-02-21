@@ -153,6 +153,24 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ data, onViewDetails
         </GlassCard>
       </div>
 
+      {/* Executive Intelligence Brief */}
+      {data.summary && data.summary.length > 0 && (
+        <div className="lg:col-span-3">
+          <GlassCard className="p-5 border-indigo-200 dark:border-indigo-500/20 bg-gradient-to-br from-indigo-50/50 to-purple-50/30 dark:from-indigo-900/10 dark:to-purple-900/5 shadow-sm dark:shadow-none">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center">
+                <TrendingUp className="text-indigo-600 dark:text-indigo-400" size={16} />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Business Intelligence Brief</h3>
+                <span className="text-[10px] text-indigo-600/60 dark:text-indigo-400/60 uppercase tracking-wider">VERA Business Impact Agent</span>
+              </div>
+            </div>
+            <pre className="text-[13px] leading-relaxed text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-sans">{data.summary}</pre>
+          </GlassCard>
+        </div>
+      )}
+
       {/* Main Graph */}
       <GlassCard className="lg:col-span-2 p-6 min-h-[300px]">
         <h3 className="text-lg font-semibold mb-6 text-slate-900 dark:text-white flex items-center gap-2">

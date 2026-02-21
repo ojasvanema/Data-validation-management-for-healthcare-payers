@@ -20,13 +20,14 @@ load_dotenv()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 if not GROQ_API_KEY:
-    print("WARNING: GROQ_API_KEY not found. VERA Agent will fail.")
-
-llm = ChatGroq(
-    temperature=0,
-    model_name="llama-3.1-8b-instant",
-    groq_api_key=GROQ_API_KEY
-)
+    print("WARNING: GROQ_API_KEY not found. VERA Agent (LLM path) will be disabled.")
+    llm = None
+else:
+    llm = ChatGroq(
+        temperature=0,
+        model_name="llama-3.1-8b-instant",
+        groq_api_key=GROQ_API_KEY
+    )
 
 # ─── STATE DEFINITION ───
 class VeraState(TypedDict):
@@ -223,14 +224,14 @@ def semantic_analysis_node(state: VeraState) -> Dict[str, Any]:
     thoughts_raw = analysis.get("thoughts", [])
     report = analysis.get("final_report", {})
     
-    # Map raw dict thoughts to ValidationStep objects for the state
+    # Map raw dict thoughts to simple dicts for the state
     thoughts = []
     for t in thoughts_raw:
-         thoughts.append(ValidationStep(
-             agent=t.get("agent", "Analysis Agent"),
-             log=t.get("log", "Processing..."),
-             timestamp=t.get("timestamp", datetime.now().isoformat())
-         ))
+         thoughts.append({
+             "agent": t.get("agent", "Analysis Agent"),
+             "log": t.get("log", "Processing..."),
+             "timestamp": t.get("timestamp", datetime.now().isoformat())
+         })
 
     return {"semantic_analysis": report, "thoughts": thoughts}
 

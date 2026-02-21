@@ -23,6 +23,7 @@ from ..services.validation import (
 from ..services.ocr import extract_text, parse_provider_fields
 from ..database.session import save_provider, get_all_providers, update_provider_status
 from ..services.detailed_agents import DetailedAgentService, ValidationOutput, PredictiveOutput, ROIOutput
+from ..services.business_impact import compute_batch_roi, generate_deterministic_summary, generate_llm_executive_brief
 from fastapi import Form
 
 detailed_agent_service = DetailedAgentService()
@@ -105,7 +106,8 @@ async def generate_historical_data(run_efficiently: bool = True):
     and return real analysis results.
     """
     # Check if data already exists in DB (cached from previous run)
-    existing_records = get_all_providers()
+    # Only use cache for the fast/deterministic path; LLM path always re-processes
+    existing_records = get_all_providers() if run_efficiently else []
     records = []
 
     if existing_records and len(existing_records) > 0:
@@ -321,9 +323,9 @@ async def generate_historical_data(run_efficiently: bool = True):
     avg_risk = round(total_risk / len(records)) if records else 0
     discrepancies = len([r for r in records if r.status != "Verified"])
 
-    # ROI: each verified record saves ~$300/year in prevented claim denials
-    verified_count = len([r for r in records if r.status == "Verified"])
-    roi = verified_count * 300
+    # Business Impact Agent: compute real ROI
+    batch_roi = compute_batch_roi(records)
+    roi = batch_roi["batch_savings"]
 
     # Timeline Data — simulate progressive validation
     steps = 6
@@ -367,9 +369,10 @@ async def generate_historical_data(run_efficiently: bool = True):
             {"agent": "VALIDATION", "log": f"Cross-validated against NPPES, Census Geocoder, and Medicare APIs", "timestamp": now_iso},
             {"agent": "FRAUD", "log": f"Identified {discrepancies} discrepancies via 3D Trust Score analysis", "timestamp": now_iso},
             {"agent": "DEGRADATION", "log": f"Computed decay probabilities for all {len(records)} records", "timestamp": now_iso},
+            {"agent": "BUSINESS", "log": f"ROI: ${batch_roi['batch_savings']:,.0f} batch | ${batch_roi['annualized_benefit']:,.0f}/yr annualized | {batch_roi['roi_percentage']:.0f}% ROI", "timestamp": now_iso},
             {"agent": "GRAPHICAL", "log": "Heatmap and risk distribution data aggregated.", "timestamp": now_iso}
         ],
-        summary=f'Validated {len(records)} providers. Found {discrepancies} discrepancies. Trust Score: avg {100 - avg_risk}/100.'
+        summary=await generate_llm_executive_brief(records, batch_roi, detailed_agent_service.llm) if not run_efficiently else generate_deterministic_summary(records, batch_roi)
     )
 
 
@@ -658,8 +661,8 @@ async def upload_csv(file: UploadFile = File(...), run_efficiently: bool = True)
     total_risk = sum(r.riskScore for r in records)
     avg_risk = round(total_risk / len(records)) if records else 0
     discrepancies = len([r for r in records if r.status != "Verified"])
-    verified_count = len([r for r in records if r.status == "Verified"])
-    roi = verified_count * 300
+    batch_roi = compute_batch_roi(records)
+    roi = batch_roi["batch_savings"]
 
     # Timeline
     steps = min(6, len(records))
@@ -691,8 +694,9 @@ async def upload_csv(file: UploadFile = File(...), run_efficiently: bool = True)
             {"agent": "VALIDATION", "log": "Cross-validated against NPPES, Census Geocoder, and Medicare APIs", "timestamp": now_iso},
             {"agent": "COMPLAINT", "log": f"Cross-referenced against complaint directory", "timestamp": now_iso},
             {"agent": "FRAUD", "log": f"Identified {discrepancies} discrepancies via 3D Trust Score", "timestamp": now_iso},
+            {"agent": "BUSINESS", "log": f"ROI: ${batch_roi['batch_savings']:,.0f} batch | ${batch_roi['annualized_benefit']:,.0f}/yr annualized | {batch_roi['roi_percentage']:.0f}% ROI", "timestamp": now_iso},
         ],
-        summary=f'CSV Upload: Validated {len(records)} providers. Found {discrepancies} discrepancies. Trust Score avg: {100 - avg_risk}/100.'
+        summary=await generate_llm_executive_brief(records, batch_roi, detailed_agent_service.llm) if not run_efficiently else generate_deterministic_summary(records, batch_roi)
     )
 
 

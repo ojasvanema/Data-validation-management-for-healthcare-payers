@@ -6,7 +6,7 @@ import { FileUpload } from '../types';
 interface UploadSectionProps {
   onFilesSelected: (files: FileUpload[]) => void;
   onLoadHistoricalData?: (runEfficiently: boolean) => void;
-  onCSVUpload?: (file: File) => void;
+  onCSVUpload?: (file: File, runEfficiently: boolean) => void;
   onOCRUpload?: (file: File) => void;
   isProcessing: boolean;
   compact?: boolean;
@@ -90,7 +90,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFilesSelected, onLoadHi
 
   const handleCSVSubmit = () => {
     if (selectedFile && onCSVUpload) {
-      onCSVUpload(selectedFile);
+      onCSVUpload(selectedFile, runEfficiently);
       setShowUploadModal(false);
       setSelectedFile(null);
     }
@@ -418,6 +418,22 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFilesSelected, onLoadHi
                   </pre>
                 </details>
               </div>
+            )}
+
+            {/* Run Efficiently Toggle (CSV tab only) */}
+            {uploadTab === 'csv' && selectedFile && (
+              <label className="flex items-center gap-3 mt-4 p-3 rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={runEfficiently}
+                  onChange={(e) => setRunEfficiently(e.target.checked)}
+                  className="w-4 h-4 rounded border-slate-300 dark:border-white/20 text-emerald-500 focus:ring-emerald-500 dark:focus:ring-emerald-400"
+                />
+                <div>
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">Run Agents Efficiently</span>
+                  <p className="text-[11px] text-slate-400 dark:text-gray-500">{runEfficiently ? 'Deterministic validation (fast, no LLM)' : 'LLM-powered analysis (immersive, slower)'}</p>
+                </div>
+              </label>
             )}
 
             {/* Action Button */}
