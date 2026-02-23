@@ -19,7 +19,9 @@ export default defineConfig(({ mode }) => {
         '/upload-ocr': 'http://127.0.0.1:8000',
         '/upload-complaints': 'http://127.0.0.1:8000',
         '/complaints-status': 'http://127.0.0.1:8000',
-        '/historical-data': 'http://127.0.0.1:8000'
+        '/historical-data': 'http://127.0.0.1:8000',
+        '/send-email': 'http://127.0.0.1:8000',
+        '/analyze-manual': 'http://127.0.0.1:8000'
       }
     },
     plugins: [react()],

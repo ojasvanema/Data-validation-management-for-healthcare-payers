@@ -170,15 +170,35 @@ export const bulkApproveSafe = async (): Promise<{ count: number, message: strin
 
 // Manual Entry Analysis
 export const analyzeManualEntry = async (data: any, file?: File, runEfficiently: boolean = true): Promise<any> => {
-    const formData = new FormData();
-    formData.append('data', JSON.stringify(data));
-    if (file) {
-        formData.append('file', file);
+    try {
+        const formData = new FormData();
+        formData.append('data', JSON.stringify(data));
+        if (file) {
+            formData.append('file', file);
+        }
+        formData.append('run_efficiently', String(runEfficiently));
+
+        const response = await api.post('/analyze-manual', formData);
+        return response.data;
+    } catch (error) {
+        console.error("Error analyzing manual entry:", error);
+        throw error;
     }
-    const response = await api.post(`/manual-entry/analyze?run_efficiently=${runEfficiently}`, formData);
-    return response.data;
 };
 
+export const sendEmailReport = async (providerData: any, toEmail?: string): Promise<any> => {
+    try {
+        const payload = {
+            providerData,
+            toEmail: toEmail || "provider@example.com"
+        };
+        const response = await api.post('/send-email', payload);
+        return response.data;
+    } catch (error) {
+        console.error("Error sending email report:", error);
+        throw error;
+    }
+};
 
 export const analyzeFilesWithAgents = async (files: FileUpload[]): Promise<AnalysisResult> => {
     console.log("Analyzing files via REAL BACKEND:", files);

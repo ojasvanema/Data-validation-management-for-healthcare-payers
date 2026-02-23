@@ -100,6 +100,7 @@ class FrontendProviderRecord(BaseModel):
     riskScore: float
     decayProb: float
     status: str # Verified, Flagged, Review
+    email: Optional[str] = None
     conflicts: List[str]
     agentThoughts: List[AgentThought]
     agentThoughts: List[AgentThought]

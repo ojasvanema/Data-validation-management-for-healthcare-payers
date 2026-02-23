@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { X, ShieldCheck, MapPin, Phone, Clock, AlertCircle, ChevronRight, Mail, BrainCircuit, ArrowRight } from 'lucide-react';
+import { X, ShieldCheck, MapPin, Phone, Clock, AlertCircle, ChevronRight, Mail, BrainCircuit, ArrowRight, CheckCircle2, Loader2 } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, ReferenceLine } from 'recharts';
 import GlassCard from './GlassCard';
 import { useTheme } from './ThemeContext';
 import { ProviderRecord } from '../types';
+import { sendEmailReport } from '../services/apiService';
 
 interface ProviderDetailViewProps {
     selectedRecord: ProviderRecord;
@@ -30,6 +31,25 @@ const ProviderDetailView: React.FC<ProviderDetailViewProps> = ({
 }) => {
     const { theme } = useTheme();
     const isDark = theme === 'dark';
+
+    const [isSendingEmail, setIsSendingEmail] = useState(false);
+    const [emailSent, setEmailSent] = useState(false);
+    const [emailError, setEmailError] = useState<string | null>(null);
+
+    const handleSendEmail = async () => {
+        setIsSendingEmail(true);
+        setEmailError(null);
+        try {
+            await sendEmailReport(selectedRecord, selectedRecord.email);
+            setEmailSent(true);
+            setTimeout(() => setEmailSent(false), 3000); // Reset after 3 seconds
+        } catch (err: any) {
+            setEmailError(err.message || 'Failed to send email');
+            setTimeout(() => setEmailError(null), 5000); // Reset error
+        } finally {
+            setIsSendingEmail(false);
+        }
+    };
 
     return (
         <div className="w-full flex flex-col h-full bg-slate-50 dark:bg-[#0a0a0a]/60 border-l border-slate-200 dark:border-white/5 overflow-y-auto animate-in slide-in-from-right-8 duration-300">
@@ -114,6 +134,15 @@ const ProviderDetailView: React.FC<ProviderDetailViewProps> = ({
                                 <span className="text-[10px] text-slate-500 bg-slate-100 dark:bg-white/10 px-1.5 py-0.5 rounded">{contact.type}</span>
                             </div>
                         ))}
+                        {selectedRecord.email && (
+                            <div className="text-xs flex justify-between items-center p-2 rounded bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5">
+                                <div className="flex items-center gap-1.5 text-slate-600 dark:text-gray-300">
+                                    <Mail size={12} className="text-slate-400" />
+                                    <span>{selectedRecord.email}</span>
+                                </div>
+                                <span className="text-[10px] text-slate-500 bg-slate-100 dark:bg-white/10 px-1.5 py-0.5 rounded">Email</span>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -195,8 +224,24 @@ const ProviderDetailView: React.FC<ProviderDetailViewProps> = ({
                         {!isActionsCollapsed && (
                             <div className="grid grid-cols-2 gap-3 animate-in slide-in-from-top-2 duration-200">
                                 <div className="flex flex-col gap-2 relative">
-                                    <button className="w-full py-2 bg-slate-50 dark:bg-white/5 hover:bg-emerald-50 dark:hover:bg-emerald-500/20 hover:text-emerald-700 dark:hover:text-emerald-300 border border-slate-200 dark:border-white/5 hover:border-emerald-200 dark:hover:border-emerald-500/30 rounded-lg text-xs text-slate-600 dark:text-gray-300 transition-colors flex items-center justify-center gap-2">
-                                        <Mail size={14} /> Send Email
+                                    <button
+                                        onClick={handleSendEmail}
+                                        disabled={isSendingEmail || emailSent}
+                                        className={`w-full py-2 border rounded-lg text-xs flex items-center justify-center gap-2 transition-colors
+                                            ${isSendingEmail ? 'opacity-70 cursor-not-allowed bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/5 text-slate-600 dark:text-gray-300' : ''}
+                                            ${emailSent ? 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30' : ''}
+                                            ${emailError ? 'border-red-300 bg-red-50 text-red-600 dark:border-red-500/30 dark:bg-red-900/10 dark:text-red-400' : ''}
+                                            ${!isSendingEmail && !emailSent && !emailError ? 'bg-slate-50 dark:bg-white/5 hover:bg-emerald-50 dark:hover:bg-emerald-500/20 hover:text-emerald-700 dark:hover:text-emerald-300 border-slate-200 dark:border-white/5 hover:border-emerald-200 dark:hover:border-emerald-500/30 text-slate-600 dark:text-gray-300' : ''}`}
+                                    >
+                                        {isSendingEmail ? (
+                                            <><Loader2 size={14} className="animate-spin" /> Sending...</>
+                                        ) : emailSent ? (
+                                            <><CheckCircle2 size={14} /> Sent</>
+                                        ) : emailError ? (
+                                            <><AlertCircle size={14} /> Error</>
+                                        ) : (
+                                            <><Mail size={14} /> Send Email</>
+                                        )}
                                     </button>
 
                                     <div className="relative">

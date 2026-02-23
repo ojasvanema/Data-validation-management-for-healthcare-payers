@@ -217,6 +217,7 @@ async def generate_historical_data(run_efficiently: bool = True):
                         "risk_score": float(risk_score),
                         "decay_prob": float(decay_prob),
                         "status": status,
+                        "email": row.get("Email", ""),
                         "conflicts": conflicts,
                         "thoughts": res.get("agent_thoughts", []),
                         "last_updated": row.get("Last_Updated", ""),
@@ -234,6 +235,7 @@ async def generate_historical_data(run_efficiently: bool = True):
                         "risk_score": 50.0,
                         "decay_prob": 0.5,
                         "status": "Review",
+                        "email": row.get("Email", ""),
                         "conflicts": [f"Validation error: {str(e)[:80]}"],
                         "thoughts": [AgentThought(
                             agentName="Validation Agent",
@@ -301,6 +303,7 @@ async def generate_historical_data(run_efficiently: bool = True):
                     riskScore=float(result["risk_score"]),
                     decayProb=float(result["decay_prob"]),
                     status=result["status"],
+                    email=result.get("email", ""),
                     conflicts=result["conflicts"],
                     agentThoughts=result["thoughts"],
                     lastUpdated=result.get("last_updated", "") or datetime.datetime.now().isoformat(),
@@ -563,6 +566,7 @@ async def upload_csv(file: UploadFile = File(...), run_efficiently: bool = True)
                     "risk_score": float(risk_score),
                     "decay_prob": float(decay_prob),
                     "status": status,
+                    "email": row.get("Email", ""),
                     "conflicts": conflicts,
                     "thoughts": res.get("agent_thoughts", []),
                     "last_updated": row.get("Last_Updated", ""),
@@ -579,6 +583,7 @@ async def upload_csv(file: UploadFile = File(...), run_efficiently: bool = True)
                     "risk_score": 50.0,
                     "decay_prob": 0.5,
                     "status": "Review",
+                    "email": row.get("Email", ""),
                     "conflicts": [f"Validation error: {str(e)[:80]}"],
                     "thoughts": [AgentThought(
                         agentName="Validation Agent",
@@ -641,6 +646,7 @@ async def upload_csv(file: UploadFile = File(...), run_efficiently: bool = True)
                 riskScore=float(result["risk_score"]),
                 decayProb=float(result["decay_prob"]),
                 status=result["status"],
+                email=result.get("email", ""),
                 conflicts=result["conflicts"],
                 agentThoughts=result["thoughts"],
                 lastUpdated=result.get("last_updated", "") or datetime.datetime.now().isoformat(),
@@ -820,3 +826,25 @@ async def analyze_manual_entry(
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
+
+class EmailPayload(BaseModel):
+    providerData: dict
+    toEmail: str = "provider@example.com"
+
+@router.post("/send-email")
+async def send_email_report(payload: EmailPayload):
+    """
+    Generate and send a structured email report to the provider.
+    """
+    try:
+        from ..services.email_service import send_provider_email
+        success = send_provider_email(payload.providerData, payload.toEmail)
+        if success:
+            return {"status": "success", "message": "Email request processed."}
+        else:
+            raise HTTPException(status_code=500, detail="Failed to process email request.")
+    except Exception as e:
+        print(f"Error in send_email_report: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
