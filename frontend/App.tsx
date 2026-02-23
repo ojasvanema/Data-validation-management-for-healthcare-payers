@@ -189,7 +189,18 @@ function AppContent() {
         }
     };
 
-    const refreshData = async () => {
+    const refreshData = async (id?: string, status?: string) => {
+        if (id && status) {
+            setAnalysisResult(prev => {
+                if (!prev) return prev;
+                return {
+                    ...prev,
+                    records: prev.records.map(r => r.id === id ? { ...r, status: status as any } : r)
+                };
+            });
+            return;
+        }
+
         try {
             const response = await fetch('/demo-data', {
                 method: 'POST'

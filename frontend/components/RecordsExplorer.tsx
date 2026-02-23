@@ -10,7 +10,7 @@ import ProviderDetailView from './ProviderDetailView';
 
 interface RecordsExplorerProps {
    records: ProviderRecord[] | undefined;
-   onRefresh?: () => void;
+   onRefresh?: (id?: string, status?: string) => void;
 }
 
 const RecordsExplorer: React.FC<RecordsExplorerProps> = ({ records, onRefresh }) => {
@@ -59,9 +59,9 @@ const RecordsExplorer: React.FC<RecordsExplorerProps> = ({ records, onRefresh })
 
             setPendingStatus(null);
 
-            // Refresh parent data
+            // Refresh parent data locally
             if (onRefresh) {
-               onRefresh();
+               onRefresh(selectedRecord.id, pendingStatus);
             }
          } catch (error) {
             console.error("Failed to update status:", error);
