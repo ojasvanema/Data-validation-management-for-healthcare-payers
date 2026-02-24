@@ -11,4 +11,4 @@ SPECIALTIES = ['Cardiology', 'Dermatology', 'Neurology', 'Orthopedics', 'Pediatr
 # Path to the dirty dataset (relative to project root)
 # Moving up from backend/app/core/config.py to project root: ../../../
 CSV_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "csvs", "test_dirty_providers_with_docs.csv")
-PROVIDER_LIMIT = 320  # Process first N providers to keep API calls manageable
+PROVIDER_LIMIT = 100  # Process first N providers to keep API calls manageable

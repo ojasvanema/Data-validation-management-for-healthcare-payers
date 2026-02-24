@@ -99,7 +99,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 </button>
                 <button
                     onClick={() => setCurrentView('manual')}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-sm font-medium group relative
+                    className={`hidden w-full items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-sm font-medium group relative
                 ${currentView === 'manual'
                             ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30 border'
                             : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white'}`}

@@ -95,6 +95,12 @@ function AppContent() {
             a.status === 'idle' && a.id !== AgentType.ORCHESTRATOR ? { ...a, status: 'completed', message: 'Cycle finished.' } : a
         ));
 
+        // Guarantee deduplication by NPI
+        const uniqueRecords = Array.from(
+            new Map(finalResult.records.map(r => [r.npi, r])).values()
+        );
+        finalResult.records = uniqueRecords;
+
         setAnalysisResult(finalResult);
 
         // Add to History

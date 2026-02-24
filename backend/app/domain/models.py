@@ -103,7 +103,7 @@ class FrontendProviderRecord(BaseModel):
     email: Optional[str] = None
     conflicts: List[str]
     agentThoughts: List[AgentThought]
-    agentThoughts: List[AgentThought]
+    complaints: Optional[List[Dict[str, Any]]] = Field(default_factory=list)
     lastUpdated: str
     state: str # US State Code
     feedback: Optional[Dict[str, Any]] = None # Score, trend, reviews

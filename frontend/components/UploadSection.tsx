@@ -514,7 +514,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onFilesSelected, onLoadHi
             <div className="text-[10px] text-slate-400 dark:text-gray-600 truncate">
               {complaintStatus?.loaded
                 ? `${complaintStatus.total} complaints from ${complaintStatus.filename}`
-                : 'Optional — upload member complaints CSV to cross-reference during validation'
+                : 'Optional : upload member complaints CSV to cross-reference during validation'
               }
             </div>
           </div>

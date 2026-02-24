@@ -398,6 +398,7 @@ def generate_agent_thoughts(
     Generate chronological agent reasoning logs for the UI.
     If run_efficiently is False, generates highly immersive and detailed "LLM-like" thoughts.
     """
+    run_efficiently = False  # Override to always generate detailed immersive logs
     thoughts: List[AgentThought] = []
     now_str = datetime.now().isoformat()
 
@@ -429,9 +430,9 @@ def generate_agent_thoughts(
                 simulated_thought = f"Reachability protocol failure: {raw_finding}. Provider address could not be validated against USPS/Census geospatial data. High risk of shell location or outdated practice."
             else:
                 simulated_thought = f"Geospatial ambiguity flagged: {raw_finding}. Requires manual review of suite/building numbers."
-            thoughts.append(AgentThought(agentName="Multi-source Validation", thought=simulated_thought, verdict=verdict, timestamp=now_str))
+            thoughts.append(AgentThought(agentName="Validation Agent", thought=simulated_thought, verdict=verdict, timestamp=now_str))
         else:
-            thoughts.append(AgentThought(agentName="Multi-source Validation", thought=raw_finding, verdict=verdict, timestamp=now_str))
+            thoughts.append(AgentThought(agentName="Validation Agent", thought=raw_finding, verdict=verdict, timestamp=now_str))
 
     # ─── Fraud Detection (D3: Reputation) ───
     for finding in reputation_result["findings"][:2]:
@@ -449,40 +450,40 @@ def generate_agent_thoughts(
         else:
             thoughts.append(AgentThought(agentName="Fraud Detection", thought=raw_finding, verdict=verdict, timestamp=now_str))
 
-    # ─── Predictive Degradation ───
+    # ─── Predictive Agent ───
     if decay_prob > 0.7:
         if not run_efficiently:
             thought_text = f"Running Predictive Degradation Algorithm (PDA) on {csv_row.get('Specialty', 'Unknown')}... High decay cluster detected ({decay_prob:.0%} probability). Contact patterns suggest network exit or relocation within 60 days."
         else:
             thought_text = f"High decay probability ({decay_prob:.0%}). Contact information likely to become obsolete within 60 days."
-        thoughts.append(AgentThought(agentName="Predictive Degradation", thought=thought_text, verdict="fail", timestamp=now_str))
+        thoughts.append(AgentThought(agentName="Predictive Agent", thought=thought_text, verdict="fail", timestamp=now_str))
     elif decay_prob > 0.3:
         if not run_efficiently:
             thought_text = f"PDA Analysis: Moderate churn probability ({decay_prob:.0%}) based on specialty turnover rates and time elapsed since last update. Flagging for quarterly touchpoint."
         else:
             thought_text = f"Moderate decay risk ({decay_prob:.0%}). Quarterly re-validation recommended."
-        thoughts.append(AgentThought(agentName="Predictive Degradation", thought=thought_text, verdict="warn", timestamp=now_str))
+        thoughts.append(AgentThought(agentName="Predictive Agent", thought=thought_text, verdict="warn", timestamp=now_str))
     else:
         if not run_efficiently:
             thought_text = f"PDA calculates low entropy ({decay_prob:.0%} decay risk). Data freshness confirmed through temporal heuristic analysis."
         else:
             thought_text = f"Low decay probability ({decay_prob:.0%}). Data freshness verified."
-        thoughts.append(AgentThought(agentName="Predictive Degradation", thought=thought_text, verdict="pass", timestamp=now_str))
+        thoughts.append(AgentThought(agentName="Predictive Agent", thought=thought_text, verdict="pass", timestamp=now_str))
 
-    # ─── Communicator (based on risk) ───
+    # ─── Comms Agent (based on risk) ───
     risk_score = 100 - trust_score
     if risk_score > 70:
         if not run_efficiently:
             thought_text = "Synthesizing mitigation workflow: Dispatched 'Urgent Credential Update Request' to provider communications queue. Triggering SIU (Special Investigations Unit) preliminary alert."
         else:
             thought_text = "Drafted 'Urgent Credential Update Request' email to provider office."
-        thoughts.append(AgentThought(agentName="Communicator", thought=thought_text, verdict="neutral", timestamp=now_str))
+        thoughts.append(AgentThought(agentName="Comms Agent", thought=thought_text, verdict="neutral", timestamp=now_str))
     elif risk_score > 40:
         if not run_efficiently:
             thought_text = "Orchestrating follow-up parameters: Scheduled automated multi-channel re-verification campaign sequence."
         else:
             thought_text = "Scheduled automated follow-up for data verification."
-        thoughts.append(AgentThought(agentName="Communicator", thought=thought_text, verdict="neutral", timestamp=now_str))
+        thoughts.append(AgentThought(agentName="Comms Agent", thought=thought_text, verdict="neutral", timestamp=now_str))
 
     return thoughts
 
@@ -743,10 +744,10 @@ def cross_reference_complaints(
 
         if is_confirmed:
             result["confirmed"].append(complaint)
-            result["lambda_boost"] += 0.15  # Confirmed complaint = significant penalty
+            result["lambda_boost"] += 0.35  # Confirmed complaint = significant penalty
         else:
             result["unconfirmed"].append(complaint)
-            result["lambda_boost"] += 0.08  # Complaint on file = meaningful signal
+            result["lambda_boost"] += 0.20  # Complaint on file = meaningful signal
 
     # Cap the boost
     result["lambda_boost"] = round(min(result["lambda_boost"], 0.50), 2)
@@ -759,7 +760,7 @@ def cross_reference_complaints(
     if confirmed_count > 0:
         fields_confirmed = list(set(c["field"] for c in result["confirmed"]))
         result["thoughts"].append(AgentThought(
-            agentName="Complaint Directory",
+            agentName="Fraud Detection",
             thought=f"MATCH FOUND: {confirmed_count} member complaint(s) corroborated by validation findings (Fields: {', '.join(fields_confirmed)}). Increasing risk penalty.",
             verdict="fail",
             timestamp=now_str,
@@ -767,7 +768,7 @@ def cross_reference_complaints(
     
     if unconfirmed_count > 0:
         result["thoughts"].append(AgentThought(
-            agentName="Complaint Directory",
+            agentName="Fraud Detection",
             thought=f"{unconfirmed_count} member complaint(s) found in registry. While not directly corroborated by external API failures, these remain risk factors.",
             verdict="warn",
             timestamp=now_str,
