@@ -130,3 +130,4 @@ npm run dev
 ## ⚠️ Notes
 *   **Demo Mode Endpoint**: The `/demo-data` endpoint creates synthetic data for demonstration, ensuring the UI can be fully tested without sensitive real-world data.
 *   **Agent Logic**: The current iteration focuses on the orchestration flow and UI integration. Some downstream agents use logic stubs for stable demonstration performance.
+Goodluck!
