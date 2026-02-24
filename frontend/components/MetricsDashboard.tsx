@@ -131,16 +131,6 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ data, onViewDetails
 
       {/* KPIs */}
       <div className="lg:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-4">
-        <GlassCard className="p-4 flex flex-col items-center justify-center text-center border-emerald-200 dark:border-emerald-500/20 bg-emerald-50 dark:bg-emerald-900/10 shadow-sm dark:shadow-none">
-          <DollarSign className="text-emerald-600 dark:text-emerald-400 mb-2" size={24} />
-          <span className="text-emerald-700/60 dark:text-emerald-200/60 text-xs uppercase tracking-wider">Potential ROI</span>
-          <span className="text-2xl font-bold text-slate-900 dark:text-white">${data.roi.toLocaleString()}</span>
-        </GlassCard>
-        <GlassCard className="p-4 flex flex-col items-center justify-center text-center border-red-200 dark:border-red-500/20 bg-red-50 dark:bg-red-900/10 shadow-sm dark:shadow-none">
-          <ShieldAlert className="text-red-500 dark:text-red-400 mb-2" size={24} />
-          <span className="text-red-700/60 dark:text-red-200/60 text-xs uppercase tracking-wider">Fraud Risk</span>
-          <span className="text-2xl font-bold text-slate-900 dark:text-white">{data.fraudRiskScore}/100</span>
-        </GlassCard>
         <GlassCard className="p-4 flex flex-col items-center justify-center text-center border-blue-200 dark:border-blue-500/20 bg-blue-50 dark:bg-blue-900/10 shadow-sm dark:shadow-none">
           <Users className="text-blue-500 dark:text-blue-400 mb-2" size={24} />
           <span className="text-blue-700/60 dark:text-blue-200/60 text-xs uppercase tracking-wider">Providers</span>
@@ -150,6 +140,16 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ data, onViewDetails
           <AlertOctagon className="text-orange-500 dark:text-orange-400 mb-2" size={24} />
           <span className="text-orange-700/60 dark:text-orange-200/60 text-xs uppercase tracking-wider">Discrepancies</span>
           <span className="text-2xl font-bold text-slate-900 dark:text-white">{data.discrepanciesFound}</span>
+        </GlassCard>
+        <GlassCard className="p-4 flex flex-col items-center justify-center text-center border-red-200 dark:border-red-500/20 bg-red-50 dark:bg-red-900/10 shadow-sm dark:shadow-none">
+          <ShieldAlert className="text-red-500 dark:text-red-400 mb-2" size={24} />
+          <span className="text-red-700/60 dark:text-red-200/60 text-xs uppercase tracking-wider">Avg Risk Score</span>
+          <span className="text-2xl font-bold text-slate-900 dark:text-white">{data.fraudRiskScore}/100</span>
+        </GlassCard>
+        <GlassCard className="p-4 flex flex-col items-center justify-center text-center border-emerald-200 dark:border-emerald-500/20 bg-emerald-50 dark:bg-emerald-900/10 shadow-sm dark:shadow-none">
+          <DollarSign className="text-emerald-600 dark:text-emerald-400 mb-2" size={24} />
+          <span className="text-emerald-700/60 dark:text-emerald-200/60 text-xs uppercase tracking-wider">Potential ROI</span>
+          <span className="text-2xl font-bold text-slate-900 dark:text-white">${data.roi.toLocaleString()}</span>
         </GlassCard>
       </div>
 
@@ -215,6 +215,8 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ data, onViewDetails
             <Tooltip
               cursor={{ fill: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}
               contentStyle={{ backgroundColor: tooltipBg, borderColor: tooltipBorder, color: tooltipText, borderRadius: '8px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+              labelStyle={{ color: tooltipText }}
+              itemStyle={{ color: tooltipText }}
             />
             <Bar dataKey="value" radius={[4, 4, 0, 0]}>
               {data.riskDistribution.map((entry, index) => (
