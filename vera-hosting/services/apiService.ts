@@ -6,41 +6,41 @@ const generateInitialResult = (): AnalysisResult => {
     return {
         roi: 1250000,
         fraudRiskScore: 42,
-        providersProcessed: 1542,
-        discrepanciesFound: 128,
+        providersProcessed: 100,
+        discrepanciesFound: 18,
         summary: `EXECUTIVE INTELLIGENCE BRIEF
 ============================
-Processing Volume: 1,542 Provider Records
+Processing Volume: 100 Provider Records
 Timestamp: ${new Date().toISOString().split('T')[0]}
 
 KEY FINDINGS & FINANCIAL IMPACT
-• Total Identified Discrepancies: 128
-• High-Risk Providers (Suggested Suspension): 42
+• Total Identified Discrepancies: 18
+• High-Risk Providers (Suggested Suspension): 6
 • Projected Revenue Protection (ROI): $1,250,000
 
 RISK VECTOR ANALYSIS
-1. License Expirations: 15 critical violations detected across 3 state registries (CA, FL, TX)
-2. Disciplinary Actions: 4 matching entries in OIG exclusion database
+1. License Expirations: 3 critical violations detected across 3 state registries (CA, FL, TX)
+2. Disciplinary Actions: 1 matching entry in OIG exclusion database
 3. Predictive Decay: 12% of currently valid records show >60% probability of degradation within 90 days due to approaching credential renewal dates.
 
 RECOMMENDED ACTIONS
-[URGENT] Isolate 42 high-risk profiles from billing cycle ID #9928.
-[AUTO] Initiated automated outreach for 86 medium-risk profiles requiring updated documentation.
-[REVIEW] Schedule batch re-verification for 180 records approaching decay threshold on ${new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}.`,
+[URGENT] Isolate 6 high-risk profiles from billing cycle ID #9928.
+[AUTO] Initiated automated outreach for 12 medium-risk profiles requiring updated documentation.
+[REVIEW] Schedule batch re-verification for 15 records approaching decay threshold on ${new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}.`,
         timelineData: [
-            { name: '00:00', value: 45, secondaryValue: 2 },
-            { name: '04:00', value: 120, secondaryValue: 5 },
-            { name: '08:00', value: 890, secondaryValue: 45 },
-            { name: '12:00', value: 1200, secondaryValue: 88 },
-            { name: '16:00', value: 1542, secondaryValue: 128 },
+            { name: '00:00', value: 0, secondaryValue: 0 },
+            { name: '04:00', value: 25, secondaryValue: 2 },
+            { name: '08:00', value: 50, secondaryValue: 8 },
+            { name: '12:00', value: 75, secondaryValue: 12 },
+            { name: '16:00', value: 100, secondaryValue: 18 },
         ],
         riskDistribution: [
-            { name: 'Low Risk', value: 1200 },
-            { name: 'Medium Risk', value: 300 },
-            { name: 'High Risk', value: 42 }
+            { name: 'Low Risk', value: 75 },
+            { name: 'Medium Risk', value: 19 },
+            { name: 'High Risk', value: 6 }
         ],
         agentLogs: [
-            { agent: AgentType.ORCHESTRATOR, log: "Batch ingestion started: 1,542 records.", timestamp: new Date().toISOString() },
+            { agent: AgentType.ORCHESTRATOR, log: "Batch ingestion started: 100 records.", timestamp: new Date().toISOString() },
             { agent: AgentType.DOCUMENT, log: "OCR processing complete. 98.5% confidence.", timestamp: new Date().toISOString() },
             { agent: AgentType.VALIDATION, log: "NPI Registry cross-reference started.", timestamp: new Date().toISOString() },
             { agent: AgentType.VALIDATION, log: "15 license mismatches detected.", timestamp: new Date().toISOString() },
