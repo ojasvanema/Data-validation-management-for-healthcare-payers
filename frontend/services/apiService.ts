@@ -43,9 +43,18 @@ const generateMockResult = (): AnalysisResult => {
                 conflicts: [],
                 lastUpdated: new Date().toISOString(),
                 agentThoughts: [
+                    { agentName: "Parser Agent", thought: "Ingesting document. Extracting entities and structuring query for validation.", verdict: "pass", timestamp: new Date().toISOString() },
                     { agentName: "Validation Agent", thought: "NPI confirmed in CMS Registry. Active status.", verdict: "pass", timestamp: new Date().toISOString() },
-                    { agentName: "Fraud Detection", thought: "No abnormal billing patterns found in last 12 months.", verdict: "pass", timestamp: new Date().toISOString() }
-                ]
+                    { agentName: "Validation Agent", thought: "Reachability check passed. Phone number active.", verdict: "pass", timestamp: new Date().toISOString() },
+                    { agentName: "Risk Scoring", thought: "Aggregated analysis complete. Trust Score: 95/100. Calculated Risk Score: 5/100.", verdict: "pass", timestamp: new Date().toISOString() },
+                    { agentName: "Predictive Degradation", thought: "Predictive modeling complete. Decay probability assessed based on 0 risk factors.", verdict: "neutral", timestamp: new Date().toISOString() },
+                    { agentName: "Interpretation Agent", thought: "LOW RISK: Data verified against authoritative sources. Standard validation cycle approved.", verdict: "pass", timestamp: new Date().toISOString() },
+                    { agentName: "Business & ROI", thought: "Calculated potential cost savings of $250.00 based on risk profile mitigation.", verdict: "pass", timestamp: new Date().toISOString() },
+                    { agentName: "Communicator", thought: "Standard notification protocol.", verdict: "neutral", timestamp: new Date().toISOString() }
+                ],
+                complaints: [],
+                locations: [],
+                contact_numbers: []
             },
             {
                 id: "2",
@@ -56,13 +65,24 @@ const generateMockResult = (): AnalysisResult => {
                 decayProb: 0.8,
                 status: "Flagged",
                 state: "CA",
-                conflicts: ["License Expired", "Address Mismatch"],
+                conflicts: ["License Expired", "Address Mismatch", "Patient Complaint"],
                 lastUpdated: new Date().toISOString(),
                 agentThoughts: [
+                    { agentName: "Parser Agent", thought: "Ingesting document. Extracting entities and structuring query for validation.", verdict: "pass", timestamp: new Date().toISOString() },
                     { agentName: "Validation Agent", thought: "CRITICAL: State License expired 45 days ago.", verdict: "fail", timestamp: new Date().toISOString() },
-                    { agentName: "Document Parser", thought: "OCR mismatch: Uploaded PDF shows different practice address than registry.", verdict: "warn", timestamp: new Date().toISOString() },
-                    { agentName: "Predictive Degradation", thought: "High probability of credential lapse spreading to other network participations.", verdict: "fail", timestamp: new Date().toISOString() }
-                ]
+                    { agentName: "Validation Agent", thought: "OCR mismatch: Uploaded PDF shows different practice address than registry.", verdict: "warn", timestamp: new Date().toISOString() },
+                    { agentName: "Discrepancy Analysis", thought: "MATCH FOUND: 1 member complaint(s) corroborated by validation findings (Fields: address).", verdict: "fail", timestamp: new Date().toISOString() },
+                    { agentName: "Risk Scoring", thought: "Aggregated analysis complete. Trust Score: 15/100. Calculated Risk Score: 85/100.", verdict: "fail", timestamp: new Date().toISOString() },
+                    { agentName: "Predictive Degradation", thought: "Predictive modeling complete. Decay probability assessed based on 3 risk factors.", verdict: "fail", timestamp: new Date().toISOString() },
+                    { agentName: "Interpretation Agent", thought: "CRITICAL RISK: High likelihood of fraud or data obsolescence. Immediate suspension or manual override recommended.", verdict: "fail", timestamp: new Date().toISOString() },
+                    { agentName: "Business & ROI", thought: "Calculated potential cost savings of $4,250.00 based on risk profile mitigation.", verdict: "pass", timestamp: new Date().toISOString() },
+                    { agentName: "Communicator", thought: "Drafted automated query to provider regarding discrepancies. Included complaint context in draft.", verdict: "neutral", timestamp: new Date().toISOString() }
+                ],
+                complaints: [
+                    { field: "address", value: "Practice closed at this location", date: "2023-10-15", notes: "Member went to appointment but door was locked." }
+                ],
+                locations: [],
+                contact_numbers: []
             },
             {
                 id: "3",
@@ -78,7 +98,10 @@ const generateMockResult = (): AnalysisResult => {
                 agentThoughts: [
                     { agentName: "Validation Agent", thought: "Primary license valid. DEA registration query timed out.", verdict: "warn", timestamp: new Date().toISOString() },
                     { agentName: "Business Impact", thought: "Potential delayed reimbursement revenue if DEA not verified.", verdict: "neutral", timestamp: new Date().toISOString() }
-                ]
+                ],
+                complaints: [],
+                locations: [],
+                contact_numbers: []
             },
             {
                 id: "4",
@@ -95,7 +118,10 @@ const generateMockResult = (): AnalysisResult => {
                     { agentName: "Fraud Detection", thought: "ALERT: Name matches OIG exclusion list entry.", verdict: "fail", timestamp: new Date().toISOString() },
                     { agentName: "Fraud Detection", thought: "Billing frequency 400% above regional average.", verdict: "fail", timestamp: new Date().toISOString() },
                     { agentName: "Communicator", thought: "Drafted immediate suspension notice.", verdict: "neutral", timestamp: new Date().toISOString() }
-                ]
+                ],
+                complaints: [],
+                locations: [],
+                contact_numbers: []
             },
             {
                 id: "5",
@@ -110,7 +136,10 @@ const generateMockResult = (): AnalysisResult => {
                 lastUpdated: new Date().toISOString(),
                 agentThoughts: [
                     { agentName: "Validation Agent", thought: "All credentials verified across 15 sources.", verdict: "pass", timestamp: new Date().toISOString() }
-                ]
+                ],
+                complaints: [],
+                locations: [],
+                contact_numbers: []
             }
         ]
     };
@@ -132,6 +161,43 @@ export const fetchDemoData = async (): Promise<AnalysisResult> => {
 export const updateProviderStatus = async (id: string, status: string): Promise<ProviderRecord> => {
     const response = await api.put<ProviderRecord>(`/providers/${id}/status`, { status });
     return response.data;
+};
+
+export const bulkApproveSafe = async (): Promise<{ count: number, message: string }> => {
+    const response = await api.post<{ count: number, message: string }>('/bulk-approve', {});
+    return response.data;
+};
+
+// Manual Entry Analysis
+export const analyzeManualEntry = async (data: any, file?: File, runEfficiently: boolean = true): Promise<any> => {
+    try {
+        const formData = new FormData();
+        formData.append('data', JSON.stringify(data));
+        if (file) {
+            formData.append('file', file);
+        }
+        formData.append('run_efficiently', String(runEfficiently));
+
+        const response = await api.post('/analyze-manual', formData);
+        return response.data;
+    } catch (error) {
+        console.error("Error analyzing manual entry:", error);
+        throw error;
+    }
+};
+
+export const sendEmailReport = async (providerData: any, toEmail?: string): Promise<any> => {
+    try {
+        const payload = {
+            providerData,
+            toEmail: toEmail || "provider@example.com"
+        };
+        const response = await api.post('/send-email', payload);
+        return response.data;
+    } catch (error) {
+        console.error("Error sending email report:", error);
+        throw error;
+    }
 };
 
 export const analyzeFilesWithAgents = async (files: FileUpload[]): Promise<AnalysisResult> => {

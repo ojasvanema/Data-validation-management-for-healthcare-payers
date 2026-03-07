@@ -1,0 +1,4 @@
+NPI,First_Name,Last_Name,Credential,Specialty,License_Number,State,Address_History,Phone_History,File_Path
+1234567890,ROBERT,SMITH,MD,Cardiology,MD12345,NY,100 Old St, Albany, NY 12207||200 Previous Rd, Buffalo, NY 14202||123 Main St, Springfield, NY 10001,555-000-0001||555-000-0002||555-0100,uploads/dummy_docs/robert_smith_license.png
+9876543210,JANE,DOE,DO,Family Medicine,DO67890,CA,500 Past Ave, San Diego, CA 92101||789 Current Blvd, Los Angeles, CA 90001,555-111-1111||555-111-2222,uploads/dummy_docs/jane_doe_id.png
+1122334455,JOHN,WAYNE,PA-C,Physician Assistant,PA11223,TX,999 Old West Ln, Austin, TX 73301||456 New Frontier Dr, Houston, TX 77001,555-222-3333||555-444-5555,uploads/dummy_docs/john_wayne_cred.png

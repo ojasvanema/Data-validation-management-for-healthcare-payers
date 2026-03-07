@@ -11,6 +11,77 @@ interface MetricsDashboardProps {
 }
 
 import { useTheme } from './ThemeContext';
+import { bulkApproveSafe } from '../services/apiService';
+import { useState } from 'react';
+import { CheckCircle } from 'lucide-react';
+
+const BatchApproveButton = ({ onRefresh, pendingCount }: { onRefresh?: () => void, pendingCount: number }) => {
+  const [status, setStatus] = useState<'idle' | 'pushing' | 'success'>('idle');
+
+  const handleApprove = async () => {
+    if (status !== 'idle') return;
+
+    // Start "Pushing" state
+    setStatus('pushing');
+
+    try {
+      // Artificial delay to show the "Pushing to DB" visual
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Actual API call
+      await bulkApproveSafe();
+
+      // Show success
+      setStatus('success');
+
+      // Wait a bit on success before refreshing
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      if (onRefresh && typeof onRefresh === 'function') {
+        // onRefresh logic
+      }
+    } catch (e) {
+      console.error("Bulk approve failed", e);
+      setStatus('idle');
+    } finally {
+      if (status !== 'idle') {
+        window.location.reload();
+      }
+    }
+  };
+
+  const isDisabled = (status !== 'idle' && status !== 'success') || (pendingCount === 0 && status === 'idle');
+
+  return (
+    <button
+      onClick={handleApprove}
+      disabled={isDisabled}
+      className={`
+        flex items-center gap-2 px-4 py-2 rounded-lg shadow-md transition-all 
+        ${isDisabled && status === 'idle'
+          ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-gray-500 cursor-not-allowed opacity-70'
+          : status === 'success'
+            ? 'bg-emerald-500 text-white'
+            : 'bg-emerald-600 hover:bg-emerald-700 text-white animate-in fade-in zoom-in-95'}
+      `}
+    >
+      {status === 'pushing' ? (
+        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+      ) : status === 'success' ? (
+        <CheckCircle size={16} className="animate-bounce" />
+      ) : (
+        <CheckCircle size={16} />
+      )}
+      <span>
+        {status === 'pushing' ? 'Pushing Verification to DB...' :
+          status === 'success' ? 'Synced to Database!' :
+            pendingCount > 0
+              ? `Batch Approve ${pendingCount} Safe Records`
+              : 'No Pending Safe Records to Approve'}
+      </span>
+    </button>
+  );
+};
 
 const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ data, onViewDetails }) => {
   const { theme } = useTheme();
@@ -48,18 +119,18 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ data, onViewDetails
         )}
       </div>
 
+      {/* Batch Approve Action */}
+      {data && (
+        <div className="lg:col-span-3 mb-2 flex justify-end">
+          <BatchApproveButton
+            onRefresh={onViewDetails}
+            pendingCount={data.records.filter(r => r.status === 'Pending' && r.riskScore <= 35).length}
+          />
+        </div>
+      )}
+
       {/* KPIs */}
       <div className="lg:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-4">
-        <GlassCard className="p-4 flex flex-col items-center justify-center text-center border-emerald-200 dark:border-emerald-500/20 bg-emerald-50 dark:bg-emerald-900/10 shadow-sm dark:shadow-none">
-          <DollarSign className="text-emerald-600 dark:text-emerald-400 mb-2" size={24} />
-          <span className="text-emerald-700/60 dark:text-emerald-200/60 text-xs uppercase tracking-wider">Potential ROI</span>
-          <span className="text-2xl font-bold text-slate-900 dark:text-white">${data.roi.toLocaleString()}</span>
-        </GlassCard>
-        <GlassCard className="p-4 flex flex-col items-center justify-center text-center border-red-200 dark:border-red-500/20 bg-red-50 dark:bg-red-900/10 shadow-sm dark:shadow-none">
-          <ShieldAlert className="text-red-500 dark:text-red-400 mb-2" size={24} />
-          <span className="text-red-700/60 dark:text-red-200/60 text-xs uppercase tracking-wider">Fraud Risk</span>
-          <span className="text-2xl font-bold text-slate-900 dark:text-white">{data.fraudRiskScore}/100</span>
-        </GlassCard>
         <GlassCard className="p-4 flex flex-col items-center justify-center text-center border-blue-200 dark:border-blue-500/20 bg-blue-50 dark:bg-blue-900/10 shadow-sm dark:shadow-none">
           <Users className="text-blue-500 dark:text-blue-400 mb-2" size={24} />
           <span className="text-blue-700/60 dark:text-blue-200/60 text-xs uppercase tracking-wider">Providers</span>
@@ -70,7 +141,35 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ data, onViewDetails
           <span className="text-orange-700/60 dark:text-orange-200/60 text-xs uppercase tracking-wider">Discrepancies</span>
           <span className="text-2xl font-bold text-slate-900 dark:text-white">{data.discrepanciesFound}</span>
         </GlassCard>
+        <GlassCard className="p-4 flex flex-col items-center justify-center text-center border-red-200 dark:border-red-500/20 bg-red-50 dark:bg-red-900/10 shadow-sm dark:shadow-none">
+          <ShieldAlert className="text-red-500 dark:text-red-400 mb-2" size={24} />
+          <span className="text-red-700/60 dark:text-red-200/60 text-xs uppercase tracking-wider">Avg Risk Score</span>
+          <span className="text-2xl font-bold text-slate-900 dark:text-white">{data.fraudRiskScore}/100</span>
+        </GlassCard>
+        <GlassCard className="p-4 flex flex-col items-center justify-center text-center border-emerald-200 dark:border-emerald-500/20 bg-emerald-50 dark:bg-emerald-900/10 shadow-sm dark:shadow-none">
+          <DollarSign className="text-emerald-600 dark:text-emerald-400 mb-2" size={24} />
+          <span className="text-emerald-700/60 dark:text-emerald-200/60 text-xs uppercase tracking-wider">Potential ROI</span>
+          <span className="text-2xl font-bold text-slate-900 dark:text-white">${data.roi.toLocaleString()}</span>
+        </GlassCard>
       </div>
+
+      {/* Executive Intelligence Brief */}
+      {data.summary && data.summary.length > 0 && (
+        <div className="lg:col-span-3">
+          <GlassCard className="p-5 border-indigo-200 dark:border-indigo-500/20 bg-gradient-to-br from-indigo-50/50 to-purple-50/30 dark:from-indigo-900/10 dark:to-purple-900/5 shadow-sm dark:shadow-none">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center">
+                <TrendingUp className="text-indigo-600 dark:text-indigo-400" size={16} />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Business Intelligence Brief</h3>
+                <span className="text-[10px] text-indigo-600/60 dark:text-indigo-400/60 uppercase tracking-wider">VERA Business Impact Agent</span>
+              </div>
+            </div>
+            <pre className="text-[13px] leading-relaxed text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-sans">{data.summary}</pre>
+          </GlassCard>
+        </div>
+      )}
 
       {/* Main Graph */}
       <GlassCard className="lg:col-span-2 p-6 min-h-[300px]">
@@ -116,6 +215,8 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ data, onViewDetails
             <Tooltip
               cursor={{ fill: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}
               contentStyle={{ backgroundColor: tooltipBg, borderColor: tooltipBorder, color: tooltipText, borderRadius: '8px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+              labelStyle={{ color: tooltipText }}
+              itemStyle={{ color: tooltipText }}
             />
             <Bar dataKey="value" radius={[4, 4, 0, 0]}>
               {data.riskDistribution.map((entry, index) => (

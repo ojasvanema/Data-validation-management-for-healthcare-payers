@@ -35,10 +35,6 @@ const Hero: React.FC<HeroProps> = ({ onStart }) => {
             Start Orchestration
             <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Button>
-          <Button variant="secondary" size="lg" className="group">
-            <PlayCircle className="mr-2 w-5 h-5 text-emerald-400" />
-            Watch Demo
-          </Button>
         </div>
 
         {/* Dashboard Preview Anchor */}

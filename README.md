@@ -62,6 +62,15 @@ source .venv/bin/activate
 # Install dependencies
 pip install -r requirements.txt
 
+# Create environment file and add required variables
+touch backend/.env
+# Add the following to backend/.env:
+# GROQ_API_KEY="your_groq_key"
+# SMTP_SERVER="smtp.gmail.com"
+# SMTP_PORT="587"
+# SMTP_USER="your_email@gmail.com"
+# SMTP_PASSWORD="your_app_password"  # Note: Must use an App Password, not regular login
+
 # Start the Backend Server (runs on http://127.0.0.1:8000)
 python3 -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
@@ -121,3 +130,4 @@ npm run dev
 ## ⚠️ Notes
 *   **Demo Mode Endpoint**: The `/demo-data` endpoint creates synthetic data for demonstration, ensuring the UI can be fully tested without sensitive real-world data.
 *   **Agent Logic**: The current iteration focuses on the orchestration flow and UI integration. Some downstream agents use logic stubs for stable demonstration performance.
+Goodluck!

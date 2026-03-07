@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { ShieldCheck, Menu, X } from 'lucide-react';
 import Button from './ui/Button';
 
-const Navbar: React.FC = () => {
+interface NavbarProps {
+  onRequestDemo?: () => void;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ onRequestDemo }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -45,7 +49,7 @@ const Navbar: React.FC = () => {
               {link.name}
             </a>
           ))}
-          <Button variant="secondary" size="sm" className="ml-4">
+          <Button variant="secondary" size="sm" className="ml-4" onClick={onRequestDemo}>
             Request Access
           </Button>
         </div>
@@ -74,7 +78,7 @@ const Navbar: React.FC = () => {
               {link.name}
             </a>
           ))}
-          <Button className="w-full mt-4">Request Access</Button>
+          <Button className="w-full mt-4" onClick={onRequestDemo}>Request Access</Button>
         </div>
       )}
     </nav>
