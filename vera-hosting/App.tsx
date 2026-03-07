@@ -227,7 +227,7 @@ function AppContent() {
     }
 
     if (view === 'login') {
-        return <LoginTransition onComplete={() => setView('dashboard')} />;
+        return <LoginTransition onComplete={() => setView('home')} />;
     }
 
     // Main Dashboard View

@@ -8,7 +8,25 @@ const generateInitialResult = (): AnalysisResult => {
         fraudRiskScore: 42,
         providersProcessed: 1542,
         discrepanciesFound: 128,
-        summary: "Analysis Complete: High ROI potential detected. 128 discrepancies found in 1,542 inspected provider records. Critical fraud flags in 'New York' region requiring immediate review.",
+        summary: `EXECUTIVE INTELLIGENCE BRIEF
+============================
+Processing Volume: 1,542 Provider Records
+Timestamp: ${new Date().toISOString().split('T')[0]}
+
+KEY FINDINGS & FINANCIAL IMPACT
+• Total Identified Discrepancies: 128
+• High-Risk Providers (Suggested Suspension): 42
+• Projected Revenue Protection (ROI): $1,250,000
+
+RISK VECTOR ANALYSIS
+1. License Expirations: 15 critical violations detected across 3 state registries (CA, FL, TX)
+2. Disciplinary Actions: 4 matching entries in OIG exclusion database
+3. Predictive Decay: 12% of currently valid records show >60% probability of degradation within 90 days due to approaching credential renewal dates.
+
+RECOMMENDED ACTIONS
+[URGENT] Isolate 42 high-risk profiles from billing cycle ID #9928.
+[AUTO] Initiated automated outreach for 86 medium-risk profiles requiring updated documentation.
+[REVIEW] Schedule batch re-verification for 180 records approaching decay threshold on ${new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}.`,
         timelineData: [
             { name: '00:00', value: 45, secondaryValue: 2 },
             { name: '04:00', value: 120, secondaryValue: 5 },
