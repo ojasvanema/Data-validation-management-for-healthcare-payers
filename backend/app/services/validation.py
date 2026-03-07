@@ -9,6 +9,7 @@ Implements the 3-Dimensional Trust Score: T = 100 × (w1·s1 + w2·s2 + w3·s3) 
 import httpx
 import asyncio
 import re
+import os
 from datetime import datetime
 from difflib import SequenceMatcher
 from typing import Dict, Any, List, Tuple, Optional
@@ -46,6 +47,56 @@ SPECIALTY_DECAY_RATES = {
 
 # High-mobility states
 HIGH_MOBILITY_STATES = {"FL", "AZ", "NV", "TX", "CA", "CO", "GA"}
+
+# ─── PDA: Load trained Cox PH model ───
+import pickle
+_PDA_MODEL = None
+try:
+    _model_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+                               "..", "data", "pda_model.pkl")
+    if os.path.exists(_model_path):
+        with open(_model_path, "rb") as _f:
+            _PDA_MODEL = pickle.load(_f)
+        print(f"[PDA] Loaded trained Cox PH model from {_model_path}")
+    else:
+        print(f"[PDA] Model not found at {_model_path}, using heuristic fallback")
+except Exception as _e:
+    print(f"[PDA] Could not load model: {_e}, using heuristic fallback")
+
+
+def _get_specialty_churn(specialty_str: str) -> float:
+    """Look up specialty churn rate for the Cox PH model."""
+    _CHURN_RATES = {
+        "Internal Medicine": 0.15, "Family Medicine": 0.12, "Family Practice": 0.12,
+        "Cardiology": 0.10, "Orthopedic Surgery": 0.10, "Dermatology": 0.08,
+        "Psychiatry": 0.18, "Emergency Medicine": 0.25, "Urgent Care": 0.30,
+        "Physician Assistant": 0.22, "Nurse Practitioner": 0.20, "Physical Therapist": 0.18,
+        "Optometry": 0.10, "Podiatry": 0.12, "Chiropractic": 0.14, "Chiropractor": 0.14,
+        "General Surgery": 0.13, "Surgery": 0.13, "Occupational Therapist": 0.15,
+        "Occupational Therapy Assistant": 0.17, "Physical Therapy Assistant": 0.19,
+        "Social Worker": 0.16, "Counselor": 0.18, "Behavior Analyst": 0.20,
+        "Behavior Technician": 0.25, "Registered Nurse": 0.18,
+        "Speech-Language Pathologist": 0.14, "Audiologist": 0.10, "Dietitian": 0.12,
+        "Pharmacist": 0.10, "Dentist": 0.08, "Psychologist": 0.15,
+    }
+    if not specialty_str:
+        return 0.15
+    for key, rate in _CHURN_RATES.items():
+        if key.lower() in specialty_str.lower() or specialty_str.lower() in key.lower():
+            return rate
+    return 0.15
+
+
+def _parse_date_for_pda(date_str: str) -> Optional[datetime]:
+    """Parse date from various formats for PDA features."""
+    if not date_str or date_str == "nan":
+        return None
+    for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%Y-%m-%dT%H:%M:%S"):
+        try:
+            return datetime.strptime(str(date_str)[:10], fmt)
+        except (ValueError, TypeError):
+            continue
+    return None
 
 
 def fuzzy_match(a: str, b: str) -> float:
@@ -343,19 +394,70 @@ def compute_trust_score(s1: float, s2: float, s3: float, lambda_penalty: float) 
     return round(max(0.0, min(100.0, T)), 1)
 
 
-def compute_decay_probability(specialty: str, last_updated: str, state: str) -> float:
+def compute_decay_probability(specialty: str, last_updated: str, state: str,
+                               has_docs: bool = False, enumeration_date: str = "") -> float:
     """
-    Rule-based heuristic for data staleness prediction.
-    decayProb = baseRate × recencyFactor × stateMobility
+    Cox PH survival model prediction for data staleness.
+    Uses trained model from data/pda_model.pkl.
+    Falls back to rule-based heuristic if model not available.
+    
+    Returns P(data stale within 90 days) = 1 - S(3 months)
     """
-    # Base rate from specialty
+    # ─── Try model-based prediction ───
+    if _PDA_MODEL is not None:
+        try:
+            import pandas as _pd
+            import numpy as _np
+
+            # Feature 1: specialty churn rate
+            spec_churn = _get_specialty_churn(specialty)
+
+            # Feature 2: months since update
+            updated_dt = _parse_date_for_pda(last_updated)
+            if updated_dt:
+                months_since = (datetime.now() - updated_dt).days / 30.0
+            else:
+                months_since = 24.0
+
+            # Feature 3: state mobility
+            state_mob = 1.0 if state and state.upper() in HIGH_MOBILITY_STATES else 0.0
+
+            # Feature 4: has docs
+            has_docs_val = 1.0 if has_docs else 0.0
+
+            # Feature 5: years active
+            enum_dt = _parse_date_for_pda(enumeration_date)
+            if enum_dt:
+                yrs_active = (datetime.now() - enum_dt).days / 365.25
+            else:
+                yrs_active = 5.0
+
+            features = _pd.DataFrame([{
+                "specialty_churn": spec_churn,
+                "months_since_update": months_since,
+                "state_mobility": state_mob,
+                "has_docs": has_docs_val,
+                "years_active": min(yrs_active, 20),
+            }])
+
+            # Predict survival at t=3 months (≈90 days)
+            sf = _PDA_MODEL.predict_survival_function(features)
+            # Find closest time point to 3.0
+            t_target = 3.0
+            idx = sf.index.searchsorted(t_target)
+            idx = min(idx, len(sf.index) - 1)
+            survival_at_90 = float(sf.iloc[idx, 0])
+            decay_prob = 1.0 - survival_at_90
+            return round(max(0.01, min(decay_prob, 0.99)), 2)
+        except Exception as e:
+            print(f"[PDA] Model prediction failed, falling back to heuristic: {e}")
+
+    # ─── Fallback: rule-based heuristic ───
     base = SPECIALTY_DECAY_RATES.get(specialty, 0.15)
 
-    # Recency factor: older data = higher decay
     recency = 1.0
     if last_updated:
         try:
-            # Handle various date formats
             for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%Y-%m-%dT%H:%M:%S"):
                 try:
                     updated_dt = datetime.strptime(last_updated[:10], fmt)
@@ -376,13 +478,12 @@ def compute_decay_probability(specialty: str, last_updated: str, state: str) -> 
                 else:
                     recency = 1.0
         except Exception:
-            recency = 1.5  # Unknown date = moderate risk
+            recency = 1.5
 
-    # State mobility factor
     state_factor = 1.3 if state and state.upper() in HIGH_MOBILITY_STATES else 1.0
 
     decay = base * recency * state_factor
-    return round(min(decay, 0.99), 2)  # Cap at 99%
+    return round(min(decay, 0.99), 2)
 
 
 def generate_agent_thoughts(
@@ -534,7 +635,9 @@ async def validate_single_provider(csv_row: Dict[str, Any], client: httpx.AsyncC
     specialty = csv_row.get("Specialty", "")
     last_updated = csv_row.get("Last_Updated", "")
     state = csv_row.get("State", "")
-    decay_prob = compute_decay_probability(specialty, last_updated, state)
+    has_docs = bool(csv_row.get("related_docs", "") and str(csv_row.get("related_docs", "")) not in ["", "[]", "nan"])
+    enumeration_date = csv_row.get("Enumeration_Date", "")
+    decay_prob = compute_decay_probability(specialty, last_updated, state, has_docs=has_docs, enumeration_date=str(enumeration_date))
 
     # Status
     if risk_score > 70:
