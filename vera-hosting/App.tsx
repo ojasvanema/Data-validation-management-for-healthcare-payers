@@ -223,7 +223,7 @@ function AppContent() {
     };
 
     if (view === 'landing') {
-        return <LandingPage onLogin={() => setView('login')} />;
+        return <LandingPage onLogin={() => setView('home')} />;
     }
 
     if (view === 'login') {

@@ -9,7 +9,7 @@ const DashboardPreview: React.FC = () => {
             <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl blur opacity-10"></div>
 
             {/* App Container */}
-            <div className="relative bg-[#050505] rounded-xl border border-white/10 shadow-2xl overflow-hidden flex h-[800px] md:h-[800px]">
+            <div className="relative bg-[#050505] rounded-xl border border-white/10 shadow-2xl overflow-hidden flex h-[500px] md:h-[800px]">
 
                 {/* Sidebar */}
                 <div className="hidden md:flex w-64 border-r border-white/5 flex-col bg-[#080808] p-4">
@@ -48,11 +48,11 @@ const DashboardPreview: React.FC = () => {
                         <div className="space-y-3 px-3">
                             <div className="border-l border-white/10 pl-3">
                                 <div className="text-xs text-gray-300">09/12/2025</div>
-                                <div className="text-[10px] text-gray-500 truncate">Processed 1542 providers with $...</div>
+                                <div className="text-[10px] text-gray-500 truncate">Processed 100 providers with $...</div>
                             </div>
                             <div className="border-l border-white/10 pl-3">
                                 <div className="text-xs text-gray-300">09/12/2025</div>
-                                <div className="text-[10px] text-gray-500 truncate">Processed 1542 providers with $...</div>
+                                <div className="text-[10px] text-gray-500 truncate">Processed 100 providers with $...</div>
                             </div>
                         </div>
                     </div>
@@ -71,76 +71,77 @@ const DashboardPreview: React.FC = () => {
                 </div>
 
                 {/* Main Dashboard Content */}
-                <div className="flex-1 bg-[#050505] p-6 md:p-8 overflow-y-auto">
+                <div className="flex-1 bg-[#050505] p-4 sm:p-6 md:p-8 overflow-y-auto">
                     {/* Breadcrumb & Header */}
-                    <div className="flex justify-between items-center mb-8">
-                        <div className="text-xs text-gray-500 mb-1">Home &gt; Analysis &gt; <span className="text-emerald-500">Live Dashboard</span></div>
-                        <div className="bg-emerald-500/10 text-emerald-500 px-3 py-1 rounded-full text-xs font-mono border border-emerald-500/20 flex items-center gap-2">
+                    <div className="flex justify-between items-center mb-6 md:mb-8">
+                        <div className="text-[10px] md:text-xs text-gray-500 mb-1">Home &gt; Analysis &gt; <span className="text-emerald-500">Live Dashboard</span></div>
+                        <div className="bg-emerald-500/10 text-emerald-500 px-2 md:px-3 py-1 rounded-full text-[10px] md:text-xs font-mono border border-emerald-500/20 flex items-center gap-2">
                             <Activity className="w-3 h-3" />
-                            System Operational
+                            <span className="hidden sm:inline">System Operational</span>
+                            <span className="sm:hidden">Operational</span>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-12 gap-6">
+                    <div className="grid grid-cols-12 gap-4 md:gap-6">
 
                         {/* Data Ingestion Card (Top Left) */}
-                        <div className="col-span-12 lg:col-span-4 bg-[#0a0a0a] border border-white/10 rounded-xl p-6 relative overflow-hidden group">
+                        <div className="col-span-12 lg:col-span-4 bg-[#0a0a0a] border border-white/10 rounded-xl p-4 md:p-6 relative overflow-hidden group">
                             <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
-                            <h3 className="text-emerald-500 font-medium mb-4 flex items-center gap-2">
+                            <h3 className="text-emerald-500 font-medium mb-4 flex items-center gap-2 text-sm md:text-base">
                                 Data Ingestion
                             </h3>
-                            <div className="border-2 border-dashed border-white/10 rounded-xl h-40 flex flex-col items-center justify-center bg-[#050505] mb-4 hover:border-emerald-500/30 transition-colors cursor-pointer">
-                                <UploadCloud className="w-8 h-8 text-gray-500 mb-2" />
-                                <span className="text-sm text-gray-400">Drag files here</span>
-                                <span className="text-xs text-gray-600">or</span>
-                                <span className="text-xs text-emerald-500 mt-1 font-medium bg-emerald-500/10 px-2 py-0.5 rounded">Browse Files</span>
+                            <div className="border-2 border-dashed border-white/10 rounded-xl h-32 md:h-40 flex flex-col items-center justify-center bg-[#050505] mb-4 hover:border-emerald-500/30 transition-colors cursor-pointer">
+                                <UploadCloud className="w-6 h-6 md:w-8 md:h-8 text-gray-500 mb-2" />
+                                <span className="text-xs md:text-sm text-gray-400">Drag files here</span>
+                                <span className="text-[10px] md:text-xs text-gray-600">or</span>
+                                <span className="text-[10px] md:text-xs text-emerald-500 mt-1 font-medium bg-emerald-500/10 px-2 py-0.5 rounded">Browse Files</span>
                             </div>
-                            <Button className="w-full bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10">Start Orchestration</Button>
+                            <Button className="w-full bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10 text-xs md:text-sm py-2">Start Orchestration</Button>
                         </div>
 
                         {/* Metrics Row (Top Right) */}
-                        <div className="col-span-12 lg:col-span-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-4 flex flex-col justify-between">
-                                <div className="flex justify-between items-start">
-                                    <DollarSign className="w-5 h-5 text-emerald-500" />
+                        <div className="col-span-12 lg:col-span-8 grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                            <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-3 md:p-4 flex flex-col justify-between">
+                                <div className="flex justify-between items-start mb-2">
+                                    <DollarSign className="w-4 h-4 md:w-5 md:h-5 text-emerald-500" />
                                 </div>
                                 <div>
-                                    <div className="text-[10px] text-gray-500 uppercase tracking-wider">Potential ROI</div>
-                                    <div className="text-2xl font-bold text-white">$1,250,000</div>
+                                    <div className="text-[9px] md:text-[10px] text-gray-500 uppercase tracking-wider">Potential ROI</div>
+                                    <div className="text-lg md:text-2xl font-bold text-white">$1.25M</div>
                                 </div>
                             </div>
-                            <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-4 flex flex-col justify-between">
-                                <div className="flex justify-between items-start">
-                                    <ShieldAlert className="w-5 h-5 text-red-500" />
+                            <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-3 md:p-4 flex flex-col justify-between">
+                                <div className="flex justify-between items-start mb-2">
+                                    <ShieldAlert className="w-4 h-4 md:w-5 md:h-5 text-red-500" />
                                 </div>
                                 <div>
-                                    <div className="text-[10px] text-gray-500 uppercase tracking-wider">Fraud Risk</div>
-                                    <div className="text-2xl font-bold text-white">42/100</div>
+                                    <div className="text-[9px] md:text-[10px] text-gray-500 uppercase tracking-wider">Fraud Risk</div>
+                                    <div className="text-lg md:text-2xl font-bold text-white">42/100</div>
                                 </div>
                             </div>
-                            <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-4 flex flex-col justify-between">
-                                <div className="flex justify-between items-start">
-                                    <Users className="w-5 h-5 text-blue-500" />
+                            <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-3 md:p-4 flex flex-col justify-between">
+                                <div className="flex justify-between items-start mb-2">
+                                    <Users className="w-4 h-4 md:w-5 md:h-5 text-blue-500" />
                                 </div>
                                 <div>
-                                    <div className="text-[10px] text-gray-500 uppercase tracking-wider">Providers</div>
-                                    <div className="text-2xl font-bold text-white">1,542</div>
+                                    <div className="text-[9px] md:text-[10px] text-gray-500 uppercase tracking-wider">Providers</div>
+                                    <div className="text-lg md:text-2xl font-bold text-white">100</div>
                                 </div>
                             </div>
-                            <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-4 flex flex-col justify-between">
-                                <div className="flex justify-between items-start">
-                                    <AlertTriangle className="w-5 h-5 text-amber-500" />
+                            <div className="bg-[#0a0a0a] border border-white/10 rounded-xl p-3 md:p-4 flex flex-col justify-between">
+                                <div className="flex justify-between items-start mb-2">
+                                    <AlertTriangle className="w-4 h-4 md:w-5 md:h-5 text-amber-500" />
                                 </div>
                                 <div>
-                                    <div className="text-[10px] text-gray-500 uppercase tracking-wider">Discrepancies</div>
-                                    <div className="text-2xl font-bold text-white">128</div>
+                                    <div className="text-[9px] md:text-[10px] text-gray-500 uppercase tracking-wider">Discrepancies</div>
+                                    <div className="text-lg md:text-2xl font-bold text-white">18</div>
                                 </div>
                             </div>
 
-                            {/* Charts Area */}
-                            <div className="col-span-2 md:col-span-3 bg-[#0a0a0a] border border-white/10 rounded-xl p-5 mt-0 h-[220px] relative">
+                            {/* Charts Area - Hidden on small mobile */}
+                            <div className="hidden sm:block col-span-2 lg:col-span-3 bg-[#0a0a0a] border border-white/10 rounded-xl p-4 md:p-5 mt-0 h-[180px] md:h-[220px] relative">
                                 <div className="flex items-center gap-2 mb-4 border-l-4 border-emerald-500 pl-2">
-                                    <h4 className="text-sm font-bold text-white">Validation Throughput</h4>
+                                    <h4 className="text-xs md:text-sm font-bold text-white">Validation Throughput</h4>
                                 </div>
                                 {/* Mock Chart Line */}
                                 <div className="absolute bottom-6 left-6 right-6 top-16 border-l border-b border-white/5">
@@ -155,30 +156,30 @@ const DashboardPreview: React.FC = () => {
                                         </defs>
                                     </svg>
                                     {/* X Axis Labels */}
-                                    <div className="absolute -bottom-5 left-0 text-[9px] text-gray-600">00:00</div>
-                                    <div className="absolute -bottom-5 left-1/4 text-[9px] text-gray-600">04:00</div>
-                                    <div className="absolute -bottom-5 left-2/4 text-[9px] text-gray-600">08:00</div>
-                                    <div className="absolute -bottom-5 left-3/4 text-[9px] text-gray-600">12:00</div>
-                                    <div className="absolute -bottom-5 right-0 text-[9px] text-gray-600">16:00</div>
+                                    <div className="absolute -bottom-5 left-0 text-[8px] md:text-[9px] text-gray-600">00:00</div>
+                                    <div className="absolute -bottom-5 left-1/4 text-[8px] md:text-[9px] text-gray-600">04:00</div>
+                                    <div className="absolute -bottom-5 left-2/4 text-[8px] md:text-[9px] text-gray-600">08:00</div>
+                                    <div className="absolute -bottom-5 left-3/4 text-[8px] md:text-[9px] text-gray-600">12:00</div>
+                                    <div className="absolute -bottom-5 right-0 text-[8px] md:text-[9px] text-gray-600">16:00</div>
                                 </div>
                             </div>
 
-                            <div className="col-span-2 md:col-span-1 bg-[#0a0a0a] border border-white/10 rounded-xl p-5 h-[220px]">
+                            <div className="hidden sm:block col-span-2 lg:col-span-1 bg-[#0a0a0a] border border-white/10 rounded-xl p-4 md:p-5 h-[180px] md:h-[220px]">
                                 <div className="flex items-center gap-2 mb-4 border-l-4 border-amber-500 pl-2">
-                                    <h4 className="text-sm font-bold text-white">Risk Dist.</h4>
+                                    <h4 className="text-xs md:text-sm font-bold text-white">Risk Dist.</h4>
                                 </div>
-                                <div className="flex items-end justify-between h-32 gap-2 mt-4">
+                                <div className="flex items-end justify-between h-24 md:h-32 gap-2 mt-4">
                                     <div className="w-1/3 bg-emerald-500 rounded-t h-full relative group">
-                                        <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] text-gray-400 opacity-0 group-hover:opacity-100">85%</div>
+                                        <div className="absolute -top-5 md:-top-6 left-1/2 -translate-x-1/2 text-[9px] md:text-[10px] text-gray-400 opacity-0 group-hover:opacity-100">85%</div>
                                     </div>
                                     <div className="w-1/3 bg-amber-500 rounded-t h-[20%] relative group">
-                                        <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] text-gray-400 opacity-0 group-hover:opacity-100">12%</div>
+                                        <div className="absolute -top-5 md:-top-6 left-1/2 -translate-x-1/2 text-[9px] md:text-[10px] text-gray-400 opacity-0 group-hover:opacity-100">12%</div>
                                     </div>
                                     <div className="w-1/3 bg-red-500 rounded-t h-[5%] relative group">
-                                        <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] text-gray-400 opacity-0 group-hover:opacity-100">3%</div>
+                                        <div className="absolute -top-5 md:-top-6 left-1/2 -translate-x-1/2 text-[9px] md:text-[10px] text-gray-400 opacity-0 group-hover:opacity-100">3%</div>
                                     </div>
                                 </div>
-                                <div className="flex justify-between mt-2 text-[9px] text-gray-500">
+                                <div className="flex justify-between mt-2 text-[8px] md:text-[9px] text-gray-500">
                                     <span>Low</span>
                                     <span>Med</span>
                                     <span>High</span>
@@ -186,8 +187,8 @@ const DashboardPreview: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* System Logs / Agent Activity (Bottom) */}
-                        <div className="col-span-12 bg-[#0a0a0a] border border-white/10 rounded-xl p-6">
+                        {/* System Logs / Agent Activity (Bottom) - Hidden on medium and small screens */}
+                        <div className="hidden lg:block col-span-12 bg-[#0a0a0a] border border-white/10 rounded-xl p-6">
                             <div className="flex items-center gap-2 mb-4 border-l-4 border-blue-500 pl-2">
                                 <h4 className="text-sm font-bold text-white">System Logs</h4>
                             </div>
@@ -195,7 +196,7 @@ const DashboardPreview: React.FC = () => {
                                 <div className="grid grid-cols-12 py-3 border-b border-white/5 text-xs">
                                     <div className="col-span-2 text-gray-500 font-mono">03:51:52</div>
                                     <div className="col-span-2 text-emerald-400 font-bold">ORCHESTRATOR</div>
-                                    <div className="col-span-8 text-gray-300">Batch ingestion started: 1,542 records.</div>
+                                    <div className="col-span-8 text-gray-300">Batch ingestion started: 100 records.</div>
                                 </div>
                                 <div className="grid grid-cols-12 py-3 border-b border-white/5 text-xs">
                                     <div className="col-span-2 text-gray-500 font-mono">03:51:52</div>
@@ -210,25 +211,25 @@ const DashboardPreview: React.FC = () => {
                                 <div className="grid grid-cols-12 py-3 text-xs">
                                     <div className="col-span-2 text-gray-500 font-mono">03:51:52</div>
                                     <div className="col-span-2 text-emerald-400 font-bold">VALIDATION</div>
-                                    <div className="col-span-8 text-gray-300">15 license mismatches detected.</div>
+                                    <div className="col-span-8 text-gray-300">3 license mismatches detected.</div>
                                 </div>
                             </div>
                         </div>
 
                         {/* Agent Cards (Floating above log in screenshot, but we'll put below or grid) */}
-                        {/* Visual simplification: Displaying key agent status cards in a grid */}
-                        <div className="col-span-6 lg:col-span-3 bg-[#0f0f0f] border border-white/10 rounded-xl p-4 flex flex-col gap-2">
+                        {/* Visual simplification: Displaying key agent status cards in a grid - Hidden on medium and small screens */}
+                        <div className="hidden lg:flex col-span-3 bg-[#0f0f0f] border border-white/10 rounded-xl p-4 flex-col gap-2">
                             <div className="flex justify-between">
                                 <ShieldCheck className="w-5 h-5 text-emerald-500" />
                                 <CheckCircle className="w-3 h-3 text-emerald-500" />
                             </div>
                             <div className="text-xs font-bold text-white">Multi-source Validation</div>
-                            <div className="text-[10px] text-gray-500">Cross-references 15+ sources (NPI, etc.)</div>
+                            <div className="text-[10px] text-gray-500">Cross-references 15+ sources</div>
                             <div className="h-1 w-full bg-gray-800 rounded-full mt-2 overflow-hidden">
                                 <div className="h-full bg-emerald-500 w-3/4"></div>
                             </div>
                         </div>
-                        <div className="col-span-6 lg:col-span-3 bg-[#0f0f0f] border border-white/10 rounded-xl p-4 flex flex-col gap-2">
+                        <div className="hidden lg:flex col-span-3 bg-[#0f0f0f] border border-white/10 rounded-xl p-4 flex-col gap-2">
                             <div className="flex justify-between">
                                 <FileText className="w-5 h-5 text-blue-500" />
                                 <CheckCircle className="w-3 h-3 text-emerald-500" />
@@ -239,7 +240,7 @@ const DashboardPreview: React.FC = () => {
                                 <div className="h-full bg-blue-500 w-full"></div>
                             </div>
                         </div>
-                        <div className="col-span-6 lg:col-span-3 bg-[#0f0f0f] border border-white/10 rounded-xl p-4 flex flex-col gap-2">
+                        <div className="hidden lg:flex col-span-3 bg-[#0f0f0f] border border-white/10 rounded-xl p-4 flex-col gap-2">
                             <div className="flex justify-between">
                                 <ShieldAlert className="w-5 h-5 text-red-500" />
                                 <div className="w-3 h-3 rounded-full border border-gray-600"></div>
@@ -248,7 +249,7 @@ const DashboardPreview: React.FC = () => {
                             <div className="text-[10px] text-gray-500">Flags suspicious billing & licenses</div>
                             <div className="px-2 py-0.5 bg-red-500/10 text-red-500 text-[9px] rounded w-fit">Suspicious Found</div>
                         </div>
-                        <div className="col-span-6 lg:col-span-3 bg-[#0f0f0f] border border-white/10 rounded-xl p-4 flex flex-col gap-2">
+                        <div className="hidden lg:flex col-span-3 bg-[#0f0f0f] border border-white/10 rounded-xl p-4 flex-col gap-2">
                             <div className="flex justify-between">
                                 <Activity className="w-5 h-5 text-purple-500" />
                                 <CheckCircle className="w-3 h-3 text-emerald-500" />
